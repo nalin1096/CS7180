@@ -1,0 +1,149 @@
+%
+% DS 7180 Readings Template
+%
+\documentclass[12pt]{article}
+
+%
+% Packages
+%
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage{graphicx}
+
+
+%
+% Package settings
+%
+
+%
+% Document Settings
+%
+\setlength{\parskip}{1pc}
+\setlength{\parindent}{0pt}
+\setlength{\topmargin}{-3pc}
+\setlength{\textheight}{9.5in}
+\setlength{\oddsidemargin}{0pc}
+\setlength{\evensidemargin}{0pc}
+\setlength{\textwidth}{6.5in}
+
+
+%
+% Document Macros
+%
+\newcommand{\reals}{\rm I\!R}
+
+\graphicspath{{imgs/}}
+
+% START DOCUMENT
+\begin{document}
+
+\section{Problem Statement}
+
+How can we use zero-shot and transfer learning to
+better denoise images? 
+
+\section{Deep Learning Book}
+
+Relevant chapters from DLB \cite{Goodfellow-et-al-2016}
+
+\begin{itemize}
+\item \textbf{7.7 Multitask Learning}
+  \begin{itemize}
+  \item The model can generally be divided into two kinds
+    of parts and associated parameters:
+    \begin{enumerate}
+    \item Task-specific parameters (which only benefit the examples
+      of their task to achieve good generalization). These are the
+      upper layers of the neural network in figure 7.2
+    \item Generic parameters, shared across all the tasks (which benefit
+      from the pooled data of all the tasks). These are the lower
+      layers of the neural network in figure 7.2
+    \end{enumerate}
+  \item From the point of view of deep learning, the underlying prior
+    belief is the following: \textit{among the factors that explain the
+      variations observed in the data associated with the different
+      tasks, some are shared across two or more tasks.}
+  \end{itemize}
+\item \textbf{7.13 Adversarial Training}
+  \begin{itemize}
+  \item Adversarial examples also provide a means of accomplishing
+    semi-supervised learning
+  \item Approach encourages the classifier to learn a function that
+    is robust to small changes anywhere along the manifold where
+    the unlabeled data lie
+  \item The assumption motivating this approach is that different
+    classes usually lie on the disconnected manifolds, and a small
+    perturbation should not be able to jump from one class manifold
+    to another class manifold
+  \end{itemize}
+\item \textbf{15 Representation Learning}
+  \begin{itemize}
+  \item Training with supervised learning techniques on the labeled
+    subset often results in severe overfitting
+  \item Semi-supervised learning offers the chance to resolve this
+    overfitting problem by also learning from the unlabeled data
+  \item Specifically, we can learn good representations for the
+    unlabeled data, and then use these representations to solve the
+    supervised learning task
+  \end{itemize}
+\item \textbf{15.2 Transfer Learning and Domain Adaptation}
+  \begin{itemize}
+  \item The learner must perform two or more different tasks,
+    but we assume that many of the factors that explain the variations
+    in $P_1$ are relevant to the variations that need to be captured
+    for learning $P_2$
+  \item Typically understood in a supervised learning context, where the
+    input is the same but the target may be of a different nature
+  \item Two extreme forms of transfer learning are \textit{one-shot learning}
+    and \textit{zerof-shot learning}, sometimes also called
+    \textit{zero-data learning}.
+    \begin{itemize}
+    \item Only one labeled example of the transfer task is given for
+      one-shot learning, while no labeled examples are given at all for
+      the zero-shot learning task
+    \item Zero-data learning \cite{larochelle2008} and zero-shot learning
+      \cite{Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}
+      \end{itemize}
+    \end{itemize}
+\end{itemize}
+
+\section{Papers}
+
+\subsection{Zero-Shot Learning}
+
+\begin{itemize}
+\item CleanNet: Transfer Learning for Scalable Image Classifier Training
+  With Label Noise \cite{Lee_2018_CVPR}
+  \begin{itemize}
+  \item In this paper, we study the problem of learning image
+    classification models with label noise. Existing approaches
+    depending on human supervision are generally not scalable as
+    manually identifying correct or incorrect labels is time-consuming,
+    whereas approaches not relying on human supervision are scalable but
+    less effective. To reduce the amount of human supervision for label
+    noise cleaning, we introduce CleanNet, a joint neural embedding network,
+    which only requires a fraction of the classes being manually verified to
+    provide the knowledge of label noise that can be transferred to other
+    classes. We further integrate CleanNet and conventional convolutional
+    neural network classifier into one framework for image classification
+    learning. We demonstrate the effectiveness of the proposed algorithm on
+    both of the label noise detection task and the image classification
+    on noisy data task on several large-scale datasets. Experimental
+    results show that CleanNet can reduce label noise detection error
+    rate on held-out classes where no human supervision available by
+    41.5\% compared to current weakly supervised methods. It also
+    achieves 47\% of the performance gain of verifying all images with
+    only 3.2\% images verified on an image classification task. Source
+    code and dataset will be available at kuanghuei.github.io/CleanNetProject.
+    \end{itemize}
+  \end{itemize}
+
+
+
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

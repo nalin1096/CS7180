@@ -1,3 +1,7 @@
 *~
 *.csv
 __pycache__
+*.bbl
+*.blg
+*.aux
+*.log
