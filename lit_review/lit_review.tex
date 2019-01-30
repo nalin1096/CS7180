@@ -137,7 +137,102 @@ Relevant chapters from DLB \cite{Goodfellow-et-al-2016}
     achieves 47\% of the performance gain of verifying all images with
     only 3.2\% images verified on an image classification task. Source
     code and dataset will be available at kuanghuei.github.io/CleanNetProject.
-    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{Image Denoising}
+
+\begin{itemize}
+\item \textbf{Deep Learning for Image Denoising: A Survey} \cite{tian2018deep}
+  \begin{itemize}
+  \item Since the proposal of big data analysis and Graphic Processing
+    Unit (GPU), the deep learning technology has received a great deal
+    of attention and has been widely applied in the field of imaging
+    processing. In this paper, we have an aim to completely review and
+    summarize the deep learning technologies for image denoising proposed
+    in recent years. Morever, we systematically analyze the conventional
+    machine learning methods for image denoising. Finally, we point out
+    some research directions for the deep learning technologies in image
+    denoising.
+  \item \textit{4.1 The challenges of deep learning technologies in
+    image denoising}
+    \begin{enumerate}
+    \item Current deep learning denoising methods only deal with AWGN,
+      which are not effective for real noisy images, such as low light
+      images.
+    \item They can't use a model to deal with all the low level vision
+      taks, such as image denoising, image super-resolution, image
+      blurring, and image deblocking.
+    \item They can't use a model to address the blind Gaussian noise
+    \end{enumerate}
+  \end{itemize}
+
+\item \textbf{Correction by Projection: Denoising Images with Generative
+  Adversarial Networks} \cite{DBLP:journals/corr/abs-1803-04477}
+  \begin{itemize}
+  \item Generative adversarial networks (GANS) transform low-dimensional
+    latent vectors into visually plausible images. If the real dataset
+    contains only clean images, then ostensibly, the manifold learned by the
+    GAN should contain only clean images. In this paper, we propose to
+    denoise corrupted images by finding the nearest point on the GAN
+    manifold, recovering latent vectors by minimizing distances in image
+    space. We first demonstrate that given a corrupted version of an image
+    that truly lies on the GAN manifold, we can approximately recover the
+    latent vector and denoise the image, obtaining significantly higher
+    quality, comparing with BM3D. Next, we demonstrate that latent vectors
+    recovered from noisy images exhibit a consistent bias. By subtracting
+    this bias before projecting back to image space, we improve denoising
+    results even further. Finally, even for unseen images, our method performs
+    better at denoising than BM3D. Notably, the basic version of our method
+    (without bias correction) requires no prior knowledge on the noise
+    variance. To achieve the highest possible denoising quality, the best
+    performing signal processing based methods, such as BM3D, require an
+    estimate of the blur kernel.
+  \end{itemize}
+\item \textbf{Very Deep Convolutional Networks for Large-Scale Image
+  Recognition} \cite{DBLP:journals/corr/SimonyanZ14a}
+  \begin{itemize}
+  \item In this work we investigate the effect of the convolutional network
+    depth on its accuracy in the large-scale image recognition setting. Our
+    main contribution is a thorough evaluation of networks of increasing
+    depth using an architecture with very small (3x3) convolution filters,
+    which shows that a significant improvement on the prior-art
+    configurations can be achieved by pushing the depth to 16-19 weight
+    layers. These findings were the basis of our ImageNet Challenge 2014
+    submission, where our team secured the first and the second places in
+    the localisation and classification tracks respectively. We also show
+    that our representations generalise well to other datasets, where they
+    achieve state-of-the-art results. We have made our two best-performing
+    ConvNet models publicly available to facilitate further research on the
+    use of deep visual representations in computer vision.
+  \end{itemize}
+\item \textbf{Universal Denoising Networks : A Novel CNN Architecture for
+  Image Denoising} \cite{DBLP:journals/corr/abs-1711-07807}
+  \begin{itemize}
+  \item We design a novel network architecture for learning discriminative
+    image models that are employed to efficiently tackle the problem of
+    grayscale and color image denoising. Based on the proposed architecture,
+    we introduce two different variants. The first network involves the
+    convolutional layers as a core component, while the second one relies
+    instead on non-local filtering layers and thus it is able to exploit the
+    inherent non-local self-similarity property of natural images. As
+    opposed to most of the existing deep network approaches, which require the
+    training of a specific model for each considered noise level, the
+    proposed models are able to handle a wide range of noise levels using a
+    single set of learned parameters, while they are very robust when the
+    noise degrading the latent image does not match the statistics of the noise
+    used during training. The latter argument is supported by results that we
+    report on publicly available images corrupted by uknown noise and which we
+    compare against solutions obtained by competing methods. At the same
+    time the introduced netowrks achieve excellent results under additive white
+    Gaussian noise (AWGN), which are comparable to those of the current
+    state-of-the-art network, while they depend on a more shallow architecture
+    with the number of trained parameters being one order of magnitude
+    smaller. These properties make the proposed netowrks ideal candidates to
+    serve as sub-solvers on restoration methods that deal with general
+    inverse imaging problems such as deblurring, demosaicking, superresolution,
+    etc.
+  \end{itemize}
   \end{itemize}
 
 
