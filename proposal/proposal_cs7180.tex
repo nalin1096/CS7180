@@ -112,10 +112,12 @@ of training our model on actual true (bright light) and corrupted
 baseline and synthetically corrupt these by darkening and adding Poisson
 noise. We train our CNN on the synthetic data to obtain our initial model
 parameters. Then, using these, and a small fraction of the real image pairs
-from the SID Dataset, we adopt a transfer learning approach to update our
+from the SID Dataset, we adopt a transfer learning
+\cite{Goodfellow-et-al-2016} approach to update our
 model parameters. We then use this model to test on our SID Dataset. In
 addition, we aim to test various transfer learning approaches, such as the
-traditional transfer learning and zero shot learning. 
+traditional transfer learning and zero shot learning \cite{larochelle2008,
+  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.
 
 
 The novelty of our approach stems from the idea of “more for less”. Our
