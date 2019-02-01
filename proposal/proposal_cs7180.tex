@@ -101,21 +101,20 @@ of collecting large amounts of low
 light and bright light images. In the absence of a true vs noisy image
 dataset, the team captured scenes using various exposure times to generate
 true (bright light) and corrupted (low light) image pairs called
-“See-in-the-Dark Dataset” (SID Dataset). Furthermore, their model is camera
+“See-in-the-Dark Dataset” (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
 specific and not easily generalizable.
-
 
 \section{Proposed Idea}
 
 We propose a transferable CNN for image brightening and denoising. Instead
 of training our model on actual true (bright light) and corrupted
 (low light) image pairs, we use images from the ImageNet dataset as our
-baseline and synthetically corrupt these by darkening and Poisson noise. We
-train our CNN on the synthetic data to obtain our initial model parameters.
-Then, using these, and a small fraction of the real image pairs from the SID
-Dataset, we adopt a transfer learning approach to update our model
-parameters. We then use this model to test on our SID Dataset. In addition,
-we aim to test various transfer learning approaches, such as the
+baseline and synthetically corrupt these by darkening and adding Poisson
+noise. We train our CNN on the synthetic data to obtain our initial model
+parameters. Then, using these, and a small fraction of the real image pairs
+from the SID Dataset, we adopt a transfer learning approach to update our
+model parameters. We then use this model to test on our SID Dataset. In
+addition, we aim to test various transfer learning approaches, such as the
 traditional transfer learning and zero shot learning. 
 
 
