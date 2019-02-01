@@ -88,7 +88,8 @@ In the past, the problem of enhancing low light images has been tackled via
 noise reduction. This noise becomes dominant especially in low-light images
 due to low SNR. Remez et. al. proposed a deep CNN for noise reduction under
 the assumption that this low-light noise belongs to a Poisson
-distribution \cite{remez2017deep}.  They used images from ImageNet as their ground truth data
+distribution \cite{remez2017deep}.  They used images from ImageNet
+\cite{imagenet_cvpr09} as their ground truth data
 and added synthetic Poisson noise to simulate corrupted images. Even though
 their model outperform the state-of-the art de-noiser “BM3D”, it does not
 scale well to real world images, due to their underlying assumptions.
