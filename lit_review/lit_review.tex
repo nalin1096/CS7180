@@ -233,7 +233,155 @@ Relevant chapters from DLB \cite{Goodfellow-et-al-2016}
     inverse imaging problems such as deblurring, demosaicking, superresolution,
     etc.
   \end{itemize}
-  \end{itemize}
+\end{itemize}
+
+\section{Suggestions from Rose}
+
+Want to make sure we thoroughly understand the research papers
+Rose suggested. It seems like she cares less about the application
+and more about the process and technique. She's been advocating for
+GANs and zero-shot learning (an extreme version of transfer learning).
+
+Rose suggested ``Deep convolutional neural network for image deconvolution''
+\cite{xu2014deep} which included their source code and dataset
+(http://lxu.me/projects/dcnn/). She also recommended a more
+recent paper, ``Image Inpainting via Generative Multi-column Convolutional Neural Networks'' \cite{wang2018image}.
+
+\section{Relevant background from DLB}
+
+First, I review DLB in CNN, then talk about where this paper
+picks up.
+
+\subsubsection*{9.1 The Convolution Operation}
+
+Recall the Convolution Operation from DLB Section 9.1
+\cite{Goodfellow-et-al-2016}.
+
+\[
+s(t) = \int x(a)w(t-a) da. \tag{9.1}
+\]
+
+where $x(t)$ is a single output at time $t$. Both $x$ and $t$
+are real-valued. We assume that our ability to measure $x(t)$
+is done in a noisy way. We would like to average or take the
+maximum (average pooling vs. max pooling I believe) of several
+measurements to reduce this noise; with more weight given to
+recent measurements. We can do this with a weighting
+function $w(a)$ where $a$ is the age of the measurement. In
+general, convolution is defined for any functions for which the
+above integral is defined and may be used for other purposes besides
+taking weighted averages. \newline
+
+In convolutional network terminology, the first argument(in this
+example, the function $x$) to the convolution is often referred
+to as the \textbf{input}, and the second argument (in this
+example, the function $w$) as the \textbf{kernel}. The output is
+sometimes referred to as the \textbf{feature map}. If we now
+assume that $x$ and $w$ are defined only on integer $t$, we can
+define the discrete convolution:
+\[
+s(t) = (x * w)(t) = \sum_{a=\infty}^{\infty} x(a)w(t-a) \tag{9.3}
+\]
+
+\subsubsection*{9.3 Pooling}
+
+A typical layer of a CNN consists of three stages (see figure 9.7). In
+the first stage, the layer performs several convolutions in parallel to
+produce a set of linear activations. In the second stage, each linear
+activation is run through a nonlinear activation function, such as the
+rectified linear (ReLU) activation function. The second stage is sometimes
+called the \textbf{detector stage}. In the third stage, we use a
+\textbf{pooling function} to modify the output of the layer further.
+
+\begin{center}
+  \includegraphics[scale=0.75]{fig9_7}
+\end{center}
+
+\subsubsection*{9.10 The Neuroscientific Basis for Convolutional Networks}
+
+Focus on a part of the brain called V1, also known as the
+\textbf{primary visual cortex}. A CNN is designed to capture
+three properties of V1:
+
+\begin{enumerate}
+\item V1 is arranged in a spatial map. It actually has a two
+  dimensional structure of the image in the retina.
+\item V1 contains many \textbf{simple cells}. A simple cell's
+  activity can to some extent be characterized by a
+  \textit{linear function} of the image in a small, spatially
+  localized receptive field. The detector units of a CNN are
+  designed to emulate these properties of simple cells
+\item V1 also contains \textbf{complex cells}. These cells respond
+  to features that are similar to those detected by simple cells,
+  but complex cells are invariant to small shifts in the position
+  of the feature. This inspires the pooling units of CNNs.
+\end{enumerate}
+
+Simple cells are roughly linear and selective for certain features,
+complex cells are more nonlinear and become invariant to some
+transformations of these simple cell features, and stacks of
+layers that alternate between selectivity and invariance can yield
+'grandmother' cells for specific phenomena. A linear model can be
+used to approximate a neuron's weights. This apporach is known as
+\textbf{reverse correlation}. \newline
+
+Reverse correlation shows us that most V1 cells have weights that
+are defined by \textbf{Gabor functions}. The Gabor function describes
+the weight at a 2-D point in the image. We can think of an image as
+being a function of 2-D coordinates, $I(x,y)$. Likewise, we can
+think of a simple cell as sampling the image at a set of locations,
+defined by a set of $x$ coordinates $\mathbb{X}$ and a set of $y$
+coordinates $\mathbb{Y}$, then applying weights that are also a
+function of the location, $w(x,y)$. From this point of view, the
+response of a simple cell to an image is given by
+\[
+s(I) = \sum_{x \in \mathbb{X}} \sum_{y \in \mathbb{Y}} w(x,y)I(x,y)
+\tag{9.15}
+\]
+
+Specifically, $w(x,y)$ takes the form of a Gabor function:
+\[
+w(x,y;\alpha, \beta_x, \beta_y, f, \phi, x_0, y_0, \tau) =
+\alpha \exp(-\beta_x x^{\prime 2} - \beta_y y^{\prime 2})
+\cos(f x^{\prime} + \phi), \tag{9.16}
+\]
+where... see equations (9.17) and (9.18).... It has two important
+factors: one is a Gaussian function, and the other ise a cosine
+function. \newline
+
+The Gaussian factor $\alpha \exp(-\beta_x x^{\prime 2} - \beta_y y^{\prime 2})$
+can be seen as a gating term that ensures that the simple cell will
+respond only to values near where $x^\prime$ and $y^\prime$ are both
+zero, in other words, \text{near the center} of the cell's receptive
+field. \newline
+
+The cartoon view of a complex cell is that it computes the $L^2$ norm of
+the 2-D vector containing two simple cells' responses:
+$c(I) = \sqrt{s_0(I)^2 + s_1(I)^2}$.
+
+\subsection{DCNN for Image Deconvolution \cite{xu2014deep} (2014)}
+
+\begin{itemize}
+\item We need to understand and recognize why CNNs use a linear
+  model to approximate simple cells. Even when approximating a complex
+  cell, it looks like they're just taking the difference of two linear
+  simple cells. Xu et. al. \cite{xu2014deep} identify this property as
+  a problem when denoising images
+\item ``Real blur degradation seldom complies with an ideal linear
+  convolution model due to camera noise, etc.\cite{xu2014deep}
+\item Instead of perfectly modeling outliers, which is rather
+  challenging from a \textit{generative} model perspective, we develop
+  a deep CNN to capture characteristics of degradation
+\item Our solution is to establish the connection between
+  traditional optimization-based schemes and a neural network architecture
+  where a novel, separable structure is introduced as a reliable support for
+  robust deconvolution against artifacts.
+\end{itemize}
+
+
+\subsection{Gen CNN for Image Inpainting \cite{wang2018image} (2018)}
+
+ok
 
 
 
