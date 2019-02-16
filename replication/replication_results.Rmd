@@ -1,0 +1,54 @@
+---
+title: "Replicating LSD"
+output: pdf_document
+---
+
+Using the LSD repo (https://github.com/cchen156/Learning-to-See-in-the-Dark.git) on GitHub I was able to partially replicate Chen et. al. 2018. Their code
+worked perfectly. I ran into limitations with computational resources.
+
+# Hardware
+
+1. Using AWSEducate did not work
+   - Unable to create roles with IAM authentication so it's really
+	 hard or impossible to move data from a S3 Bucket to an EC2 Instance
+   - Tried to create a `P3.8xlarge` instance but these instances are
+	 not allowed even though they are listed
+1. Using regular AWS does work but costs money
+   - Ran a single AWS EC2 `p3.8xlarge` instance with 32 CPU, 244 GB of
+	 Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This costs $12.24
+	 an hour.
+   - This is the amount of GPU Memory requested by the paper
+     authors as a minimum amount
+
+
+# Run Time
+
+I ran model training for 90 minutes, testing on the trained model parameters
+failed. I extracted the papers model parameters and then used those for testing
+which lasted 30 minutes. Some time was required to extract the Sony dataset
+which came in at around 115GB of decompressed images.
+
+# Training Results
+
+Training results are available in the attached log file `train_sony.log`. In
+90 minutes, I was able to get through 11 epochs. The code requires 4000 epochs
+to run. At 2000 epochs, the code updates the learning rate to an order
+of magnitude lower.
+
+# Test Results from Training Parameters
+
+I was not able to get trainable parameters out of the 11-12 epochs based 
+on how the code is currently written; which could then be run using the 
+testing script. Results of this step are in `test_sony.log`. I did not
+take any debugging steps, just noted the errors when they were raised using
+the log file.
+
+
+# Test Results from LSD Model Parameters
+
+Test results are logged using `test_model_params_sony.log` but that log
+doesn't say anything interested. Results were written out to a `result_Sony`
+folder which I will be sharing when the upload is complete. It contains
+the processed images and looks pretty nice. This is encouraging because it
+shows that the authors code was clearly run correctly.
+
