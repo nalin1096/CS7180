@@ -25,6 +25,10 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\graphicspath{ {imgs/} }
 
 \title{CS 7180 Milestone 1}
 
@@ -118,8 +122,38 @@ for \textit{only} the Sony model takes approximately 500 hours or
 
 \subsection{Test Results from SID Model Parameters}
 
+Figure \ref{train} contains example training data. Figure \ref{test}
+contains example test results. Both Figure \ref{train} and Figure \ref{test}
+are pictures of a similar yellow bike. We can see a qualitative improvement
+across the three renderings of the same predicted test image in
+Figure \ref{test}.
+
+\section{Appendix}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[scale=0.1]{00002_00_train_100}
+  \caption{\label{train} Example Training Data}
+\end{figure}
 
 
+
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_gt}
+    \caption{gt}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_out}
+    \caption{out}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_scale}
+    \caption{scale}
+  \end{subfigure}
+  \caption{\label{test} Example Test Data}
+\end{figure}
 
 \bibliographystyle{unsrt}
 \bibliography{references}
