@@ -201,16 +201,16 @@ several options.
 Given these initial facts, we then tried to estimate run time requirements
 for the Sony model. We trained the Sony model for 90 minutes using an
 AWS $p3.8xlarge$ instance. We were able to complete $\approx 12$ training
-epochs. Figure \ref{train} contains an example test image/labelled image
+epochs. Figure \ref{fig:train} contains an example test image/labelled image
 pairing. We then tried to use the training parameters to
 test the model but could not get this to work without modifying the script
 provided by Chen et. al. \cite{chen2018learning}. The model parameters
 were available to download, we used these parameters to run against test
-data for 30 minutes. Figure \ref{test} contains example output from this
-test run. Both Figure \ref{train} and Figure \ref{test}
+data for 30 minutes. Figure \ref{fig:test} contains example output from this
+test run. Both Figure \ref{fig:train} and Figure \ref{fig:test}
 are pictures of a similar yellow bike. We can see a qualitative improvement
 across the three renderings of the same predicted test image in
-Figure \ref{test}.
+Figure \ref{fig:test}.
 
 Additional time was required to extract the Sony dataset
 which decompressed to about 115GB of image files. We estimate that
@@ -223,7 +223,26 @@ for \textit{only} the Sony model takes approximately 500 hours or
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.1]{00002_00_train_100}
-  \caption{\label{train} Example Training Data}
+  \caption{ Example Training Data}
+  \label{fig:train}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[t]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_gt}
+    \caption{gt}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_out}
+    \caption{out}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_scale}
+    \caption{scale}
+  \end{subfigure}
+  \caption{ Example Test Data}
+  \label{fig:test}
 \end{figure}
 
 
