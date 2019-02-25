@@ -78,17 +78,14 @@
 \section{Introduction and Related Work}
 
 Images taken in low-light conditions are often too dark, noisy, and distorted to be used in industrial purposes. We propose a deep-learning model that processes low-light
-images to improve image brightness and increase their overall quality.
-
-The problem with imaging in low-light conditions is challenging due to low-photon count
-and low Signal-to-Noise (SNR) ratio. These yield very dark and noisy images.
-The most common technique to overcome this problem is long exposure shot.
-However, this method yields blurry images with the slightest camera shake
-or object motion\cite{chen2018learning}. Common post-processing techniques brighten the image at the expense of image quality. 
-
-Being able to ``see in the dark'' provides a
+images to improve image brightness and increase their overall quality. The
+problem with imaging in low-light conditions is challenging due to low-photon count and low Signal-to-Noise (SNR) ratio. These yield very dark and noisy
+images. The most common technique to overcome this problem is long exposure
+shot. However, this method yields blurry images with the slightest camera
+shake
+or object motion\cite{chen2018learning}. Common post-processing techniques brighten the image at the expense of image quality. Being able to ``see in the dark'' provides a
 number of real-world benefits such as photography, computer vision, and
-social networking. 
+social networking. \newline
 
 In the past, the problem of enhancing low light images has been tackled via
 noise reduction. This noise becomes dominant especially in low-light images
@@ -109,7 +106,7 @@ light and bright light images. In the absence of a true vs noisy image
 dataset, the team captured scenes using various exposure times to generate
 true (bright light) and corrupted (low light) image pairs called
 ``See-in-the-Dark Dataset'' (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
-specific and not easily generalizable.
+specific and not easily generalizable.\newline
 
 We propose a transferable CNN for image brightening and denoising. Instead
 of training our model on actual true (bright light) and corrupted
@@ -120,7 +117,7 @@ from the SID Dataset, we adopt a transfer learning
 model parameters. We then use this model to test on our SID Dataset. In
 addition, we aim to test various transfer learning approaches, such as the
 traditional transfer learning and zero shot learning \cite{larochelle2008,
-  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.
+  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.\newline
 
 
 The novelty of our approach stems from the idea of ``more for less''. Our
@@ -129,8 +126,6 @@ synthesizing readily available training data (MIT-Adobe FiveK). This is
 particularly beneficial in domains where collecting images pairs is
 expensive/time consuming. 
 
-
-We use the SID Model as our baseline and our performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR) greater or equal to the baseline.
 
 \section{Model}
 
