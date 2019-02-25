@@ -154,7 +154,9 @@ Our model is based on the one developed for SID, with the addition of 2 fully-co
 \section{Experiment}
 
 We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We then run these images through our pipeline to generate our simulated low-light images. An example of two of such images is represented in
-Figure \ref{fig:simulate}. We use the SID Model as our baseline and our
+Figure \ref{fig:simulate}. We train our first model on these simulated
+images, and then transfer to a fraction of the Sid dataset (500 images). We
+use the SID Model as our baseline and our
 performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR)
 greater or equal to the baseline.
 
