@@ -178,25 +178,16 @@ each of the two cameras. They specified a minimum of 64GB of GPU RAM for the
 Sony model and 128 GB of GPU RAM for the Fuji model. We decided to try
 replicating the less resource intensive Sony model. The hardware
 requirements for the Sony model are nontrivial so we have explored
-several options.
+several options.\newline
 
-\begin{enumerate}
-\item Using AWSEducate did not work
-  \begin{itemize}
-    \item Unable to create roles with IAM authentication so it's really
-	 hard or impossible to move data from a S3 Bucket to an EC2 Instance
-    \item Tried to create a $p3.8xlarge$ instance but these instances are
-      not allowed even though they are listed
-  \end{itemize}
-\item Using regular AWS does work but is costly
-  \begin{itemize}
-    \item Ran a single AWS EC2 $p3.8xlarge$ instance with 32 CPU, 244 GB of
-	 Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This costs \$12.24
-	 an hour.
-    \item This is the amount of GPU Memory requested by the paper
-      authors as a minimum amount
-    \end{itemize}
-\end{enumerate}
+Using AWSEducate did not work for us. We were unable to create roles with
+IAM authentication so it's really hard or impossible to move data from a
+S3 Bucket to an EC2 Instance. We tried to create a $p3.8xlarge$ instance but
+these instances are not allowed even though they are listed. Using regular
+AWS does work but is costly. Ran a single AWS EC2 $p3.8xlarge$ instance
+with 32 CPU, 244 GB of Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This
+costs \$12.24 an hour. This is the amount of GPU Memory requested by the
+paper authors as a minimum amount. \newline
 
 Given these initial facts, we then tried to estimate run time requirements
 for the Sony model. We trained the Sony model for 90 minutes using an
