@@ -155,16 +155,19 @@ Our model is based on the one developed for SID, with the addition of 2 fully-co
 
 \section{Experiment}
 
-We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We then run these images through our pipeline to generate our simulated low-light images. An example of two of such images is represented in Figure 3. 
+We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We then run these images through our pipeline to generate our simulated low-light images. An example of two of such images is represented in
+Figure \ref{fig:simulate}. We use the SID Model as our baseline and our
+performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR)
+greater or equal to the baseline.
+
 
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.3]{fig3.png}
   \caption{Simulating two low-light images via our pipeline: (a) Original
     image, (b) Gamma Distortion, (c) White Imbalance, (d) Poisson Noise addition, (e) Black Level, final low-light simulation}
+  \label{fig:simulate}
 \end{figure}
-
-We use the SID Model as our baseline and our performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR) greater or equal to the baseline.
 
 Using the GitHub repository provided by Chen et. al. \cite{chen2018learning},
 we were gather and run to run their code but ran into limitations with computational
