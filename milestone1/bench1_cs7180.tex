@@ -75,10 +75,103 @@
 
 \maketitle
 
-\section{Replication}
+\section{Introduction and Related Work}
+
+Images taken in low-light conditions are often too dark, noisy, and distorted to be used in industrial purposes. We propose a deep-learning model that processes low-light
+images to improve image brightness and increase their overall quality.
+
+The problem with imaging in low-light conditions is challenging due to low-photon count
+and low Signal-to-Noise (SNR) ratio. These yield very dark and noisy images.
+The most common technique to overcome this problem is long exposure shot.
+However, this method yields blurry images with the slightest camera shake
+or object motion\cite{chen2018learning}. Common post-processing techniques brighten the image at the expense of image quality. 
+
+Being able to ``see in the dark'' provides a
+number of real-world benefits such as photography, computer vision, and
+social networking. 
+
+In the past, the problem of enhancing low light images has been tackled via
+noise reduction. This noise becomes dominant especially in low-light images
+due to low SNR. Remez et. al. proposed a deep CNN for noise reduction under
+the assumption that this low-light noise belongs to a Poisson
+distribution \cite{remez2017deep}.  They used images from ImageNet
+\cite{imagenet_cvpr09} as their ground truth data
+and added synthetic Poisson noise to simulate corrupted images. Even though
+their model outperform the state-of-the art de-noiser ``BM3D'', it does not
+scale well to real world images, due to their underlying assumptions.
+Furthermore, their model only denoises images but does not brighten them.
+Motivated by these downfalls, Chen et. al., proposed an end-to-end CNN,
+``See-in-the-Dark'' (SID), which brightens extremely low light images and
+removes noise without making any underlying assumptions
+\cite{chen2018learning}. However these advances come with the added expense
+of collecting large amounts of low
+light and bright light images. In the absence of a true vs noisy image
+dataset, the team captured scenes using various exposure times to generate
+true (bright light) and corrupted (low light) image pairs called
+``See-in-the-Dark Dataset'' (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
+specific and not easily generalizable.
+
+We propose a transferable CNN for image brightening and denoising. Instead
+of training our model on actual true (bright light) and corrupted
+(low light) image pairs, we use images from the publicly available "MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating low-light conditions. We train our CNN on the synthetic data to obtain our initial model
+parameters. Then, using these, and a small fraction of the real image pairs
+from the SID Dataset, we adopt a transfer learning
+\cite{Goodfellow-et-al-2016} approach to update our
+model parameters. We then use this model to test on our SID Dataset. In
+addition, we aim to test various transfer learning approaches, such as the
+traditional transfer learning and zero shot learning \cite{larochelle2008,
+  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.
+
+
+The novelty of our approach stems from the idea of ``more for less''. Our
+model drastically reduces the overhead costs of data collection by
+synthesizing readily available training data (MIT-Adobe FiveK). This is
+particularly beneficial in domains where collecting images pairs is
+expensive/time consuming. 
+
+
+We use the SID Model as our baseline and our performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR) greater or equal to the baseline.
+
+\section{Model}
+
+We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR camers by a set of different photographers in different scenarios. We made sure that these photographs cover a broad range of scenes, subjects, and lighting conditions. 
+
+Considering these images as the ground truth (i.e., images taken in normal light conditions), we corrupt them to simulate images taken in low-light conditions. These distorted images and original images consist of our training inputs to our first model. 
+In order to simulate the distortion created by taking pictures in poor light conditions, we emulate the traditional image processing pipeline for correcting such images, only in reverse. 
+
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image during our Gamma Distortion step, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a positive bias to the pixel values (i.e., random black level). 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.35]{pipeline.jpg}
+  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
+\end{figure}
+
+
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.3]{model.png}
+  \caption{Our proposed model framework}
+\end{figure}
+
+
+
+\section{Experiment}
+
+We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We then run these images through our pipeline to generate our simulated low-light images. An example of two of such images is represented in Figure 3. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.3]{fig3.png}
+  \caption{Simulating two low-light images via our pipeline: (a) Gamma Distortion, (b) White Imbalance, (c) Poisson Noise addition, (d) Black Level, (e) Final low-light simulation}
+\end{figure}
+
+We use the SID Model as our baseline and our performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR) greater or equal to the baseline.
 
 Using the GitHub repository provided by Chen et. al. \cite{chen2018learning},
-we were able to run their code but ran into limitations with computational
+we were gather and run to run their code but ran into limitations with computational
 resources. Chen et. al. \cite{chen2018learning} used a separate model for
 each of the two cameras. They specified a minimum of 64GB of GPU RAM for the
 Sony model and 128 GB of GPU RAM for the Fuji model. We decided to try
@@ -132,24 +225,6 @@ for \textit{only} the Sony model takes approximately 500 hours or
   \caption{\label{train} Example Training Data}
 \end{figure}
 
-
-
-\begin{figure}[ht]
-  \centering
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_gt}
-    \caption{gt}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_out}
-    \caption{out}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_scale}
-    \caption{scale}
-  \end{subfigure}
-  \caption{\label{test} Example Test Data}
-\end{figure}
 
 \bibliographystyle{unsrt}
 \bibliography{references}
