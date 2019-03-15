@@ -9,15 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.util import random_noise
 
-class SimulateCondition:
-    def __init__(self, image, gamma_correction=True, noise=True, white_balance=True, black_level=True):
+class SimulateCondition(object):
+    def __init__(self, image, gamma_correction=True, noise=True,
+                 white_balance=True, black_level=True):
+        
         self.image = image
         
         self.gamma_correction = gamma_correction
         self.noise = noise
         self.white_balance = white_balance
         self.black_level = black_level
-        
+        3
         self.GAMMA = np.random.uniform(0.3, 0.6, 1)[0]
 #         self.GAMMA = 0.5
         self.NOISE_PEAK = 0.5
@@ -66,3 +68,4 @@ def show_image(image, convert=False):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     plt.imshow(image)
     plt.show()
+
