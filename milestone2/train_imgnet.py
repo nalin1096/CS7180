@@ -4,75 +4,35 @@ We want to see if we can generate useful parameters using data augmented
 from ImageNet (http://www.image-net.org/) instead of from a professional
 photographer with a fancy camera.  
 
+Using CIFAR instead of imagenet for small example because it's
+a default dataset in Keras.
+
 Note that I've updated this model to use Keras instead of 
 tensorflow.contrib.slim
+
+We may move to kubeflow <https://www.kubeflow.org/>
 """
 import glob
 import logging
 import os
 import time
 
-import numpy as np
-import rawpy
-import tensorflow as tf
-from keras.layers import Conv2D, MaxPooling2D, LeakyReLU
-from keras.models import Sequential
+from keras.datasets import cifar10
+
+from specify_imgnet_model import debug_model
+from augment_data import SimulateCondition
+
+logger = logging.getLogger(__name__)
 
 
-def upsample_and_concat(x1, x2, output_channels, in_channels):
-    pool_size = 2
-    deconv_filter = tf.Variable(tf.truncated_normal(
-        [pool_size, pool_size, output_channels, in_channels], stddev=0.02
-    ))
-    
-    deconv = tf.nn.conv2d_transpose(x1, deconv_filter, tf.shape(x2),
-                                    strides=[1, pool_size, pool_size, 1])
+# Dataset of 50,000 32x32 color training images, 
+# labeled over 10 categories, and 10,000 test images.
 
-    deconv_output = tf.concat([deconv, x2], 3)
-    deconv_output.set_shape([None, None, None, output_channels * 2])
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
 
-    return deconv_output
 
-def pool_block(model, output, activ):
+# Get basic training example working using CIFAR 10 ...
 
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
-    model.add(MaxPooling2D([2,2], padding='same'))
 
-    return model
 
-def upsample_block(model, innodes, outnodes, activ):
 
-    model.add(UpsampleAndConcat())
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
-    
-
-    return model
-
-def specify_model(input_shape):
-    model = Sequential()
-    lrelu = LeakyReLU(alpha=0.2)
-
-    model = pool_block(model, 32, lrelu)         # Block 1
-    model = pool_block(model, 64, lrelu)         # Block 2
-    model = pool_block(model, 128, lrelu)        # Block 3
-    model = pool_block(model, 256, lrelu)        # Block 4
-
-    # Block 5
-    
-    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
-    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
-
-    # Upsample blocks
-
-    model = upsample_block(model, 256, 512, lrelu) # Block 6
-    model = upsample_block(model, 128, 256, lrelu) # Block 7
-    model = upsample_block(model, 64, 128, lrelu)  # Block 8
-    model = upsample_block(model, 32, 64, lrelu)   # Block 9
-
-    return model
-    
-def debug_model(input_shape):
-
-    pass
