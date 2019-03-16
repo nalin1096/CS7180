@@ -15,10 +15,9 @@ import time
 import numpy as np
 import rawpy
 import tensorflow as tf
-from keras.layers import Conv2D
+from keras.layers import Conv2D, MaxPooling2D, LeakyReLU
+from keras.models import Sequential
 
-def lrelu(x):
-    return tf.maximum(x * 0.2, x)
 
 def upsample_and_concat(x1, x2, output_channels, in_channels):
     pool_size = 2
@@ -34,7 +33,46 @@ def upsample_and_concat(x1, x2, output_channels, in_channels):
 
     return deconv_output
 
-def model(input_shape):
+def pool_block(model, output, activ):
+
+    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
+    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
+    model.add(MaxPooling2D([2,2], padding='same'))
+
+    return model
+
+def upsample_block(model, innodes, outnodes, activ):
+
+    model.add(UpsampleAndConcat())
+    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
+    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
+    
+
+    return model
+
+def specify_model(input_shape):
+    model = Sequential()
+    lrelu = LeakyReLU(alpha=0.2)
+
+    model = pool_block(model, 32, lrelu)         # Block 1
+    model = pool_block(model, 64, lrelu)         # Block 2
+    model = pool_block(model, 128, lrelu)        # Block 3
+    model = pool_block(model, 256, lrelu)        # Block 4
+
+    # Block 5
+    
+    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
+    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
+
+    # Upsample blocks
+
+    model = upsample_block(model, 256, 512, lrelu) # Block 6
+    model = upsample_block(model, 128, 256, lrelu) # Block 7
+    model = upsample_block(model, 64, 128, lrelu)  # Block 8
+    model = upsample_block(model, 32, 64, lrelu)   # Block 9
+
+    return model
+    
+def debug_model(input_shape):
+
     pass
-
-
