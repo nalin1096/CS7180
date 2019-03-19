@@ -44,26 +44,110 @@ def initialize_parameters():
     """
     tf.set_random_seed(1)
 
-    W1 = tf.get_variable("W1", [3,3,3,3],
+    # Block 1
+
+    W1 = tf.get_variable("W1", [3,3,3,32],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
+    W2 = tf.get_variable("W2", [3,3,32,32],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 2
+
+    W3 = tf.get_variable("W3", [3,3,32,64],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W4 = tf.get_variable("W4", [3,3,64,64],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 3
+
+    W5 = tf.get_variable("W5", [3,3,64,128],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W6 = tf.get_variable("W6", [3,3,128,128],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 4
+
+    W7 = tf.get_variable("W7", [3,3,128,256],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W8 = tf.get_variable("W8", [3,3,256,256],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 5
+
+    W9 = tf.get_variable("W9", [3,3,256, 512],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W10 = tf.get_variable("W10", [3,3,512,512],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+
     
     parameters = {
-        "W1": W1,
+        'W1': W1, 'W2': W2, 'W3': W3, 'W4': W4, 'W5': W5, 'W6': W6,
+        'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10,
     }
     
     return parameters
 
+def pool_block(X, Wa, Wb):
+    """ This is like a mini forward propagation module. """
+    Za = tf.nn.conv2d(X, Wa, strides=(1,1,1,1), padding='SAME')
+    Aa = tf.nn.leaky_relu(Za, alpha=0.2)
+    Zb = tf.nn.conv2d(Aa, Wb, strides=(1,1,1,1), padding='SAME')
+    Ab = tf.nn.leaky_relu(Zb, alpha=0.2)
+    P = tf.nn.max_pool(Ab, ksize=[1,2,2,1],
+                        strides=[1,1,1,1], padding='SAME')
+    return P
+
+def conv_block(X, Wa, Wb):
+    Za = tf.nn.conv2d(X, Wa, strides=(1,1,1,1), padding='SAME')
+    Aa = tf.nn.leaky_relu(Za, alpha=0.2)
+    Zb = tf.nn.conv2d(Aa, Wb, strides=(1,1,1,1), padding='SAME')
+    Ab = tf.nn.leaky_relu(Zb, alpha=0.2)
+    return Ab
+
+def upsample_block():
+    pass
+
+def output_block():
+    pass
+
 def forward_propagation(X, parameters):
 
-    # Weights for individual layers
-    W1 = parameters["W1"]
-
     # Block 1
-    Z1 = tf.nn.conv2d(X, W1, strides=(1,1,1,1), padding='SAME')
-    A1 = tf.nn.leaky_relu(Z1, alpha=0.2)
+    W1, W2 = parameters['W1'], parameters['W2']
+    B1 = pool_block(X, W1, W2)
 
-    return A1
+    # Block 2
+    W3, W4 = parameters['W3'], parameters['W4']
+    B2 = pool_block(B1, W3, W4)
+
+    # Block 3
+    W5, W6 = parameters['W5'], parameters['W6']
+    B3 = pool_block(B2, W5, W6)
+
+    # Block 4
+    W7, W8 = parameters['W7'], parameters['W8']
+    B4 = pool_block(B3, W7, W8)
+
+    # Block 5
+    W9, W10 = parameters['W9'], parameters['W10']
+    B5 = conv_block(B4, W9, W10)
+
+    # Block 6
+    # TODO: upsample and concat
+    
+    
+    return B5 # TODO finish forward prop
 
 def compute_cost(Z, Y):
     """
