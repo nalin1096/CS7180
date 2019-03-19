@@ -4,8 +4,10 @@
 import numpy as np
 import rawpy
 import tensorflow as tf
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, LeakyReLU, Dense
+from tensorflow.keras.layers import (Conv2D, MaxPooling2D, LeakyReLU, Dense,
+                                     Reshape)
 from tensorflow.keras.models import Sequential
+import tensorflow.keras.backend as K
 
 
 def upsample_and_concat(x1, x2, output_channels, in_channels):
@@ -65,6 +67,7 @@ def debug_model(input_shape):
     model = Sequential()
     lrelu = LeakyReLU(alpha=0.2)
 
+    # Input block
 
     model.add(Conv2D(32, (3,3), padding='same',
                      input_shape=input_shape[1:],
@@ -72,6 +75,15 @@ def debug_model(input_shape):
     model.add(Conv2D(32, (3,3), padding='same',
                      dilation_rate=1, activation=lrelu))
     model.add(MaxPooling2D((2,2), padding='same'))
+
+
+    # Additional blocks
+
+    
+
+    # Output block
+
+    # out = tf.depth_to_space(conv10, 2)
 
     #model = pool_block(model, 32, lrelu)
     #model.add(Dense(units=3, activation='softmax'))

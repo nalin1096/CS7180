@@ -45,7 +45,7 @@ model.compile(loss='mean_absolute_error',
               metrics=['accuracy'])
 
 logger.info("Fitting basic model without metrics")
-#model.fit(x_train, x_train, epochs=1, batch_size=32)
+model.fit(x_train, x_train, epochs=1, batch_size=32)
 
 logger.info("Evaluating against basic test set without metrics")
 #loss_and_metrics = model.evaluate(x_test, x_test, batch_size=128)
