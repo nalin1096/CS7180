@@ -4,8 +4,8 @@
 import numpy as np
 import rawpy
 import tensorflow as tf
-from keras.layers import Conv2D, MaxPooling2D, LeakyReLU, Dense
-from keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, LeakyReLU, Dense
+from tensorflow.keras.models import Sequential
 
 
 def upsample_and_concat(x1, x2, output_channels, in_channels):
