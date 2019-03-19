@@ -65,9 +65,19 @@ def debug_model(input_shape):
     model = Sequential()
     lrelu = LeakyReLU(alpha=0.2)
 
-    model = pool_block(model, 32, lrelu)
-    model.add(Dense(units=12, activation='softmax'))
 
+    model.add(Conv2D(32, (3,3), padding='same',
+                     input_shape=input_shape[1:],
+                     dilation_rate=1, activation=lrelu))
+    model.add(Conv2D(32, (3,3), padding='same',
+                     dilation_rate=1, activation=lrelu))
+    model.add(MaxPooling2D((2,2), padding='same'))
+
+    #model = pool_block(model, 32, lrelu)
+    #model.add(Dense(units=3, activation='softmax'))
+
+    #model.add(Conv2D(input_shape, [3,3], dilation_rate=1, activation=lrelu))
+    
     return model
 
 

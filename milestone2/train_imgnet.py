@@ -41,29 +41,21 @@ model = debug_model(x_train.shape)
 
 logger.info("Compiling basic model without metrics")
 model.compile(loss='mean_absolute_error',
-              optimizer='adam')
+              optimizer='adam',
+              metrics=['accuracy'])
 
 logger.info("Fitting basic model without metrics")
-model.fit(x_train, y_train, epochs=5, batch_size=32)
+#model.fit(x_train, x_train, epochs=1, batch_size=32)
 
 logger.info("Evaluating against basic test set without metrics")
-loss_and_metrics = model.evaluate(x_test, y_test, batch_size=128)
+#loss_and_metrics = model.evaluate(x_test, x_test, batch_size=128)
 
 
 
 
 # now use a basic model with noise
 
-def some_accuracy_metric():
-    """ 
-    There was a specific accuracy metric
-    from the paper you guys liked. We need
-    to plug that in here and then add it 
-    when we compile the model.
-    """
-    pass
 
-
-
+# darkness or whatever
 
 
