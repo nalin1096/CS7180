@@ -1,97 +1,175 @@
 """ Specify imagenet model.
 
 """
+import logging
+
 import numpy as np
 import rawpy
 import tensorflow as tf
-from tensorflow.keras.layers import (Conv2D, MaxPooling2D, LeakyReLU, Dense,
-                                     Reshape)
-from tensorflow.keras.models import Sequential
-import tensorflow.keras.backend as K
+from tensorflow.python.framework import ops
 
 
-def upsample_and_concat(x1, x2, output_channels, in_channels):
-    pool_size = 2
-    deconv_filter = tf.Variable(tf.truncated_normal(
-        [pool_size, pool_size, output_channels, in_channels], stddev=0.02
-    ))
+logger = logging.getLogger(__name__)
+
+def create_placeholders(n_H, n_W, n_C):
+    """ 
+    Creates the placeholders for the tensorflow session.
+
+    Note that the placeholders will most likely vary by input dataset.
+
+    Arguments:
+    n_H -- scalar, height of an input image
+    n_W -- scalar, width of an input image
+    n_C -- scalar, number of channels of the input
+
+    Returns:
+    X -- placeholder for the data input, of shape [None, n_H, n_W, n_C] and dtype "int"
+    Y -- placeholder for the input labels, of shape and dtype equal to X
+    """
+
+    X = tf.placeholder(tf.int32, shape=(None, n_H, n_W, n_C))
+    Y = tf.placeholder(tf.int32, shape=(None, n_H, n_W, n_C))
+
+    return X,Y
+
+def initialize_parameters():
+    """
+    Initializes weight parameters to build a neural network with tensorflow. The shapes are:
+        []
+
+    Returns:
+    parameters -- a dictionary of tensors containing W1,...,WN
+    """
+    seed = tf.set_random_seed(42)
+
+    W1 = tf.get_variable("W1", (32,32,3),tf.initializers.random_normal(seed=seed))
+
+    parameters = {
+        "W1": W1,
+    }
     
-    deconv = tf.nn.conv2d_transpose(x1, deconv_filter, tf.shape(x2),
-                                    strides=[1, pool_size, pool_size, 1])
+    return parameters
 
-    deconv_output = tf.concat([deconv, x2], 3)
-    deconv_output.set_shape([None, None, None, output_channels * 2])
+def forward_propagation(X, parameters):
 
-    return deconv_output
+    # Weights for individual layers
+    W1 = parameters["W1"]
 
-def pool_block(model, output, activ):
+    # Block 1
+    Z1 = tf.nn.conv2d(X, W1, strides=(1,1,1,1), padding='SAME')
+    A1 = tf.nn.leaky_relu(Z1, alpha=0.2)
 
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=activ))
-    model.add(MaxPooling2D([2,2], padding='same'))
+    return A1
 
-    return model
+def compute_cost(Z, Y):
+    """
+    Computes the cost 
 
-def upsample_block(model, innodes, outnodes, activ):
+    Arguments:
+    Z -- output of forward propagation
+    Y -- "true" image as a label, same shape as Z
 
-    model.add(UpsampleAndConcat())
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
-    model.add(Conv2D(output, [3,3], dilation_rate=1, activation=lrelu))
-    
-    return model
+    Returns:
+    cost - Tensor of the cost function
+    """
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+    return cost
 
-def specify_model(input_shape):
-    model = Sequential()
-    lrelu = LeakyReLU(alpha=0.2)
+def random_mini_batches(m, minibatch_size, seed):
+    """ Generator yielding minibatches """
+    ids = [i for i in range(m)]
+    np.random.seed(seed)
+    np.random.shuffle(ids)
 
-    model = pool_block(model, 32, lrelu)         # Block 1
-    model = pool_block(model, 64, lrelu)         # Block 2
-    model = pool_block(model, 128, lrelu)        # Block 3
-    model = pool_block(model, 256, lrelu)        # Block 4
+    begin = 0
+    for end in range(0, m, minibatch_size):
+        yield ids[begin:end]
+        begin = end
 
-    # Block 5
-    
-    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
-    model.add(Conv2D(512, [3,3], dilation_rate=1, activation=lrelu))
+def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
+                num_epochs=1, minibatch_size=32, print_cost=True):
+    """ 
+    Implements Learn-to-See-in-the-Dark for CIFAR dataset
 
-    # Upsample blocks
+    Arguments:
+    X_train -- training set, of shape (None, 32, 32, 3)
+    Y_train -- test set, of shape (None, 32, 32, 3)
+    X_test -- training set, of shape (None, 32, 32, 3)
+    Y_test -- test set, of shape (None, 32, 32, 3)
+    learning_rate -- learning rate of the optimization
+    num_epochs -- number of epochs of the optimization loop
+    minibatch_size -- size of a minibatch
+    print_cost -- True to print cost every 100 epochs
 
-    model = upsample_block(model, 256, 512, lrelu) # Block 6
-    model = upsample_block(model, 128, 256, lrelu) # Block 7
-    model = upsample_block(model, 64, 128, lrelu)  # Block 8
-    model = upsample_block(model, 32, 64, lrelu)   # Block 9
+    Returns:
+    train_accuracy -- real number, accuracy o the train set (X_train)
+    test_accuracy -- real number, accuracy on the test set (X_test)
+    parameters -- parameters learnt by the model. They can be used to predict.
+    """
+    ops.reset_default_graph() # be able to rerun the model without overwriting tf variables
+    tf.set_random_seed(42)
+    seed = 42
+    (m, n_H, n_W, n_C) = X_train.shape
+    assert X_train.shape == Y_train.shape
+    costs = []
 
-    return model
-    
-def debug_model(input_shape):
-    model = Sequential()
-    lrelu = LeakyReLU(alpha=0.2)
+    X,Y = create_placeholders(n_H, n_W, n_C)
+    parameters = initialize_parameters()
+    Z = forward_propagation(X, parameters)
 
-    # Input block
+    cost = compute_cost(Z, Y)
 
-    model.add(Conv2D(32, (3,3), padding='same',
-                     input_shape=input_shape[1:],
-                     dilation_rate=1, activation=lrelu))
-    model.add(Conv2D(32, (3,3), padding='same',
-                     dilation_rate=1, activation=lrelu))
-    model.add(MaxPooling2D((2,2), padding='same'))
+    # Backpropagation
 
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 
-    # Additional blocks
+    # Initialize all the variables globally
+    init = tf.global_variables_initializer()
 
-    
+    # Start the session to compute the tensorflow graph
+    with tf.Session() as sess:
 
-    # Output block
+        # Run the initialization
+        sess.run(init)
 
-    # out = tf.depth_to_space(conv10, 2)
+        # Do the training loop
 
-    #model = pool_block(model, 32, lrelu)
-    #model.add(Dense(units=3, activation='softmax'))
+        minibatches = random_mini_batches(m, minibatch_size, seed)
+        
+        for epoch in range(num_epochs):
 
-    #model.add(Conv2D(input_shape, [3,3], dilation_rate=1, activation=lrelu))
-    
-    return model
+            minibatch_cost = 0
+            num_minibatches = int(m / minibatch_size)
+            seed = seed + 1
+            minibatches = random_mini_batches(m, minibatch_size, seed)
 
+            for minibatch in minibatches:
 
+                # Select a minibatch
+                (minibatch_X, minibatch_Y) = minibatch
 
+                _, temp_cost = sess.run([optimizer, cost],
+                                        feed_dict={X: minibatch_X, Y: minibatch_Y})
+
+                minibatch_cost += temp_cost / num_minibatches
+
+            # Print the cost every epoch
+            if print_cost == True and epoch % 5 == 0:
+                logger.info("Cost after epoch %i: %f" % (epoch, minibatch_cost))
+            if print_cost == True and epoch % 1 == 0:
+                costs.append(minibatch_cost)
+
+        # plot the cost
+
+        # calculate the correct predictions
+
+        # calculate accuracy on the test set
+        train_accuracy = None
+        test_accuracy = None
+
+        return train_accuracy, test_accuracy, parameters
+        
+            
+                
+        
     
