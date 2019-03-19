@@ -20,7 +20,7 @@ import time
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 
-from specify_imgnet_model import cifar_model, plot_costs, initialize_parameters
+from specify_imgnet_model import cifar_model, plot_costs
 from augment_data import SimulateCondition
 from logging_utils import enable_cloud_log
 
