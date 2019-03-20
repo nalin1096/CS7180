@@ -44,18 +44,9 @@ def initialize_parameters():
     """
     tf.set_random_seed(1)
 
-    # Block 0, CIFAR modification
-
-    WC1 = tf.get_variable('WC1', [3,3,3,16],
-                          initializer=\
-                          tf.contrib.layers.xavier_initializer(seed = 0))
-    WC2 = tf.get_variable('WC1', [3,3,16,16],
-                          initializer=\
-                          tf.contrib.layers.xavier_initializer(seed = 0))
-
     # Block 1
 
-    W1 = tf.get_variable("W1", [3,3,16,32],
+    W1 = tf.get_variable("W1", [3,3,3,32],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W2 = tf.get_variable("W2", [3,3,32,32],
@@ -136,20 +127,11 @@ def initialize_parameters():
 
     # Block 10
 
-    W19 = tf.get_variable('W19', [3,3,32, 12],
+    W19 = tf.get_variable('W19', [3,3,32, 16],
                           initializer=\
                           tf.contrib.layers.xavier_initializer(seed = 0))
 
-    WC3 = tf.get_variable('WC3', [3,3,32,16],
-                          initializer=\
-                          tf.contrib.layers.xavier_initializer(seed = 0))
-    WC4 = tf.get_variable('WC4', [3,3,16,16],
-                          initializer=\
-                          tf.contrib.layers.xavier_initializer(seed = 0))
-
-    # Block 11
-
-    WC5 = tf.get_variable('WC5', [3,3,16,6],
+    W20 = tf.get_variable('W20', [3,3,16, 12],
                           initializer=\
                           tf.contrib.layers.xavier_initializer(seed = 0))
 
@@ -157,7 +139,7 @@ def initialize_parameters():
         'W1': W1, 'W2': W2, 'W3': W3, 'W4': W4, 'W5': W5, 'W6': W6,
         'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10, 'W11': W11, 'W12': W12,
         'W13': W13, 'W14': W14, 'W15': W15, 'W16': W16, 'W17': W17,
-        'W18': W18, 'W19': W19, 'WC3': WC3, 'WC4': WC4, 'WC5': WC5,
+        'W18': W18, 'W19': W19, 'W20': W20,
     }
     
     return parameters
@@ -208,15 +190,21 @@ def output_block(X, W):
     Out = tf.depth_to_space(Z, 2)
     return Out
 
-def forward_propagation(X, parameters):
+def cifar_output_block(X, Wa, Wb):
 
-    # Block 0, CIFAR modification
-    WC1, WC2 = parameters['WC1'], parameters['WC2']
-    BC1 = pool_block(X, WC1, WC2)
+    Za = tf.nn.conv2d(X, Wa, strides=(1,1,1,1), padding='SAME')
+    Aa = tf.nn.leaky_relu(Za, alpha=0.2)
+    P = tf.nn.max_pool(Aa, ksize=[1,2,2,1],
+                       strides=[1,2,2,1], padding='SAME')
+    Zb = tf.nn.conv2d(P, Wb, strides=(1,1,1,1), padding='SAME')
+    Out = tf.depth_to_space(Zb, 2)
+    return Out
+
+def forward_propagation(X, parameters):
 
     # Block 1
     W1, W2 = parameters['W1'], parameters['W2']
-    B1 = pool_block(BC1, W1, W2)
+    B1 = pool_block(X, W1, W2)
 
     # Block 2
     W3, W4 = parameters['W3'], parameters['W4']
@@ -250,13 +238,9 @@ def forward_propagation(X, parameters):
     W17, W18 = parameters['W17'], parameters['W18']
     B9 = upsample_block(B8, B1, 32, 64, W17, W18)
 
-    # Block 10, CIFAR modification; reduce pixel output from 64 to 32
-    WC3, WC4 = parameters['WC3'], parameters['WC4']
-    BC2 = upsample_block(B9, BC1, 16, 32, WC3, WC4)
-
-    # Block 11, CIFAR modification; replace W19 with WC5
-    WC5 = parameters['WC5']
-    Bout = output_block(BC2, WC5)
+    # Block 10
+    W19, W20 = parameters['W19'], parameters['W20']
+    Bout = cifar_output_block(B9, W19, W20)
 
     return Bout
 
