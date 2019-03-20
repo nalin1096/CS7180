@@ -44,9 +44,18 @@ def initialize_parameters():
     """
     tf.set_random_seed(1)
 
+    # Block 0, CIFAR modification
+
+    WC1 = tf.get_variable('WC1', [3,3,3,16],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+    WC2 = tf.get_variable('WC1', [3,3,16,16],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+
     # Block 1
 
-    W1 = tf.get_variable("W1", [3,3,3,32],
+    W1 = tf.get_variable("W1", [3,3,16,32],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W2 = tf.get_variable("W2", [3,3,32,32],
@@ -131,11 +140,24 @@ def initialize_parameters():
                           initializer=\
                           tf.contrib.layers.xavier_initializer(seed = 0))
 
+    WC3 = tf.get_variable('WC3', [3,3,32,16],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+    WC4 = tf.get_variable('WC4', [3,3,16,16],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 11
+
+    WC5 = tf.get_variable('WC5', [3,3,16,6],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+
     parameters = {
         'W1': W1, 'W2': W2, 'W3': W3, 'W4': W4, 'W5': W5, 'W6': W6,
         'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10, 'W11': W11, 'W12': W12,
         'W13': W13, 'W14': W14, 'W15': W15, 'W16': W16, 'W17': W17,
-        'W18': W18, 'W19': W19,
+        'W18': W18, 'W19': W19, 'WC3': WC3, 'WC4': WC4, 'WC5': WC5,
     }
     
     return parameters
@@ -188,9 +210,13 @@ def output_block(X, W):
 
 def forward_propagation(X, parameters):
 
+    # Block 0, CIFAR modification
+    WC1, WC2 = parameters['WC1'], parameters['WC2']
+    BC1 = pool_block(X, WC1, WC2)
+
     # Block 1
     W1, W2 = parameters['W1'], parameters['W2']
-    B1 = pool_block(X, W1, W2)
+    B1 = pool_block(BC1, W1, W2)
 
     # Block 2
     W3, W4 = parameters['W3'], parameters['W4']
@@ -224,9 +250,13 @@ def forward_propagation(X, parameters):
     W17, W18 = parameters['W17'], parameters['W18']
     B9 = upsample_block(B8, B1, 32, 64, W17, W18)
 
-    # Block 10
-    W19 = parameters['W19']
-    Bout = output_block(B9, W19)
+    # Block 10, CIFAR modification; reduce pixel output from 64 to 32
+    WC3, WC4 = parameters['WC3'], parameters['WC4']
+    BC2 = upsample_block(B9, BC1, 16, 32, WC3, WC4)
+
+    # Block 11, CIFAR modification; replace W19 with WC5
+    WC5 = parameters['WC5']
+    Bout = output_block(BC2, WC5)
 
     return Bout
 
