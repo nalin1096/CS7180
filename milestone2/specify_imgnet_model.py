@@ -89,11 +89,53 @@ def initialize_parameters():
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
 
+    # Block 6
 
-    
+    W11 = tf.get_variable("W11", [3,3,256, 256],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W12 = tf.get_variable("W12", [3,3,256, 256],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 7
+
+    W13 = tf.get_variable("W13", [3,3,128, 128],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W14 = tf.get_variable("W14", [3,3,128,128],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 8
+
+    W15 = tf.get_variable("W15", [3,3,64,64],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W16 = tf.get_variable("W16", [3,3,64,64],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 9
+
+    W17 = tf.get_variable("W17", [3,3,32,32],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+    W18 = tf.get_variable("W18", [3,3,32,32],
+                         initializer=\
+                         tf.contrib.layers.xavier_initializer(seed = 0))
+
+    # Block 10
+
+    W19 = tf.get_variable('W19', [3,3,32, 12],
+                          initializer=\
+                          tf.contrib.layers.xavier_initializer(seed = 0))
+
     parameters = {
         'W1': W1, 'W2': W2, 'W3': W3, 'W4': W4, 'W5': W5, 'W6': W6,
-        'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10,
+        'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10, 'W11': W11, 'W12': W12,
+        'W13': W13, 'W14': W14, 'W15': W15, 'W16': W16, 'W17': W17,
+        'W18': W18, 'W19': W19,
     }
     
     return parameters
@@ -115,11 +157,34 @@ def conv_block(X, Wa, Wb):
     Ab = tf.nn.leaky_relu(Zb, alpha=0.2)
     return Ab
 
-def upsample_block():
-    pass
+def upsample_and_concat(x1, x2, output_channels, in_channels):
+    pool_size = 2
+    deconv_filter = tf.Variable(
+        tf.truncated_normal([pool_size, pool_size, output_channels,
+                             in_channels], stddev=0.02)
+    )
+    deconv = tf.nn.conv2d_transpose(x1, deconv_filter, tf.shape(x2),
+                                    strides=[1, pool_size, pool_size, 1])
 
-def output_block():
-    pass
+    deconv_output = tf.concat([deconv, x2], 3)
+    deconv_output.set_shape([None, None, None, output_channels * 2])
+
+    return deconv_output
+
+def upsample_block(B, Bp, output_channels, in_channels, Wa, Wb):
+
+    U = upsample_and_concat(B, Bp, output_channels, in_channels)
+    Za = tf.nn.conv2d(U, Wa, strides=(1,1,1,1), padding='SAME')
+    Aa = tf.nn.leaky_relu(Za, alpha=0.2)
+    Zb = tf.nn.conv2d(Aa, Wb, strides=(1,1,1,1), padding='SAME')
+    Ab = tf.nn.leaky_relu(Zb, alpha=0.2)
+    return Ab
+
+def output_block(X, W):
+
+    Z = tf.nn.conv2d(X, W, strides=(1,1,1,1), padding='SAME')
+    Out = tf.depth_to_space(Z, 2)
+    return Out
 
 def forward_propagation(X, parameters):
 
@@ -144,10 +209,26 @@ def forward_propagation(X, parameters):
     B5 = conv_block(B4, W9, W10)
 
     # Block 6
-    # TODO: upsample and concat
-    
-    
-    return B5 # TODO finish forward prop
+    W11, W12 = parameters['W11'], parameters['W12']
+    B6 = upsample_block(B5, B4, 256, 512, W11, W12)
+
+    # Block 7
+    W13, W14 = parameters['W13'], parameters['W14']
+    B7 = upsample_block(B6, B3, 128, 256, W13, W14)
+
+    # Block 8
+    W15, W16 = parameters['W15'], parameters['W16']
+    B8 = upsample_block(B7, B2, 64, 128, W15, W16)
+
+    # Block 9
+    W17, W18 = parameters['W17'], parameters['W18']
+    B9 = upsample_block(B8, B1, 32, 64)
+
+    # Block 10
+    W19 = parameters['W19']
+    Bout = output_block(B9, W19)
+
+    return Bout
 
 def compute_cost(Z, Y):
     """
