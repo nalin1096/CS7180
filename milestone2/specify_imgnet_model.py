@@ -85,13 +85,13 @@ def initialize_parameters():
     W9 = tf.get_variable("W9", [3,3,256, 512],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
-    W10 = tf.get_variable("W10", [3,3,512,512],
+    W10 = tf.get_variable("W10", [32,32,512,512],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
 
     # Block 6
 
-    W11 = tf.get_variable("W11", [3,3,256, 256],
+    W11 = tf.get_variable("W11", [3,3,512, 256],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W12 = tf.get_variable("W12", [3,3,256, 256],
@@ -100,7 +100,7 @@ def initialize_parameters():
 
     # Block 7
 
-    W13 = tf.get_variable("W13", [3,3,128, 128],
+    W13 = tf.get_variable("W13", [3,3,256,128],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W14 = tf.get_variable("W14", [3,3,128,128],
@@ -109,7 +109,7 @@ def initialize_parameters():
 
     # Block 8
 
-    W15 = tf.get_variable("W15", [3,3,64,64],
+    W15 = tf.get_variable("W15", [3,3,128,64],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W16 = tf.get_variable("W16", [3,3,64,64],
@@ -118,7 +118,7 @@ def initialize_parameters():
 
     # Block 9
 
-    W17 = tf.get_variable("W17", [3,3,32,32],
+    W17 = tf.get_variable("W17", [3,3,64,32],
                          initializer=\
                          tf.contrib.layers.xavier_initializer(seed = 0))
     W18 = tf.get_variable("W18", [3,3,32,32],
@@ -222,7 +222,7 @@ def forward_propagation(X, parameters):
 
     # Block 9
     W17, W18 = parameters['W17'], parameters['W18']
-    B9 = upsample_block(B8, B1, 32, 64)
+    B9 = upsample_block(B8, B1, 32, 64, W17, W18)
 
     # Block 10
     W19 = parameters['W19']
