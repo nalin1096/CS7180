@@ -21,6 +21,7 @@ import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 
 from specify_imgnet_model import cifar_model, plot_costs
+from process_imgnet import ndarray_inmemory
 from augment_data import SimulateCondition
 from logging_utils import enable_cloud_log
 
@@ -33,6 +34,12 @@ logger = logging.getLogger(__name__)
 # labeled over 10 categories, and 10,000 test images.
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+# Tiny Imagenet dataset of 64x64 training images
+
+#imgdir = 'dataset/tiny-imagenet-200/train/n01443537/images/'
+#X_train = ndarray_inmemory(imgdir)
+#X_test = X_train
 
 # validate basic model 
 

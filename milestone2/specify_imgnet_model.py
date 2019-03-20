@@ -127,11 +127,7 @@ def initialize_parameters():
 
     # Block 10
 
-    W19 = tf.get_variable('W19', [3,3,32, 16],
-                          initializer=\
-                          tf.contrib.layers.xavier_initializer(seed = 0))
-
-    W20 = tf.get_variable('W20', [3,3,16, 12],
+    W19 = tf.get_variable('W19', [3,3,32, 12],
                           initializer=\
                           tf.contrib.layers.xavier_initializer(seed = 0))
 
@@ -139,7 +135,7 @@ def initialize_parameters():
         'W1': W1, 'W2': W2, 'W3': W3, 'W4': W4, 'W5': W5, 'W6': W6,
         'W7': W7, 'W8': W8, 'W9': W9, 'W10':W10, 'W11': W11, 'W12': W12,
         'W13': W13, 'W14': W14, 'W15': W15, 'W16': W16, 'W17': W17,
-        'W18': W18, 'W19': W19, 'W20': W20,
+        'W18': W18, 'W19': W19,
     }
     
     return parameters
@@ -190,57 +186,57 @@ def output_block(X, W):
     Out = tf.depth_to_space(Z, 2)
     return Out
 
-def cifar_output_block(X, Wa, Wb):
-
-    Za = tf.nn.conv2d(X, Wa, strides=(1,1,1,1), padding='SAME')
-    Aa = tf.nn.leaky_relu(Za, alpha=0.2)
-    P = tf.nn.max_pool(Aa, ksize=[1,2,2,1],
-                       strides=[1,2,2,1], padding='SAME')
-    Zb = tf.nn.conv2d(P, Wb, strides=(1,1,1,1), padding='SAME')
-    Out = tf.depth_to_space(Zb, 2)
-    return Out
-
 def forward_propagation(X, parameters):
 
     # Block 1
     W1, W2 = parameters['W1'], parameters['W2']
     B1 = pool_block(X, W1, W2)
+    logger.debug('B1 shape: {}'.format(B1.get_shape()))
 
     # Block 2
     W3, W4 = parameters['W3'], parameters['W4']
     B2 = pool_block(B1, W3, W4)
-
+    logger.debug('B2 shape: {}'.format(B2.get_shape()))
+    
     # Block 3
     W5, W6 = parameters['W5'], parameters['W6']
     B3 = pool_block(B2, W5, W6)
+    logger.debug('B3 shape: {}'.format(B3.get_shape()))
 
     # Block 4
     W7, W8 = parameters['W7'], parameters['W8']
     B4 = pool_block(B3, W7, W8)
+    logger.debug('B4 shape: {}'.format(B4.get_shape()))
 
     # Block 5
     W9, W10 = parameters['W9'], parameters['W10']
     B5 = conv_block(B4, W9, W10)
+    logger.debug('B5 shape: {}'.format(B5.get_shape()))
 
     # Block 6
     W11, W12 = parameters['W11'], parameters['W12']
     B6 = upsample_block(B5, B4, 256, 512, W11, W12)
+    logger.debug('B6 shape: {}'.format(B6.get_shape()))
 
     # Block 7
     W13, W14 = parameters['W13'], parameters['W14']
     B7 = upsample_block(B6, B3, 128, 256, W13, W14)
+    logger.debug('B7 shape: {}'.format(B7.get_shape()))
 
     # Block 8
     W15, W16 = parameters['W15'], parameters['W16']
     B8 = upsample_block(B7, B2, 64, 128, W15, W16)
+    logger.debug('B8 shape: {}'.format(B8.get_shape()))
 
     # Block 9
     W17, W18 = parameters['W17'], parameters['W18']
     B9 = upsample_block(B8, B1, 32, 64, W17, W18)
+    logger.debug('B9 shape: {}'.format(B9.get_shape()))
 
     # Block 10
-    W19, W20 = parameters['W19'], parameters['W20']
-    Bout = cifar_output_block(B9, W19, W20)
+    W19 = parameters['W19']
+    Bout = output_block(B9, W19)
+    logger.debug('Bout shape: {}'.format(Bout.get_shape()))
 
     return Bout
 
