@@ -345,13 +345,15 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
     ops.reset_default_graph() # be able to rerun the model 
     tf.set_random_seed(42)
     seed = 42
-    (m, n_H, n_W, n_C) = X_train.shape
+    #(m, n_H, n_W, n_C) = X_train.shape
     assert X_train.shape == Y_train.shape
     costs = []
 
-    X,Y = create_placeholders(n_H, n_W, n_C)
-    parameters = initialize_parameters()
+    #X,Y = create_placeholders(n_H, n_W, n_C)
+    #parameters = initialize_parameters()
     #Z = forward_propagation(X, parameters)
+    X, Y = X_train, Y_train
+    
     Z = sony_network(X)
 
     cost = compute_cost(Z, Y)

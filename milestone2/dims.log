@@ -1,0 +1,31 @@
+2019-03-21 20:56:10,930 INFO STARTED CIFAR model
+Traceback (most recent call last):
+  File "train_imgnet.py", line 52, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 348, in cifar_model
+    (m, n_H, n_W, n_C) = X_train.shape
+ValueError: too many values to unpack (expected 4)
+2019-03-21 20:58:18,279 INFO STARTED CIFAR model
+Traceback (most recent call last):
+  File "train_imgnet.py", line 52, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 355, in cifar_model
+    Z = sony_network(X)
+NameError: name 'X' is not defined
+2019-03-21 20:59:07,312 INFO STARTED CIFAR model
+Traceback (most recent call last):
+  File "train_imgnet.py", line 52, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 357, in cifar_model
+    Z = sony_network(X)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 252, in sony_network
+    conv1 = slim.conv2d(input, 32, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv1_1')
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/contrib/framework/python/ops/arg_scope.py", line 182, in func_with_args
+    return func(*args, **current_args)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/contrib/layers/python/layers/layers.py", line 1154, in convolution2d
+    conv_dims=2)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/contrib/framework/python/ops/arg_scope.py", line 182, in func_with_args
+    return func(*args, **current_args)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/contrib/layers/python/layers/layers.py", line 1025, in convolution
+    (conv_dims + 2, input_rank))
+ValueError: Convolution expects input with rank 4, got 5
