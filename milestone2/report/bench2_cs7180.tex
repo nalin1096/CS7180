@@ -75,29 +75,17 @@
 
 \maketitle
 
-\section{Introduction}
+\section{Introduction and Related Work}
 
-We are trying to make it more cost effective for AI to see in the dark. Chen et. al.
-(2018) \cite{chen2018learning} successfully demonstrated that a neural network could
-process dark images into light images. Their model requires a specially curated dataset
-by a professional photographer, and substantial processing resources. Our group is trying to
-replicate Chen et. al. (2018) functionality using data augmentation on existing datasets.
-Our goal is to make the Chen et. al. (2018) more cost efficient and generalizable across
-domains.
-
-The novelty of our approach stems from the idea of ``more for less''. Our
-model drastically reduces the overhead costs of data collection by
-synthesizing readily available training data (MIT-Adobe FiveK). This is
-particularly beneficial in domains where collecting images pairs is
-expensive/time consuming.
-
-This is a hard problem because simulating natural phenomena using augmented data
-is not easy. In other words, ``[i]mitation is possible because distinct physical
-systems can be organized to exhibit nearly identical behavior'' \cite{Simon:1996:SA:237774}.
-Identifying this identical behavior using statistical distributions of image properties
-such as distortion, and lighting.
-
-\section{Related Work}
+Images taken in low-light conditions are often too dark, noisy, and distorted to be used in industrial purposes. We propose a deep-learning model that processes low-light
+images to improve image brightness and increase their overall quality. The
+problem with imaging in low-light conditions is challenging due to low-photon count and low Signal-to-Noise (SNR) ratio. These yield very dark and noisy
+images. The most common technique to overcome this problem is long exposure
+shot. However, this method yields blurry images with the slightest camera
+shake
+or object motion\cite{chen2018learning}. Common post-processing techniques brighten the image at the expense of image quality. Being able to ``see in the dark'' provides a
+number of real-world benefits such as photography, computer vision, and
+social networking. \newline
 
 In the past, the problem of enhancing low light images has been tackled via
 noise reduction. This noise becomes dominant especially in low-light images
@@ -120,11 +108,174 @@ true (bright light) and corrupted (low light) image pairs called
 ``See-in-the-Dark Dataset'' (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
 specific and not easily generalizable.\newline
 
-\section{Method/Model}
+We propose a transferable CNN for image brightening and denoising. Instead
+of training our model on actual true (bright light) and corrupted
+(low light) image pairs, we use images from the publicly available "MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating low-light conditions. We train our CNN on the synthetic data to obtain our initial model
+parameters. Then, using these, and a small fraction of the real image pairs
+from the SID Dataset, we adopt a transfer learning
+\cite{Goodfellow-et-al-2016} approach to update our
+model parameters. We then use this model to test on our SID Dataset. In
+addition, we aim to test various transfer learning approaches, such as the
+traditional transfer learning and zero shot learning \cite{larochelle2008,
+  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.\newline
+
+
+The novelty of our approach stems from the idea of ``more for less''. Our
+model drastically reduces the overhead costs of data collection by
+synthesizing readily available training data (MIT-Adobe FiveK). This is
+particularly beneficial in domains where collecting images pairs is
+expensive/time consuming. 
+
+
+\section{Model}
+
+We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We made sure that these photographs cover a broad range of scenes, subjects, and lighting conditions. Considering these images as the ground truth (i.e., images taken in normal light conditions), we corrupt them to simulate images taken in low-light conditions. These distorted images and original images consist of our training inputs to our first model. 
+In order to simulate the distortion created by taking pictures in poor light conditions, we emulate the traditional image processing pipeline for correcting such images, only in reverse. 
+
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.35]{pipeline.jpg}
+  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
+\end{figure}
+
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.5]{model.png}
+  \caption{Our proposed model framework}
+\end{figure}
+
+\subsection{Replicating their Model}
+
+We tried to replicate their model to using other readily
+available data such as CIFAR10 \cite{cifar10} and ImageNet
+\cite{imagenet_cvpr09}. The CIFAR10 ad ImageNet data is augmented to
+simulate properties of the images used by Chen et. al. (2018)
+\cite{chen2018learning}. The CIFAR10 and ImageNet datasets are distinctly
+different because they are not \textit{raw} images. This means the
+dimensionality of CIFAR10 is $32 \times 32 \times 3$ rather than a raw
+image which could be $512 \times 512 \times 4$. We not only need to
+simulate images but also account for the \textit{change in dimensionality}
+across image types.
+
+
 
 \section{Experiment}
 
-\section{Discussion}
+We first collect 5,000 images in raw format from the MIT-Adobe dataset, taken with SLR cameras by a set of different photographers in different scenarios. We then run these images through our pipeline to generate our simulated low-light images. An example of two of such images is represented in
+Figure \ref{fig:simulate}. We train our first model on these simulated
+images, and then transfer to a fraction of the Sid dataset (500 images). We
+use the SID Model as our baseline and our
+performance measure will be achieving a Peak Signal-to-Noise Ratio (PSNR)
+greater or equal to the baseline.
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.3]{fig3.png}
+  \caption{Simulating two low-light images via our pipeline: (a) Original
+    image, (b) Gamma Distortion, (c) White Imbalance, (d) Poisson Noise addition, (e) Black Level, final low-light simulation}
+  \label{fig:simulate}
+\end{figure}
+
+Using the GitHub repository provided by Chen et. al. \cite{chen2018learning},
+we were gather and run to run their code but ran into limitations with computational
+resources. Chen et. al. \cite{chen2018learning} used a separate model for
+each of the two cameras. They specified a minimum of 64GB of GPU RAM for the
+Sony model and 128 GB of GPU RAM for the Fuji model. We decided to try
+replicating the less resource intensive Sony model. The hardware
+requirements for the Sony model are nontrivial so we have explored
+several options.\newline
+
+Using AWSEducate did not work for us. We were unable to create roles with
+IAM authentication so it's really hard or impossible to move data from a
+S3 Bucket to an EC2 Instance. We tried to create a $p3.8xlarge$ instance but
+these instances are not allowed even though they are listed. Using regular
+AWS does work but is costly. Ran a single AWS EC2 $p3.8xlarge$ instance
+with 32 CPU, 244 GB of Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This
+costs \$12.24 an hour. This is the amount of GPU Memory requested by the
+paper authors as a minimum amount. \newline
+
+Given these initial facts, we then tried to estimate run time requirements
+for the Sony model. We trained the Sony model for 90 minutes using an
+AWS $p3.8xlarge$ instance. We were able to complete $\approx 12$ training
+epochs. Figure \ref{fig:train} contains an example test image/labelled image
+pairing. We then tried to use the training parameters to
+test the model but could not get this to work without modifying the script
+provided by Chen et. al. \cite{chen2018learning}. The model parameters
+were available to download, we used these parameters to run against test
+data for 30 minutes. Figure \ref{fig:test} contains example output from this
+test run. Both Figure \ref{fig:train} and Figure \ref{fig:test}
+are pictures of a similar yellow bike. We can see a qualitative improvement
+across the three renderings of the same predicted test image in
+Figure \ref{fig:test}.
+
+Additional time was required to extract the Sony dataset
+which decompressed to about 115GB of image files. We estimate that
+replicating the Chen et. al. \cite{chen2018learning} training parameters
+for \textit{only} the Sony model takes approximately 500 hours or
+\$ 6,120. We will either require more resources or have to work on just a
+subset of this problem. We are currently looking for additional resources
+and would appreciate any help in this matter.
+
+\subsection{Model Replication}
+
+We tried replicating their model and writing a model in parallel to
+replicate their functionality. We also tried using the CIFAR10 and
+ImageNet datasets as input. The primary issue when replicating their
+model related to dimensionality. The RGB images in CIFAR10 and ImageNet
+have $m \times n \times 3$ dimensions. Raw images have $m \times n \times 4$
+dimensions.
+
+We were able to confirm that output dimensions from Chen et. al.
+\cite{chen2018learning} follow the pattern $2m \times 2n \times 3$
+irrespective of the image size or type used. During our experiment,
+we focused our debugging efforts on understanding whether the dimensionality
+of a raw image as an input generated incompatible dimensions with the
+target vector after model output. This error resulted in our replicated
+model not being able to compute the cost function.
+
+In terms of techniques used, their model is mostly written in a higher
+level Tensorflow contribution module called ``slim''. The ``slim''
+contribution module does not appear to have any documentation and requires
+one to read the module code embedded within Tensorflow. We initially tried
+writing a model in parallel using Keras but found that moving from Keras
+objects back down to lower level Tensorflow for some blocks within
+forward propagation to not be documented well. We then rewrote the
+Chen et. al. \cite{chen2018learning} model using only low level Tensorflow
+code. This approach has the disadvantage of requiring the dimensions of
+all weight matrices to be specified and initialized in a separate function
+we called 'initialize\_parameters()'.
+
+These efforts allowed us to understand the dimensionality of both models
+at each of the 10 block modules within forward propagation.
+
+
+\section{Appendix}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.1]{00002_00_train_100}
+  \caption{ Example Training Data}
+  \label{fig:train}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[t]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_gt}
+    \caption{Input}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.3\textwidth}
+    \includegraphics[width=\textwidth]{10016_00_100_scale}
+    \caption{Output}
+  \end{subfigure}
+  \caption{ Example Test Data}
+  \label{fig:test}
+\end{figure}
 
 
 \bibliographystyle{unsrt}
