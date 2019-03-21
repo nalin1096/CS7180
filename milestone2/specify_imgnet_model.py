@@ -8,8 +8,9 @@ import numpy as np
 import rawpy
 import tensorflow as tf
 from tensorflow.python.framework import ops
+import tensorflow.contrib.slim as slim
 
-from train_Sony import network
+#from train_Sony import network
 
 
 logger = logging.getLogger(__name__)
@@ -244,6 +245,59 @@ def forward_propagation(X, parameters):
 
     return Bout
 
+def lrelu(x):
+    return tf.maximum(x * 0.2, x)
+
+def sony_network(input):
+    conv1 = slim.conv2d(input, 32, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv1_1')
+    conv1 = slim.conv2d(conv1, 32, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv1_2')
+    pool1 = slim.max_pool2d(conv1, [2, 2], padding='SAME')
+    logger.debug("pool1: {}".format(pool1.get_shape()))
+
+    conv2 = slim.conv2d(pool1, 64, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv2_1')
+    conv2 = slim.conv2d(conv2, 64, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv2_2')
+    pool2 = slim.max_pool2d(conv2, [2, 2], padding='SAME')
+    logger.debug("pool2: {}".format(pool2.get_shape()))
+
+    conv3 = slim.conv2d(pool2, 128, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv3_1')
+    conv3 = slim.conv2d(conv3, 128, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv3_2')
+    pool3 = slim.max_pool2d(conv3, [2, 2], padding='SAME')
+    logger.debug("pool3: {}".format(pool3.get_shape()))
+
+    conv4 = slim.conv2d(pool3, 256, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv4_1')
+    conv4 = slim.conv2d(conv4, 256, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv4_2')
+    pool4 = slim.max_pool2d(conv4, [2, 2], padding='SAME')
+    logger.debug("pool4: {}".format(pool4.get_shape()))
+
+    conv5 = slim.conv2d(pool4, 512, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv5_1')
+    conv5 = slim.conv2d(conv5, 512, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv5_2')
+    logger.debug('conv5: {}'.format(conv5.get_shape()))
+
+    up6 = upsample_and_concat(conv5, conv4, 256, 512)
+    conv6 = slim.conv2d(up6, 256, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv6_1')
+    conv6 = slim.conv2d(conv6, 256, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv6_2')
+    logger.debug('conv6: {}'.format(conv6.get_shape()))
+
+    up7 = upsample_and_concat(conv6, conv3, 128, 256)
+    conv7 = slim.conv2d(up7, 128, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv7_1')
+    conv7 = slim.conv2d(conv7, 128, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv7_2')
+    logger.debug('conv7: {}'.format(conv7.get_shape()))
+
+    up8 = upsample_and_concat(conv7, conv2, 64, 128)
+    conv8 = slim.conv2d(up8, 64, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv8_1')
+    conv8 = slim.conv2d(conv8, 64, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv8_2')
+    logger.debug('conv8: {}'.format(conv8.get_shape()))
+
+    up9 = upsample_and_concat(conv8, conv1, 32, 64)
+    conv9 = slim.conv2d(up9, 32, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv9_1')
+    conv9 = slim.conv2d(conv9, 32, [3, 3], rate=1, activation_fn=lrelu, scope='g_conv9_2')
+    logger.debug('conv9: {}'.format(conv9.get_shape()))
+
+    conv10 = slim.conv2d(conv9, 12, [1, 1], rate=1, activation_fn=None, scope='g_conv10')
+    out = tf.depth_to_space(conv10, 2)
+    logger.debug('out shape: {}'.format(out.get_shape()))
+    return out
+
 def compute_cost(Z, Y):
     """
     Computes the cost 
@@ -264,13 +318,9 @@ def random_mini_batches(m, minibatch_size, seed):
     np.random.seed(seed)
     np.random.shuffle(ids)
 
-    begin = 0
-    for end in range(0, m, minibatch_size):
+    for id_val in ids:
+        yield id_val
 
-        if end > 0:
-            yield ids[begin:end]
-
-        begin = end
 
 def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 num_epochs=1, minibatch_size=32, print_cost=True):
@@ -302,7 +352,7 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
     X,Y = create_placeholders(n_H, n_W, n_C)
     parameters = initialize_parameters()
     #Z = forward_propagation(X, parameters)
-    Z = network(X)
+    Z = sony_network(X)
 
     cost = compute_cost(Z, Y)
 
