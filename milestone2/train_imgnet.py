@@ -17,6 +17,7 @@ import logging
 import os
 import time
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 
@@ -34,6 +35,9 @@ logger = logging.getLogger(__name__)
 # labeled over 10 categories, and 10,000 test images.
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+X_train = np.append(X_train, X_train[...,[1]], axis=3)
+X_test = np.append(X_test, X_test[...,[1]], axis=3)
 
 # Tiny Imagenet dataset of 64x64 training images
 
