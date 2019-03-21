@@ -9,6 +9,8 @@ import rawpy
 import tensorflow as tf
 from tensorflow.python.framework import ops
 
+from train_Sony import network
+
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +129,7 @@ def initialize_parameters():
 
     # Block 10
 
-    W19 = tf.get_variable('W19', [3,3,32, 12],
+    W19 = tf.get_variable('W19', [1,1,32, 12],
                           initializer=\
                           tf.contrib.layers.xavier_initializer(seed = 0))
 
@@ -299,7 +301,8 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
 
     X,Y = create_placeholders(n_H, n_W, n_C)
     parameters = initialize_parameters()
-    Z = forward_propagation(X, parameters)
+    #Z = forward_propagation(X, parameters)
+    Z = network(X)
 
     cost = compute_cost(Z, Y)
 
