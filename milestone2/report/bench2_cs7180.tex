@@ -1,0 +1,133 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2018
+
+% ready for submission
+% \usepackage{neurips_2018}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2018}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+     \usepackage[final]{nips_2018}
+
+% to avoid loading the natbib package, add option nonatbib:
+%     \usepackage[nonatbib]{neurips_2018}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\graphicspath{ {imgs/} }
+
+\title{CS 7180 Milestone 2}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+  Nalin Gupta \\
+  \texttt{NUID: 001726854} \\
+  \And
+  Christopher Botica\\
+  \texttt{NUID: 001726854} \\
+  \And
+  Tyler Brown\\
+  \texttt{NUID: 001684955} \\
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+\begin{document}
+% \nipsfinalcopy is no longer used
+
+\maketitle
+
+\section{Introduction}
+
+We are trying to make it more cost effective for AI to see in the dark. Chen et. al.
+(2018) \cite{chen2018learning} successfully demonstrated that a neural network could
+process dark images into light images. Their model requires a specially curated dataset
+by a professional photographer, and substantial processing resources. Our group is trying to
+replicate Chen et. al. (2018) functionality using data augmentation on existing datasets.
+Our goal is to make the Chen et. al. (2018) more cost efficient and generalizable across
+domains.
+
+The novelty of our approach stems from the idea of ``more for less''. Our
+model drastically reduces the overhead costs of data collection by
+synthesizing readily available training data (MIT-Adobe FiveK). This is
+particularly beneficial in domains where collecting images pairs is
+expensive/time consuming.
+
+This is a hard problem because simulating natural phenomena using augmented data
+is not easy. In other words, ``[i]mitation is possible because distinct physical
+systems can be organized to exhibit nearly identical behavior'' \cite{Simon:1996:SA:237774}.
+Identifying this identical behavior using statistical distributions of image properties
+such as distortion, and lighting.
+
+\section{Related Work}
+
+In the past, the problem of enhancing low light images has been tackled via
+noise reduction. This noise becomes dominant especially in low-light images
+due to low SNR. Remez et. al. proposed a deep CNN for noise reduction under
+the assumption that this low-light noise belongs to a Poisson
+distribution \cite{remez2017deep}.  They used images from ImageNet
+\cite{imagenet_cvpr09} as their ground truth data
+and added synthetic Poisson noise to simulate corrupted images. Even though
+their model outperform the state-of-the art de-noiser ``BM3D'', it does not
+scale well to real world images, due to their underlying assumptions.
+Furthermore, their model only denoises images but does not brighten them.
+Motivated by these downfalls, Chen et. al., proposed an end-to-end CNN,
+``See-in-the-Dark'' (SID), which brightens extremely low light images and
+removes noise without making any underlying assumptions
+\cite{chen2018learning}. However these advances come with the added expense
+of collecting large amounts of low
+light and bright light images. In the absence of a true vs noisy image
+dataset, the team captured scenes using various exposure times to generate
+true (bright light) and corrupted (low light) image pairs called
+``See-in-the-Dark Dataset'' (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
+specific and not easily generalizable.\newline
+
+\section{Method/Model}
+
+\section{Experiment}
+
+\section{Discussion}
+
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}
