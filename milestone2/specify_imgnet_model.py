@@ -183,7 +183,9 @@ def upsample_block(B, Bp, output_channels, in_channels, Wa, Wb):
 def output_block(X, W):
 
     Z = tf.nn.conv2d(X, W, strides=(1,1,1,1), padding='SAME')
+    logger.debug("output block shape Z: {}".format(Z.get_shape()))
     Out = tf.depth_to_space(Z, 2)
+    logger.debug("output block transform: {}".format(Out.get_shape()))
     return Out
 
 def forward_propagation(X, parameters):

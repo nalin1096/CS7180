@@ -9,4 +9,4 @@ chmod +x Miniconda3-latest-Linux-x86_64.sh
 ./Miniconda3-latest-Linux-x86_64.sh
 
 
-git clone https://github.com/tbonza/CS7180.git
+#git clone https://github.com/tbonza/CS7180.git

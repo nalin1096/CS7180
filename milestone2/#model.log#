@@ -1,0 +1,314 @@
+2019-03-21 00:00:21,342 INFO Validating basic model
+2019-03-21 00:00:24,185 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:00:24,190 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:00:24,195 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:00:24,200 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:00:24,205 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:00:24,218 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:00:24,231 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:00:24,243 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:00:24,256 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:00:24,257 DEBUG Bout shape: (?, 64, 64, 3)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 302, in cifar_model
+    cost = compute_cost(Z, Y)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 254, in compute_cost
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 866, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 8318, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+2019-03-21 00:31:05,619 INFO STARTED CIFAR model
+2019-03-21 00:31:08,480 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:31:08,486 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:31:08,491 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:31:08,497 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:31:08,502 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:31:08,515 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:31:08,529 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:31:08,542 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:31:08,555 DEBUG B9 shape: (?, 32, 32, 32)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimension size must be evenly divisible by 4 but is 9 for 'DepthToSpace' (op: 'DepthToSpace') with input shapes: [?,32,32,9].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 300, in cifar_model
+    Z = forward_propagation(X, parameters)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 238, in forward_propagation
+    Bout = output_block(B9, W19)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 186, in output_block
+    Out = tf.depth_to_space(Z, 2)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 2283, in depth_to_space
+    return gen_array_ops.depth_to_space(input, block_size, data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 1459, in depth_to_space
+    data_format=data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimension size must be evenly divisible by 4 but is 9 for 'DepthToSpace' (op: 'DepthToSpace') with input shapes: [?,32,32,9].
+2019-03-21 00:32:52,136 INFO STARTED CIFAR model
+2019-03-21 00:32:55,074 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:32:55,079 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:32:55,085 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:32:55,090 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:32:55,095 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:32:55,108 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:32:55,121 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:32:55,134 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:32:55,147 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:32:55,149 DEBUG Bout shape: (?, 64, 64, 8)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,8], [?,32,32,3].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 302, in cifar_model
+    cost = compute_cost(Z, Y)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 254, in compute_cost
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 866, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 8318, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,8], [?,32,32,3].
+2019-03-21 00:37:17,450 INFO STARTED CIFAR model
+2019-03-21 00:37:20,366 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:37:20,371 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:37:20,377 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:37:20,382 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:37:20,387 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:37:20,399 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:37:20,412 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:37:20,424 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:37:20,437 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:37:20,438 DEBUG Bout shape: (?, 64, 64, 3)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 302, in cifar_model
+    cost = compute_cost(Z, Y)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 254, in compute_cost
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 866, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 8318, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+2019-03-21 00:39:34,834 INFO STARTED CIFAR model
+2019-03-21 00:39:37,700 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:39:37,705 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:39:37,711 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:39:37,716 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:39:37,721 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:39:37,734 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:39:37,746 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:39:37,758 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:39:37,771 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:39:37,772 DEBUG output block shape: (?, 32, 32, 12)
+2019-03-21 00:39:37,773 DEBUG Bout shape: (?, 64, 64, 3)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 303, in cifar_model
+    cost = compute_cost(Z, Y)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 255, in compute_cost
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 866, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 8318, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+2019-03-21 00:46:03,037 INFO STARTED CIFAR model
+2019-03-21 00:46:05,813 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:46:05,818 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:46:05,824 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:46:05,829 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:46:05,833 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:46:05,846 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:46:05,857 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:46:05,869 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:46:05,882 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:46:05,883 DEBUG output block shape Z: (?, 32, 32, 12)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimension size must be evenly divisible by 16 but is 12 for 'DepthToSpace' (op: 'DepthToSpace') with input shapes: [?,32,32,12].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 302, in cifar_model
+    Z = forward_propagation(X, parameters)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 240, in forward_propagation
+    Bout = output_block(B9, W19)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 187, in output_block
+    Out = tf.depth_to_space(Z, 4)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 2283, in depth_to_space
+    return gen_array_ops.depth_to_space(input, block_size, data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 1459, in depth_to_space
+    data_format=data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimension size must be evenly divisible by 16 but is 12 for 'DepthToSpace' (op: 'DepthToSpace') with input shapes: [?,32,32,12].
+2019-03-21 00:48:40,711 INFO STARTED CIFAR model
+2019-03-21 00:48:43,558 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:48:43,563 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:48:43,568 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:48:43,573 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:48:43,578 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:48:43,590 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:48:43,603 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:48:43,615 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:48:43,627 DEBUG B9 shape: (?, 32, 32, 32)
+2019-03-21 00:48:43,628 DEBUG output block shape Z: (?, 32, 32, 12)
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 302, in cifar_model
+    Z = forward_propagation(X, parameters)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 240, in forward_propagation
+    Bout = output_block(B9, W19)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 187, in output_block
+    Out = tf.depth_to_space(Z, 1)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 2283, in depth_to_space
+    return gen_array_ops.depth_to_space(input, block_size, data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 1459, in depth_to_space
+    data_format=data_format, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 708, in _apply_op_helper
+    (key, op_type_name, attr_value.i, attr_def.minimum))
+ValueError: Attr 'block_size' of 'DepthToSpace' Op passed 1 less than minimum 2.
+2019-03-21 00:51:39,449 INFO STARTED CIFAR model
+2019-03-21 00:51:42,292 DEBUG B1 shape: (?, 32, 32, 32)
+2019-03-21 00:51:42,298 DEBUG B2 shape: (?, 32, 32, 64)
+2019-03-21 00:51:42,303 DEBUG B3 shape: (?, 32, 32, 128)
+2019-03-21 00:51:42,308 DEBUG B4 shape: (?, 32, 32, 256)
+2019-03-21 00:51:42,312 DEBUG B5 shape: (?, 32, 32, 512)
+2019-03-21 00:51:42,325 DEBUG B6 shape: (?, 32, 32, 256)
+2019-03-21 00:51:42,337 DEBUG B7 shape: (?, 32, 32, 128)
+2019-03-21 00:51:42,349 DEBUG B8 shape: (?, 32, 32, 64)
+2019-03-21 00:51:42,362 DEBUG B9 shape: (?, 32, 32, 16)
+2019-03-21 00:51:42,363 DEBUG output block shape Z: (?, 32, 32, 12)
+2019-03-21 00:51:42,364 DEBUG output block transform: (?, 64, 64, 3)
+2019-03-21 00:51:42,364 DEBUG Bout shape: (?, 64, 64, 3)
+Traceback (most recent call last):
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1628, in _create_c_op
+    c_op = c_api.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "train_imgnet.py", line 47, in <module>
+    parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 304, in cifar_model
+    cost = compute_cost(Z, Y)
+  File "/home/tylerbrown/CS7180/milestone2/specify_imgnet_model.py", line 256, in compute_cost
+    cost = tf.reduce_mean(tf.abs(Z - Y))
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 866, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 8318, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1792, in __init__
+    control_input_ops)
+  File "/home/tylerbrown/miniconda3/envs/rose/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1631, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Dimensions must be equal, but are 64 and 32 for 'sub' (op: 'Sub') with input shapes: [?,64,64,3], [?,32,32,3].
+

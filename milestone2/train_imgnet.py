@@ -43,8 +43,9 @@ logger = logging.getLogger(__name__)
 
 # validate basic model 
 
-logger.info("Validating basic model")
+logger.info("STARTED CIFAR model")
 parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+logging.info("FINISHED CIFAR model")
 
 
 # now use a basic model with noise
