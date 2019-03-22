@@ -332,8 +332,14 @@ this problem can be solved when we use the entire dataset to train the model.
 
 \section{Discussion}
 
-
-
+Currently, we are simulating low light images using (Section 3.4) using
+raw images from the SID dataset. A drawback of this approach is that we
+can modify the pixels of the image to simulate low light but we cannot
+view these modifications as a RGB image. Our proposed next step is to modify
+our model is so it is compatible with RGB images as input. We have identified
+blocks within the model which most likely need to be changed. After
+updating our model to accept RGB input, we will be implementing transfer
+learning to obtain the final result. 
 
 \section{Appendix}
 
