@@ -118,18 +118,22 @@ their model is camera specific and not easily generalizable.\newline
 We propose a transferable CNN for image brightening and denoising. Instead
 of training our model on actual true (bright light) and corrupted
 (low light) image pairs, we use images from the publicly available
-"MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating
-low-light conditions. We train our CNN on the synthetic data to obtain our initial
-model parameters. Then, using these, and a small fraction of the real image pairs
-from the SID Dataset, we adopt a transfer learning \cite{Goodfellow-et-al-2016}
-approach to update our model parameters. We then use this model to test on our
-SID Dataset. In addition, we aim to test various transfer learning approaches,
-such as the traditional transfer learning and zero shot learning \cite{larochelle2008,
-  NIPS2009_3650, socher2013zeroshot}.\newline
+RAISE raw images dataset \cite{Dang-Nguyen:2015:RRI:2713168.2713194}. We
+use the RAISE raw images dataset as our true images and corrupt these by
+simulating low-light conditions for use in our model. We train our CNN on
+this synthetic
+data to obtain our initial model parameters. A small fraction of the real
+images paired from the SID dataset is then used in our transfer learning
+\cite{Goodfellow-et-al-2016} approach to update our model parameters.
+These model parameters are updated for the particular camera used in the
+SID dataset. We then use this model to test on the SID Dataset. In
+addition, we aim to test various transfer learning approaches, such as the
+traditional transfer learning and zero shot learning \cite{larochelle2008, NIPS2009_3650,socher2013zeroshot}. \newline
 
 The novelty of our approach stems from the idea of ``more for less''. Our
 model drastically reduces the overhead costs of data collection by
-synthesizing readily available training data (MIT-Adobe FiveK). This is
+synthesizing readily available training data (RAISE raw images dataset).
+This is
 particularly beneficial in domains where collecting images pairs is
 expensive/time consuming.
 
@@ -268,6 +272,12 @@ image where $g$ has not been applied.
 
 \subsection{State of the Art Model Results}
 
+The model used by Chen et. al. \cite{chen2018learning} trains on raw
+images for 4,000 epochs. It beats the current state of the art denoising
+technique, BM3D. An example of a result for this model is shown in
+Figure \ref{fig:train}. A drawback of this model is that it learns a
+separate model for each device used to capture the raw images.
+
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.35]{Their_results}
@@ -275,6 +285,9 @@ image where $g$ has not been applied.
   \label{fig:train}
 \end{figure}
 
+We can see in Figure \ref{fig:train}, a nearly dark image in sub-figure
+(a) is converted to an image shot in normal light conditions; shown
+in sub-figure (b).
 
 \subsection{Our Model Results}
 
