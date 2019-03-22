@@ -27,6 +27,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{amsmath}
 
 \graphicspath{ {imgs/} }
 
@@ -181,7 +182,8 @@ greater or equal to the baseline.
   \label{fig:simulate}
 \end{figure}
 
-Using the GitHub repository provided by Chen et. al. \cite{chen2018learning},
+As part of Milestone 1, we used the GitHub repository provided by Chen et.
+al. \cite{chen2018learning},
 we were gather and run to run their code but ran into limitations with computational
 resources. Chen et. al. \cite{chen2018learning} used a separate model for
 each of the two cameras. They specified a minimum of 64GB of GPU RAM for the
@@ -251,7 +253,31 @@ all weight matrices to be specified and initialized in a separate function
 we called 'initialize\_parameters()'.
 
 These efforts allowed us to understand the dimensionality of both models
-at each of the 10 block modules within forward propagation.
+at each of the 10 blocks within their forward propagation. We also
+experimented with pooling in regards to window size. We also experimented
+with strides for convolutional layers with each block. We also added up
+to three additional blocks with different parameters in an attempt to
+get the output dimensions to match the dimensionality of our input image.
+
+At this point, we have not been able to use RGB images, having
+$m \times n \times 3$ dimensions, to work with Chen et. al.
+\cite{chen2018learning} model. It is important for us to develop this
+capability in order to qualitatively verify that we are correctly augmenting
+image data. We are unable to generate images in raw format because
+it would require us to know proprietary information about how a camera
+generated an image.
+
+In order to generate output for this milestone, we modified images from
+Chen et. al. \cite{chen2018learning}, such that
+
+\begin{align*}
+  X &= g(y_{train})\\
+  Y &= y_{train}
+\end{align*}
+
+where function $g$ is an application of artificial noise to a clean
+image in $y_{train}$ which is then trained against a corresponding
+image where $g$ has not been applied.
 
 
 \section{Appendix}
