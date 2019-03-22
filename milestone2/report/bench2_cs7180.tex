@@ -291,13 +291,38 @@ in sub-figure (b).
 
 \subsection{Our Model Results}
 
+Currently, our model has been trained on a subset of simulated lowlight
+images using the SID dataset as mentioned in Section 4.1. We ran the model
+for 25 epochs due to limited resources. However, we were still able to obtain
+images which showed some enhancement. We are able to show some initial
+results but they are not of the same quality compared to state-of-the-art.
+\cite{chen2018learning}. 
+
 \begin{figure}[ht]
   \centering
   \includegraphics[scale=0.1]{trashcan_original_simmulated_and_our_result}
   \caption{ Predicted Results}
-  \label{fig:train}
+  \label{fig:ourmodel}
 \end{figure}
 
+Figure \ref{fig:ourmodel} shows the steps followed by our approach.
+Sub-figure (a) is the original image, sub-figure (b) is the simulated low
+light image described in Section 3.4, and sub-figure (c) shows the result
+of our model. We can clearly observe from Figure \ref{fig:ourmodel} that
+our model was able to identify the colors while simultaneously brightening
+the image.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.65]{loss_epoch_our_model}
+  \caption{ Loss vs. Epochs}
+  \label{fig:ourloss}
+\end{figure}
+
+Figure \ref{fig:ourloss} plots our loss function at each epoch. We can
+see a downward trend in the loss function output. However, we can also
+see that our model is having trouble converging after 25 epochs. We believe
+this problem can be solved when we use the entire dataset to train the model.
 
 \section{Discussion}
 
