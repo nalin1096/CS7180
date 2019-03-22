@@ -144,6 +144,11 @@ using simulated data.
 
 \subsection{Dataset}
 
+We plan to use the RAISE raw images dataset which includes 6,000 high
+definition images taken by professional photographers. Since these are
+raw images, they have not been touched or processed in any way. This gives
+us a true representation of the scene. 
+
 \subsection{Model}
 
 As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
@@ -212,26 +217,14 @@ TODO: some theory, maybe Chris?
 
 \section{Experiment}
 
-We experimented on our contributions
+Our experiments consist of recreating the see-in-the-dark model and
+getting results from our own model. We also compare results and provide
+insight into the model implementation details.
 
 \subsection{Model Implementation}
 
-We tried replicating their model and writing a model in parallel to
-replicate their functionality. We also tried using the CIFAR10 and
-ImageNet datasets as input. The primary issue when replicating their
-model related to dimensionality. The RGB images in CIFAR10 and ImageNet
-have $m \times n \times 3$ dimensions. Raw images have $m \times n \times 4$
-dimensions.
-
-We were able to confirm that output dimensions from Chen et. al.
-\cite{chen2018learning} follow the pattern $2m \times 2n \times 3$
-irrespective of the image size or type used. During our experiment,
-we focused our debugging efforts on understanding whether the dimensionality
-of a raw image as an input generated incompatible dimensions with the
-target vector after model output. This error resulted in our replicated
-model not being able to compute the cost function.
-
-In terms of techniques used, their model is mostly written in a higher
+We took inspiration from the SID model and wrote our own model which
+had similar functionality. The SID model is mostly written in a higher
 level Tensorflow contribution module called ``slim''. The ``slim''
 contribution module does not appear to have any documentation and requires
 one to read the module code embedded within Tensorflow. We initially tried
@@ -241,25 +234,38 @@ forward propagation to not be documented well. We then rewrote the
 Chen et. al. \cite{chen2018learning} model using only low level Tensorflow
 code. This approach has the disadvantage of requiring the dimensions of
 all weight matrices to be specified and initialized in a separate function
-we called 'initialize\_parameters()'.
+we called 'initialize\_parameters()'. \newline
 
-These efforts allowed us to understand the dimensionality of both models
-at each of the 10 blocks within their forward propagation. We also
-experimented with pooling in regards to window size. We also experimented
-with strides for convolutional layers with each block. We also added up
+These efforts allowed us to understand the dimensionality of both models at
+each of the 10 blocks within their forward propagation. We used these
+models to experiment with pooling window size, and stride
+length for the convolutional layers. We also added up
 to three additional blocks with different parameters in an attempt to
-get the output dimensions to match the dimensionality of our input image.
+get the output dimensions to match the dimensionality of our input
+image. \newline
 
-At this point, we have not been able to use RGB images, having
-$m \times n \times 3$ dimensions, to work with Chen et. al.
-\cite{chen2018learning} model. It is important for us to develop this
+We also tried using the CIFAR10 and ImageNet datasets as input. The primary
+issue when replicating their model was related to dimensionality. The RGB
+images in CIFAR10 and ImageNet have $m \times n \times 3$ dimensions.
+However, the SID model takes as input Raw images which have
+$m \times n \times 4$ dimensions. We were able to confirm that output
+dimensions from Chen et. al. \cite{chen2018learning} follow the pattern
+$2m \times 2n \times 3$ irrespective of the image size or type used. During
+our experiment, we focused our debugging efforts on understanding whether
+the dimensionality of a raw image as an input generated incompatible
+dimensions with the target vector after model output. This error resulted
+in our replicated model not being able to compute the cost function.\newline
+
+Currently, we are working with raw images as input which have been corrupted
+using our low light simulation; mentioned in Section 3.4. The results
+for our model are shown in Section 4.3. At this point, we have not been
+able to use RGB images, having $m \times n \times 3$ dimensions, to work
+with our model. It is important for us to develop this
 capability in order to qualitatively verify that we are correctly augmenting
-image data. We are unable to generate images in raw format because
-it would require us to know proprietary information about how a camera
-generated an image.
-
-In order to generate output for this milestone, we modified images from
-Chen et. al. \cite{chen2018learning}, such that
+image data. We are unable to view simulated images in raw format because
+it requires us to know proprietary information about how a camera
+generated an image. In order to generate output for this milestone, we
+modified images from Chen et. al. \cite{chen2018learning}, such that
 
 \begin{align*}
   X &= g(y_{train})\\
@@ -325,6 +331,8 @@ see that our model is having trouble converging after 25 epochs. We believe
 this problem can be solved when we use the entire dataset to train the model.
 
 \section{Discussion}
+
+
 
 
 \section{Appendix}
