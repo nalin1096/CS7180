@@ -151,21 +151,31 @@ us a true representation of the scene.
 
 \subsection{Model}
 
-As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the RAISE dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. An example of a training pair
+(image taken in low-light and normal light conditions) is shown in
+Figure \ref{fig:train4}.This is highlighted in our model framework in Figure 2. 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.35]{pipeline.jpg}
-  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
-\end{figure}
-
-Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[scale=0.5]{model.png}
+  \includegraphics[scale=0.5]{model}
   \caption{Our proposed model framework}
 \end{figure}
+
+We tried to replicate their model to using other readily
+available data such as CIFAR10 \cite{cifar10} and ImageNet
+\cite{imagenet_cvpr09}. The CIFAR10 ad ImageNet data is augmented to
+simulate properties of the images used by Chen et. al. (2018)
+\cite{chen2018learning}. The CIFAR10 and ImageNet datasets are distinctly
+different because they are not \textit{raw} images. This means the
+dimensionality of CIFAR10 is $32 \times 32 \times 3$ rather than a raw
+image which could be $512 \times 512 \times 4$. We not only need to
+simulate images but also account for the \textit{change in dimensionality}
+across image types.
+
+
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
 
 We tried to replicate their model to using other readily
 available data such as CIFAR10 \cite{cifar10} and ImageNet
@@ -205,13 +215,66 @@ days.
 
 \subsection{Low Light Simulation}
 
-TODO: some theory, maybe Chris?
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.1]{00002_00_train_100}
+  \includegraphics[scale=0.35]{pipeline.jpg}
+  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
+\end{figure}
+
+We simulate our low light images by successively applying gamma distortion, white imbalance, Poisson noise, and black level to a normal lighted. An example of two of such images is represented in Figure 3. 
+
+For a given bright image, \(B\), a matrix of size \(m\)x\(n\)x3, we want to simulate a low-light image \(D\), or the same. We define gamma distortion as follows:
+\[   D = {B}^{1/\gamma}, \] 
+where \(\gamma\) controls the brightness of the image and the exponentiation is computed element-wise.
+
+Furthermore, for the three channels of \(B\), namely \(B_{R}\), \(B_{G}\), and \(B_{B}\), and the three channels of \(D\), namely \(D_{R}\), \(D_{G}\), and \(D_{B}\), respectively, we define color distortion as follows:
+\[ D_{R} = w_{R}*B_{R},\]
+\[ D_{G} = w_{G}*B_{G},\]
+\[ D_{B} = w_{B}*B_{B},\]
+where \(w_{R}, w_{G}, w_{B}\) are small weights that distort the color space.  
+
+We define the black level as follows: 
+\[  D = max(B-bl,0), \]
+where \(bl\) represents the amount of black level added to the image. Note that the closer the pixel values are to 0, the darker they are. The maximum of \(B - bl\) and 0 is taken so that no pixels are negative. \newline
+
+Finally, we add Poison noise. Since this outputs values between \([0, 1]\), we first scale our image, apply Poison, and then re-scale as follows:
+\[  D/255 = Poisson(B/255). \]
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.3]{fig3.png}
+  \caption{Simulating two low-light images via our pipeline: (a) Gamma Distortion, (b) White Imbalance, (c) Poisson Noise addition, (d) Black Level, (e) Final low-light simulation}
+\end{figure}
+
+
+Our initial approach to creating simulated low light images was to randomly select values for \(\gamma, w_{R}, w_{G}, w_{B},\) and \(bl\) was to choose these randomly and validate them by visualizing the distorted image. However, this process is not good enough to yield accurate results. The purpose of the simulation step is to simulate low light images the best we can, in order to then provide a well-trained model for transfer. Therefore, we assume values for these hyper-parameters for natural low-light images belong to certain distributions. In the next step, we aim to approximate these distributions.  \newline
+
+Let \(b_{i,j,k}\) be a pixel value from \(B\) and \(d_{i,j,k}\) be a pixel value from \(D\). We approximate \(\gamma\) finding the value such, when gamma-distortion is applied to the bright image, the average pixel value equals that to the darker image:
+
+\[  \frac{1}{3mn}\sum_{i,j,k}b_{i,j,k}^
+{1/\gamma} = \frac{1}{3mn}\sum_{i,j,k}d_{i,j,k}\] 
+
+Similarly, for a given pair \(B\) and \(D\), we find the optimal values for \(w_{R}, w_{G}, w_{B},\) and \(bl\), such that, after applying color-distortion, and adding black-level, respectively, the average pixel value for \(B\) equals that of \(D\). \newline
+
+We repeat this process for 200 random pairs \(B\) and \(D\) from SID and compute the distribution for each value of \(\gamma, w_{R}, w_{G}, w_{B},\) and \(bl\). These distributions are exemplified in Figure 4. Our assumption is that, by sampling these values from their respective distribution, we can create more accurate low-light images. We find these distributions by computing
+the Kernel Density Estimation (KDE) and then randomly sample. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.4]{Distributions}
+  \caption{Distributions for (a) gamma, (b) RGB weights, and (c) black level.}
+  \label{fig:train2}
+\end{figure}
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.5]{low_light_normal_light}
   \caption{ SID Images in Normal and Low Light Conditions}
-  \label{fig:train}
+  \label{fig:train4}
 \end{figure}
 
 
@@ -341,7 +404,6 @@ blocks within the model which most likely need to be changed. After
 updating our model to accept RGB input, we will be implementing transfer
 learning to obtain the final result. 
 
-\section{Appendix}
 
 \bibliographystyle{unsrt}
 \bibliography{references}
