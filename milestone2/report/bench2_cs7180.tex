@@ -131,12 +131,14 @@ The novelty of our approach stems from the idea of ``more for less''. Our
 model drastically reduces the overhead costs of data collection by
 synthesizing readily available training data (MIT-Adobe FiveK). This is
 particularly beneficial in domains where collecting images pairs is
-expensive/time consuming. 
+expensive/time consuming.
 
 \section{Methods}
 
 Our contributions were to simulate the data and replicate their model
 using simulated data.
+
+\subsection{Dataset}
 
 \subsection{Model}
 
@@ -156,12 +158,6 @@ Our model is based on the one developed for SID, with the addition of 2 fully-co
   \caption{Our proposed model framework}
 \end{figure}
 
-\subsection{Low Light Image Simulation}
-
-TODO: some theory, maybe Chris?
-
-\subsection{Replicating their Model}
-
 We tried to replicate their model to using other readily
 available data such as CIFAR10 \cite{cifar10} and ImageNet
 \cite{imagenet_cvpr09}. The CIFAR10 ad ImageNet data is augmented to
@@ -174,15 +170,47 @@ simulate images but also account for the \textit{change in dimensionality}
 across image types.
 
 
+
+\subsection{Computational Resources}
+
+Using AWSEducate did not work for us. We were unable to create roles with
+IAM authentication so it's really hard or impossible to move data from a
+S3 Bucket to an EC2 Instance. We tried to create a $p3.8xlarge$ instance but
+these instances are not allowed even though they are listed. Using regular
+AWS does work but is costly. Ran a single AWS EC2 $p3.8xlarge$ instance
+with 32 CPU, 244 GB of Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This
+costs \$12.24 an hour. This is the amount of GPU Memory requested by the
+paper authors as a minimum amount. \newline
+
+We have also been able to use Google Cloud for some of our workload. This
+resource is well integrated with Tensorflow. Leading up to Milestone 2,
+we extensively used Google Cloud Compute with 2 CPU and 7.5GB of memory
+for debugging and working with image datasets; primarily CIFAR10 and
+Tiny ImageNet. \newline
+
+In regards to training our model, one of our group members has also
+received permission to use computational resources from Lincoln
+Laboratory's Super Computer (LLSC) for our project. We are currently
+waiting for complete access and expect to be able to use it in the coming
+days.
+
+\subsection{Low Light Simulation}
+
+TODO: some theory, maybe Chris?
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.1]{00002_00_train_100}
+  \caption{ Example Training Data}
+  \label{fig:train}
+\end{figure}
+
+
 \section{Experiment}
 
 We experimented on our contributions
 
-\subsection{Low Light Image Simulation}
-
-TODO: Nalin script
-
-\subsection{Model Replication}
+\subsection{Model Implementation}
 
 We tried replicating their model and writing a model in parallel to
 replicate their functionality. We also tried using the CIFAR10 and
@@ -238,34 +266,22 @@ where function $g$ is an application of artificial noise to a clean
 image in $y_{train}$ which is then trained against a corresponding
 image where $g$ has not been applied.
 
+\subsection{State of the Art Model Results}
 
-\section{Discussion}
-
-ok
-
-\section{Appendix}
+\subsection{Our Model Results}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.1]{00002_00_train_100}
-  \caption{ Example Training Data}
+  \includegraphics[scale=0.1]{trashcan_original_simmulated_and_our_result}
+  \caption{ Predicted Results}
   \label{fig:train}
 \end{figure}
 
-\begin{figure}[ht]
-  \centering
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_gt}
-    \caption{Input}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_scale}
-    \caption{Output}
-  \end{subfigure}
-  \caption{ Example Test Data}
-  \label{fig:test}
-\end{figure}
 
+\section{Discussion}
+
+
+\section{Appendix}
 
 \bibliographystyle{unsrt}
 \bibliography{references}
