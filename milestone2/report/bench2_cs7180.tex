@@ -76,17 +76,22 @@
 
 \maketitle
 
-\section{Introduction and Related Work}
+\section{Introduction}
 
-Images taken in low-light conditions are often too dark, noisy, and distorted to be used in industrial purposes. We propose a deep-learning model that processes low-light
-images to improve image brightness and increase their overall quality. The
-problem with imaging in low-light conditions is challenging due to low-photon count and low Signal-to-Noise (SNR) ratio. These yield very dark and noisy
-images. The most common technique to overcome this problem is long exposure
-shot. However, this method yields blurry images with the slightest camera
-shake
-or object motion\cite{chen2018learning}. Common post-processing techniques brighten the image at the expense of image quality. Being able to ``see in the dark'' provides a
-number of real-world benefits such as photography, computer vision, and
-social networking. \newline
+Images taken in low-light conditions are often too dark, noisy, and
+distorted to be used in industrial purposes. We propose a deep-learning
+model that processes low-light images to improve image brightness and
+increase their overall quality. The problem with imaging in low-light
+conditions is challenging due to low-photon count and low
+Signal-to-Noise (SNR) ratio. These yield very dark and noisy images. The
+most common technique to overcome this problem is long exposure shot.
+However, this method yields blurry images with the slightest camera shake
+or object motion\cite{chen2018learning}. Common post-processing
+techniques brighten the image at the expense of image quality. Being able to
+``see in the dark'' provides a number of real-world benefits such as
+photography, computer vision, and social networking.
+
+\section{Related Work}
 
 In the past, the problem of enhancing low light images has been tackled via
 noise reduction. This noise becomes dominant especially in low-light images
@@ -106,26 +111,124 @@ of collecting large amounts of low
 light and bright light images. In the absence of a true vs noisy image
 dataset, the team captured scenes using various exposure times to generate
 true (bright light) and corrupted (low light) image pairs called
-``See-in-the-Dark Dataset'' (SID Dataset \footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore, their model is camera
-specific and not easily generalizable.\newline
+``See-in-the-Dark Dataset'' (SID Dataset
+\footnote{https://github.com/cchen156/Learning-to-See-in-the-Dark}). Furthermore,
+their model is camera specific and not easily generalizable.\newline
 
 We propose a transferable CNN for image brightening and denoising. Instead
 of training our model on actual true (bright light) and corrupted
-(low light) image pairs, we use images from the publicly available "MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating low-light conditions. We train our CNN on the synthetic data to obtain our initial model
-parameters. Then, using these, and a small fraction of the real image pairs
-from the SID Dataset, we adopt a transfer learning
-\cite{Goodfellow-et-al-2016} approach to update our
-model parameters. We then use this model to test on our SID Dataset. In
-addition, we aim to test various transfer learning approaches, such as the
-traditional transfer learning and zero shot learning \cite{larochelle2008,
-  Palatucci:2009:ZLS:2984093.2984252, socher2013zeroshot}.\newline
-
+(low light) image pairs, we use images from the publicly available
+"MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating
+low-light conditions. We train our CNN on the synthetic data to obtain our initial
+model parameters. Then, using these, and a small fraction of the real image pairs
+from the SID Dataset, we adopt a transfer learning \cite{Goodfellow-et-al-2016}
+approach to update our model parameters. We then use this model to test on our
+SID Dataset. In addition, we aim to test various transfer learning approaches,
+such as the traditional transfer learning and zero shot learning \cite{larochelle2008,
+  NIPS2009_3650, socher2013zeroshot}.\newline
 
 The novelty of our approach stems from the idea of ``more for less''. Our
 model drastically reduces the overhead costs of data collection by
 synthesizing readily available training data (MIT-Adobe FiveK). This is
 particularly beneficial in domains where collecting images pairs is
 expensive/time consuming. 
+
+\section{Methods}
+
+Our contributions were to simulate the data and replicate their model
+using simulated data.
+
+\subsection{Model}
+
+
+
+
+\subsection{Low Light Image Simulation}
+
+TODO: some theory, maybe Chris?
+
+\subsection{Replicating their Model}
+
+We tried to replicate their model to using other readily
+available data such as CIFAR10 \cite{cifar10} and ImageNet
+\cite{imagenet_cvpr09}. The CIFAR10 ad ImageNet data is augmented to
+simulate properties of the images used by Chen et. al. (2018)
+\cite{chen2018learning}. The CIFAR10 and ImageNet datasets are distinctly
+different because they are not \textit{raw} images. This means the
+dimensionality of CIFAR10 is $32 \times 32 \times 3$ rather than a raw
+image which could be $512 \times 512 \times 4$. We not only need to
+simulate images but also account for the \textit{change in dimensionality}
+across image types.
+
+
+\section{Experiment}
+
+We experimented on our contributions
+
+\subsection{Low Light Image Simulation}
+
+TODO: Nalin script
+
+\subsection{Model Replication}
+
+We tried replicating their model and writing a model in parallel to
+replicate their functionality. We also tried using the CIFAR10 and
+ImageNet datasets as input. The primary issue when replicating their
+model related to dimensionality. The RGB images in CIFAR10 and ImageNet
+have $m \times n \times 3$ dimensions. Raw images have $m \times n \times 4$
+dimensions.
+
+We were able to confirm that output dimensions from Chen et. al.
+\cite{chen2018learning} follow the pattern $2m \times 2n \times 3$
+irrespective of the image size or type used. During our experiment,
+we focused our debugging efforts on understanding whether the dimensionality
+of a raw image as an input generated incompatible dimensions with the
+target vector after model output. This error resulted in our replicated
+model not being able to compute the cost function.
+
+In terms of techniques used, their model is mostly written in a higher
+level Tensorflow contribution module called ``slim''. The ``slim''
+contribution module does not appear to have any documentation and requires
+one to read the module code embedded within Tensorflow. We initially tried
+writing a model in parallel using Keras but found that moving from Keras
+objects back down to lower level Tensorflow for some blocks within
+forward propagation to not be documented well. We then rewrote the
+Chen et. al. \cite{chen2018learning} model using only low level Tensorflow
+code. This approach has the disadvantage of requiring the dimensions of
+all weight matrices to be specified and initialized in a separate function
+we called 'initialize\_parameters()'.
+
+These efforts allowed us to understand the dimensionality of both models
+at each of the 10 blocks within their forward propagation. We also
+experimented with pooling in regards to window size. We also experimented
+with strides for convolutional layers with each block. We also added up
+to three additional blocks with different parameters in an attempt to
+get the output dimensions to match the dimensionality of our input image.
+
+At this point, we have not been able to use RGB images, having
+$m \times n \times 3$ dimensions, to work with Chen et. al.
+\cite{chen2018learning} model. It is important for us to develop this
+capability in order to qualitatively verify that we are correctly augmenting
+image data. We are unable to generate images in raw format because
+it would require us to know proprietary information about how a camera
+generated an image.
+
+In order to generate output for this milestone, we modified images from
+Chen et. al. \cite{chen2018learning}, such that
+
+\begin{align*}
+  X &= g(y_{train})\\
+  Y &= y_{train}
+\end{align*}
+
+where function $g$ is an application of artificial noise to a clean
+image in $y_{train}$ which is then trained against a corresponding
+image where $g$ has not been applied.
+
+
+\section{Discussion}
+
+ok
 
 
 \section{Model}
