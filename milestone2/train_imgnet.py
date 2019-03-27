@@ -36,6 +36,9 @@ logger = logging.getLogger(__name__)
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 
+X_train = X_train[0:25,...]
+X_test = X_test[0:25,...]
+
 # Tiny Imagenet dataset of 64x64 training images
 
 #imgdir = 'dataset/tiny-imagenet-200/train/n01443537/images/'
@@ -47,7 +50,8 @@ logger = logging.getLogger(__name__)
 
 
 logger.info("STARTED CIFAR model")
-parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
+parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test, 1e-4,
+                                    num_epochs=5)
 logging.info("FINISHED CIFAR model")
 
 plot_costs(costs, lr, "costs_epochs.png")

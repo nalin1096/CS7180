@@ -390,7 +390,8 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
         # Do the training loop
 
         minibatches = random_mini_batches(m, minibatch_size, seed)
-        
+
+        logger.info("Starting epochs")
         for epoch in range(num_epochs):
 
             minibatch_cost = 0
