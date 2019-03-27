@@ -359,14 +359,16 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
     ops.reset_default_graph() # be able to rerun the model 
     tf.set_random_seed(42)
     seed = 42
-    #(m, n_H, n_W, n_C) = X_train.shape
+    m = X_train.shape[0]
     assert X_train.shape == Y_train.shape
     costs = []
 
     #X,Y = create_placeholders(n_H, n_W, n_C)
     #parameters = initialize_parameters()
     #Z = forward_propagation(X, parameters)
-    X, Y = X_train, Y_train
+
+    X = tf.placeholder(tf.float32, [None, None, None, 3])
+    Y = tf.placeholder(tf.float32, [None, None, None, 3])
     
     Z = sony_network(X)
 
@@ -404,6 +406,8 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 minibatch_Y = Y_train[minibatch,...]
 
                 minibatch_X, minibatch_Y = process_minibatch(minibatch_X, minibatch_Y)
+
+                logger.info("mb_X: {}, mb_Y: {}".format(minibatch_X.shape, minibatch_Y.shape))
 
                 _, temp_cost = sess.run([optimizer, cost],
                                         feed_dict={X: minibatch_X,

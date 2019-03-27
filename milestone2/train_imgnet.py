@@ -23,7 +23,7 @@ from tensorflow.keras.datasets import cifar10
 
 from specify_imgnet_model import cifar_model, plot_costs
 from process_imgnet import ndarray_inmemory
-from augment_data import SimulateCondition
+#from augment_data import SimulateCondition
 from logging_utils import enable_cloud_log
 
 
@@ -36,10 +36,6 @@ logger = logging.getLogger(__name__)
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 
-X_train = np.append(X_train, X_train[...,[1]], axis=3)
-X_test = np.append(X_test, X_test[...,[1]], axis=3)
-X_test = np.array([[x] for x in X_test])
-X_train = np.array([[x] for x in X_train])
 # Tiny Imagenet dataset of 64x64 training images
 
 #imgdir = 'dataset/tiny-imagenet-200/train/n01443537/images/'
