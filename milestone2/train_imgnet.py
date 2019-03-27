@@ -27,7 +27,7 @@ from process_imgnet import ndarray_inmemory
 from logging_utils import enable_cloud_log
 
 
-enable_cloud_log(level='DEBUG')
+enable_cloud_log(level='INFO')
 logger = logging.getLogger(__name__)
 
 
@@ -49,6 +49,8 @@ logger = logging.getLogger(__name__)
 logger.info("STARTED CIFAR model")
 parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
 logging.info("FINISHED CIFAR model")
+
+plot_costs(costs, lr, "costs_epochs.png")
 
 
 # now use a basic model with noise

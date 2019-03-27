@@ -407,7 +407,7 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
 
                 minibatch_X, minibatch_Y = process_minibatch(minibatch_X, minibatch_Y)
 
-                logger.info("mb_X: {}, mb_Y: {}".format(minibatch_X.shape, minibatch_Y.shape))
+                logger.debug("mb_X: {}, mb_Y: {}".format(minibatch_X.shape, minibatch_Y.shape))
 
                 _, temp_cost = sess.run([optimizer, cost],
                                         feed_dict={X: minibatch_X,
