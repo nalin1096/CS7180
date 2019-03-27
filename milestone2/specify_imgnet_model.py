@@ -321,6 +321,13 @@ def random_mini_batches(m, minibatch_size, seed):
     for id_val in ids:
         yield id_val
 
+def get_image_patch(ps=512):
+    """ Each input image is processed using an image patch. """
+
+    ratio = 300 # in_exposure/gt_exposure; ignored here
+
+    # figure out which dimensions their using from their data.
+
 
 def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 num_epochs=1, minibatch_size=32, print_cost=True):

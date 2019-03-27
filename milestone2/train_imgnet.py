@@ -46,7 +46,9 @@ X_train = np.array([[x] for x in X_train])
 #X_train = ndarray_inmemory(imgdir)
 #X_test = X_train
 
-# validate basic model 
+# validate basic model
+
+
 
 logger.info("STARTED CIFAR model")
 parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test)
