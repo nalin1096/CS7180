@@ -321,13 +321,20 @@ def random_mini_batches(m, minibatch_size, seed):
     for id_val in ids:
         yield id_val
 
-def get_image_patch(ps=512):
-    """ Each input image is processed using an image patch. """
-
-    ratio = 300 # in_exposure/gt_exposure; ignored here
-
-    # figure out which dimensions their using from their data.
-
+def process_minibatch(minibatch_X, minibatch_Y, ps=16):
+    
+    mb_X = np.expand_dims(minibatch_X, axis=0)
+    mb_Y = np.expand_dims(minibatch_Y, axis=0)
+    
+    _, H, W, _ = mb_X.shape
+    
+    xx = np.random.randint(0, W - ps)
+    yy = np.random.randint(0, H - ps)
+    
+    X_patch = mb_X[:,yy:yy + ps, xx:xx + ps, :]
+    Y_patch = mb_Y
+    
+    return X_patch, Y_patch
 
 def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 num_epochs=1, minibatch_size=32, print_cost=True):
@@ -395,6 +402,8 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 # Select a minibatch
                 minibatch_X = X_train[minibatch,...]
                 minibatch_Y = Y_train[minibatch,...]
+
+                minibatch_X, minibatch_Y = process_minibatch(minibatch_X, minibatch_Y)
 
                 _, temp_cost = sess.run([optimizer, cost],
                                         feed_dict={X: minibatch_X,
