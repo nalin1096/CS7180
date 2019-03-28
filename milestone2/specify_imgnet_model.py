@@ -409,16 +409,11 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
 
                 minibatch_X, minibatch_Y = process_minibatch(minibatch_X, minibatch_Y)
 
-                logger.debug("mb_X: {}, mb_Y: {}".format(minibatch_X.shape, minibatch_Y.shape))
-
                 _, temp_cost, output = sess.run([optimizer, cost, Z],
                                         feed_dict={X: minibatch_X,
                                                    Y: minibatch_Y})
 
                 minibatch_cost += temp_cost / num_minibatches
-
-                logger.debug('temp_cost: {}, minibatch cost: {}'.\
-                             format(temp_cost, num_minibatches))
 
             # Print the cost every epoch
             if print_cost == True and epoch % 5 == 0:

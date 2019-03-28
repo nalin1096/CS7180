@@ -27,7 +27,7 @@ from process_imgnet import ndarray_inmemory
 from logging_utils import enable_cloud_log
 
 
-enable_cloud_log(level='INFO')
+enable_cloud_log(level='DEBUG')
 logger = logging.getLogger(__name__)
 
 
