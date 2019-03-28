@@ -51,7 +51,7 @@ X_test = X_test[0:25,...]
 
 logger.info("STARTED CIFAR model")
 parameters, costs, lr = cifar_model(X_train, X_train, X_test, X_test, 1e-4,
-                                    num_epochs=5)
+                                    num_epochs=10, minibatch_size=1)
 logging.info("FINISHED CIFAR model")
 
 plot_costs(costs, lr, "costs_epochs.png")
