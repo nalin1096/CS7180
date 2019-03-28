@@ -6,6 +6,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import rawpy
+import imageio
 import tensorflow as tf
 from tensorflow.python.framework import ops
 import tensorflow.contrib.slim as slim
@@ -426,8 +427,11 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
             if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
 
-            # Write out image
-            output = np.minimum(np.maximum(output, 0), 1)
+    # Write out image
+    output = np.minimum(np.maximum(output, 0), 1)
+    logger.info("output shape: {}".format(output.shape))
+    imageio.imwrite("sony_network.jpg", output[0,...])
+    parameters = {}
 
     return (parameters, costs, learning_rate)
 
