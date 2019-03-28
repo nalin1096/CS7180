@@ -410,7 +410,7 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
 
                 logger.debug("mb_X: {}, mb_Y: {}".format(minibatch_X.shape, minibatch_Y.shape))
 
-                _, temp_cost = sess.run([optimizer, cost],
+                _, temp_cost, output = sess.run([optimizer, cost, Z],
                                         feed_dict={X: minibatch_X,
                                                    Y: minibatch_Y})
 
@@ -425,6 +425,9 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                                                          minibatch_cost))
             if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
+
+            # Write out image
+            output = np.minimum(np.maximum(output, 0), 1)
 
     return (parameters, costs, learning_rate)
 
