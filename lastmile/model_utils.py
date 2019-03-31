@@ -3,6 +3,7 @@
 """
 import logging
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -26,3 +27,14 @@ def create_patch(X, ps=16):
 
     return X_patch
 
+def plot_imgpair(Y_pred, Y_true, name):
+    """ Show the predicted and true images side by side. """
+    
+    fig, (ax1, ax2) = plt.subplots(1,2,sharey=True)
+    ax1.matshow(Y_pred[0,...])
+    ax1.set_title('Y_predict')
+    ax2.matshow(Y_true[0,...])
+    ax2.set_title('Y_true')
+
+    plt.savefig(name)
+    
