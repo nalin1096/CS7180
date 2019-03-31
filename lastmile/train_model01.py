@@ -34,12 +34,14 @@ cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 
-m = 25
+#m = 25
 
-X_train = X_train[0:m,...]
-Y_train = X_train[0:m,...]
-X_test = X_test[0:m,...]
-Y_test = X_test[0:m,...]
+Y_train = X_train
+Y_test = X_test
+#X_train = X_train[0:m,...]
+#Y_train = X_train[0:m,...]
+#X_test = X_test[0:m,...]
+#Y_test = X_test[0:m,...]
 
 
 logger.debug("X_train default shape: {}".format(X_train.shape))
@@ -62,7 +64,7 @@ model.summary()
 # Fitting the model
 
 history = model.fit(X_train, Y_train, validation_split=0.25,
-                    epochs=10, batch_size=5,
+                    epochs=1000, batch_size=32,
                     callbacks=[cp_callback])
 plot_loss('review/train_val_loss.png', history)
 
@@ -74,7 +76,7 @@ logger.debug("prediction output shape: {}".format(output.shape))
 
 # Review image output
 
-every = 5
+every = 10000
 for i in range(output.shape[0]):
 
     base = "review/"
