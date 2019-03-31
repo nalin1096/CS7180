@@ -3,15 +3,12 @@
 
 """
 import tensorflow as tf
-from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Input
 from tensorflow.keras.layers import LeakyReLU, Lambda
 
+from model_utils import create_patch
 
-def process_keras_minibatch():
-    """ Still need to uses patches on training data here. """
-    pass
 
 def simple_sony():
     """ Simpified version of the sony LSD model. """
@@ -19,8 +16,12 @@ def simple_sony():
     lrelu = LeakyReLU(alpha=0.2)
     inputs = Input(shape=(32,32,3))
 
+    # Convert X to patches
+
+    x0 = Lambda(lambda x: create_patch(x))(inputs)
+
     # Block 1
-    x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(inputs)
+    x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x0)
     x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x1)
     x1 = MaxPooling2D(pool_size=2)(x1)
 
