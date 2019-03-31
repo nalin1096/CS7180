@@ -9,6 +9,11 @@ from tensorflow.keras.layers import LeakyReLU, Lambda
 
 from model_utils import create_patch
 
+class LeakyReLU(LeakyReLU):
+    def __init__(self, **kwargs):
+        self.__name__ = "LeakyReLU"
+        super(LeakyReLU, self).__init__(**kwargs)
+
 
 def simple_sony():
     """ Simpified version of the sony LSD model. """

@@ -11,15 +11,22 @@ at each convolutional layer, for example.
 import logging
 from urllib.parse import urljoin
 
+from tensorflow.train import AdamOptimizer
+from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.optimizers import Adam
 
 from model01 import simple_sony
-from model_utils import enable_cloud_log, plot_imgpair
+from model_utils import enable_cloud_log, plot_imgpair, plot_loss
 
 
 logger = logging.getLogger(__name__)
 enable_cloud_log(level='DEBUG')
+
+# Create checkpoint callback
+checkpoint_path = 'checkpoints/cp.ckpt'
+cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
+                              verbose=1)
 
 
 # Dataset of 50,000 32x32 color training images, 
@@ -43,7 +50,8 @@ logger.debug("Y_train default shape: {}".format(Y_train.shape))
 
 learning_rate = 1e-4
 model = simple_sony()
-opt = Adam(lr=1e-4)
+#opt = Adam(lr=1e-4)
+opt = AdamOptimizer(learning_rate=1e-4)
 
 model.compile(optimizer=opt,
               loss='mae',
@@ -53,7 +61,10 @@ model.summary()
 
 # Fitting the model
 
-history = model.fit(X_train, Y_train, epochs=10, batch_size=5)
+history = model.fit(X_train, Y_train, validation_split=0.25,
+                    epochs=10, batch_size=5,
+                    callbacks=[cp_callback])
+plot_loss('review/train_val_loss.png', history)
 
 # Predicting with the model
 
