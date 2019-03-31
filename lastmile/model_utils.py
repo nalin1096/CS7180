@@ -4,6 +4,7 @@
 import logging
 
 import matplotlib.pyplot as plt
+import imageio
 import numpy as np
 
 
@@ -29,12 +30,9 @@ def create_patch(X, ps=16):
 
 def plot_imgpair(Y_pred, Y_true, name):
     """ Show the predicted and true images side by side. """
-    
-    fig, (ax1, ax2) = plt.subplots(1,2,sharey=True)
-    ax1.matshow(Y_pred[0,...])
-    ax1.set_title('Y_predict')
-    ax2.matshow(Y_true[0,...])
-    ax2.set_title('Y_true')
 
-    plt.savefig(name)
-    
+    tmp = np.concatenate((Y_pred, Y_true), axis=1)
+
+    tmp = tmp.astype(np.uint8)
+
+    plt.imsave(name, tmp)
