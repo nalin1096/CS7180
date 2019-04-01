@@ -16,7 +16,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.optimizers import Adam
 
-from model01 import simple_sony
+from model01 import simple_sony, full_sony
 from model_utils import enable_cloud_log, plot_imgpair, plot_loss
 
 
@@ -34,14 +34,14 @@ cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
 
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 
-#m = 25
+m = 64
 
-Y_train = X_train
-Y_test = X_test
-#X_train = X_train[0:m,...]
-#Y_train = X_train[0:m,...]
-#X_test = X_test[0:m,...]
-#Y_test = X_test[0:m,...]
+#Y_train = X_train
+#Y_test = X_test
+X_train = X_train[0:m,...]
+Y_train = X_train[0:m,...]
+X_test = X_test[0:m,...]
+Y_test = X_test[0:m,...]
 
 
 logger.debug("X_train default shape: {}".format(X_train.shape))
@@ -51,24 +51,25 @@ logger.debug("Y_train default shape: {}".format(Y_train.shape))
 # Compiling model using Keras
 
 learning_rate = 1e-4
-model = simple_sony()
+#model = simple_sony()
+model = full_sony()
 #opt = Adam(lr=1e-4)
-opt = AdamOptimizer(learning_rate=1e-4)
+opt = AdamOptimizer(learning_rate=learning_rate)
 
 model.compile(optimizer=opt,
               loss='mae',
               metrics=['accuracy'])
 
-model.summary()
-
 # Fitting the model
 
 history = model.fit(X_train, Y_train, validation_split=0.25,
-                    epochs=1000, batch_size=32,
+                    epochs=100, batch_size=32,
                     callbacks=[cp_callback])
 plot_loss('review/train_val_loss.png', history)
 
 # Predicting with the model
+
+model.summary()
 
 output = model.predict(X_test)
 logger.debug("prediction output shape: {}".format(output.shape))
