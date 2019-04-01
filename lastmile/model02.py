@@ -1,9 +1,9 @@
 """ Removing upsampling, just using convolutional layers.
 
 """
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense
 from tensorflow.keras.layers import LeakyReLU
-from tensorflow.models import Sequential
+from tensorflow.keras.models import Sequential
 
 
 class LeakyReLU(LeakyReLU):
@@ -18,20 +18,24 @@ def model02():
     model = Sequential()
 
     # Block 1
-    model.append(Conv2D(8, (3,3), activation=lrelu,
+    model.add(Conv2D(8, (3,3), activation=lrelu,
                         padding='same', input_shape=(32,32,3)))
-    model.append(Conv2D(8, (3,3), padding='same', activation=lrelu))
-    model.append(MaxPooling2D(pool_size=2))
+    model.add(Conv2D(8, (3,3), padding='same', activation=lrelu))
 
     # Block 2
-    model.append(Conv2D(16, (3,3), padding='same', activation=lrelu))
-    model.append(Conv2D(16, (3,3), padding='same', activation=lrelu))
-    model.append(MaxPooling2D(pool_size=2))
+    model.add(Conv2D(16, (3,3), padding='same', activation=lrelu))
+    model.add(Conv2D(16, (3,3), padding='same', activation=lrelu))
 
     # Block 3
-    model.append(Conv2D(32, (3,3), padding='same', activation=lrelu))
-    model.append(Conv2D(32, (3,3), padding='same', activation=lrelu))
-    model.append(MaxPooling2D(pool_size=2))
+    model.add(Conv2D(32, (3,3), padding='same', activation=lrelu))
+    model.add(Conv2D(32, (3,3), padding='same', activation=lrelu))
+
+    # Block 4
+    model.add(Dense(16))
+    model.add(Dense(8))
+    model.add(Dense(3))
+
+    return model
 
     
 
