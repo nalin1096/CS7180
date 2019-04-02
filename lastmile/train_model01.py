@@ -18,6 +18,7 @@ from tensorflow.keras.optimizers import Adam
 
 from model01 import simple_sony, full_sony
 from model_utils import enable_cloud_log, plot_imgpair, plot_loss
+from custom_loss import mean_absolute_error
 
 
 logger = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ model = full_sony()
 opt = AdamOptimizer(learning_rate=learning_rate)
 
 model.compile(optimizer=opt,
-              loss='mae',
+              loss=mean_absolute_error,
               metrics=['accuracy'])
 
 # Fitting the model
