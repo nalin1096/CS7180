@@ -56,7 +56,7 @@ model.summary()
 # Fitting the model
 
 history = model.fit(X_train, Y_train, validation_split=0.25,
-                    epochs=10, batch_size=32,
+                    epochs=100, batch_size=32,
                     callbacks=[cp_callback])
 plot_loss('review/train_val_loss.png', history)
 
