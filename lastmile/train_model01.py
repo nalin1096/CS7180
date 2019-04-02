@@ -52,8 +52,8 @@ logger.debug("Y_train default shape: {}".format(Y_train.shape))
 # Compiling model using Keras
 
 learning_rate = 1e-4
-#model = simple_sony()
-model = full_sony()
+model = simple_sony()
+#model = full_sony()
 #opt = Adam(lr=1e-4)
 opt = AdamOptimizer(learning_rate=learning_rate)
 

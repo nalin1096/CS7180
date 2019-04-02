@@ -12,6 +12,7 @@ from tensorflow.keras.datasets import cifar10
 
 from model02 import model02
 from model_utils import enable_cloud_log, plot_imgpair, plot_loss
+from custom_loss import mean_absolute_error
 
 
 logger = logging.getLogger(__name__)
@@ -29,8 +30,8 @@ cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
 (X_train, y_train), (X_test, y_test) = cifar10.load_data()
 
 m = 64
-X_train = X_train[0:64,...]
-X_test = X_test[0:64,...]
+X_train = X_train[0:m,...]
+X_test = X_test[0:m,...]
 Y_train = X_train
 Y_test = X_test
 
@@ -47,7 +48,7 @@ opt = AdamOptimizer(learning_rate=learning_rate)
 
 
 model.compile(optimizer=opt,
-              loss='mae',
+              loss=mean_absolute_error,
               metrics=['accuracy'])
 
 model.summary()
