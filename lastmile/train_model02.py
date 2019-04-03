@@ -13,6 +13,7 @@ from tensorflow.keras.datasets import cifar10
 from model02 import model02
 from model_utils import enable_cloud_log, plot_imgpair, plot_loss
 from custom_loss import mean_absolute_error
+from augment_utils import SimulateCondition
 
 
 logger = logging.getLogger(__name__)

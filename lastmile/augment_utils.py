@@ -11,6 +11,10 @@ import imageio
 logger = logging.getLogger(__name__)
 
 
+def adjust_gamma(image):
+    GAMMA = np.random.normal(0.9, 0.1)
+    return image**GAMMA
+
 class SimulateCondition(object):
     
     def __init__(self):

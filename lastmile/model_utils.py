@@ -30,15 +30,18 @@ def plot_loss(fpath, history):
     
     # Plot training & validation loss values
     plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
+    #plt.plot(history.history['val_loss'])
     plt.title('Model loss')
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.legend(['Train', 'Test'], loc='upper left')
     plt.show()
-    
     plt.savefig(fpath, format='png')
-    
+
+def plot_images(X_test, Y_pred, Y_true, name):
+    tmp = np.concatenate((X_test, Y_pred, Y_true), axis=1)
+    tmp = tmp.astype(np.uint8)
+    plt.imsave(name, tmp)
 
 def plot_imgpair(Y_pred, Y_true, name):
     """ Show the predicted and true images side by side. """

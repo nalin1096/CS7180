@@ -4,26 +4,31 @@ This is a version which includes the augmented data. We're
 using a different approach than the Sony model so we don't
 have to use patching. RGB input image.
 """
+import os
 import logging
 from urllib.parse import urljoin
 
+import tensorflow as tf
 from tensorflow.train import AdamOptimizer
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from model02 import model02
-from model_utils import enable_cloud_log, plot_imgpair, plot_loss
+from model_utils import enable_cloud_log, plot_images, plot_loss
 from custom_loss import mean_absolute_error
-from augment_utils import SimulateCondition
+from augment_utils import adjust_gamma
 
 logger = logging.getLogger(__name__)
 enable_cloud_log('DEBUG')
 
 # Create checkpoint callback
-checkpoint_path = 'checkpoints/cp.ckpt'
+
+checkpoint_path = "checkpoints/cp-{epoch:04d}.ckpt"
+checkpoint_dir = os.path.dirname(checkpoint_path)
+
 cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
-                              verbose=1)
+                              period=5, verbose=1)
 
 
 # Dataset of 50,000 32x32 color training images, 
@@ -37,39 +42,50 @@ X_test = X_test[0:m,...]
 Y_train = X_train
 Y_test = X_test
 
+# Define model
 
-sc = SimuluateCondition()
-datagen = ImageDataGenerator(
-    preprocessing_function=sc.adjust_gamma)
-
-# Transform all training images
-datagen.fit(X_train)
-
-# Compile model
-
-learning_rate = 1e-3
 model = model02()
-opt = AdamOptimizer(learning_rate=learning_rate)
+
+# Retrieve latest checkpoint if it exists
+
+chk = os.listdir(checkpoint_dir)
+if len(chk) > 0:
+    latest = tf.train.latest_checkpoint(checkpoint_dir)
+    model.load_weights(latest)
+
+else:
+
+    datagen = ImageDataGenerator(
+        preprocessing_function=adjust_gamma)
+
+    # Transform all training images
+    datagen.fit(X_train)
+
+    # Compile model
+
+    learning_rate = 1e-3
+    opt = AdamOptimizer(learning_rate=learning_rate)
+
+    model.compile(optimizer=opt,
+                  loss=mean_absolute_error,
+                  metrics=['accuracy'])
+
+    model.summary()
 
 
-model.compile(optimizer=opt,
-              loss=mean_absolute_error,
-              metrics=['accuracy'])
+    # Fit model
 
-model.summary()
+    history = model.fit_generator(datagen.flow(X_train,Y_train, batch_size=32),
+                                  steps_per_epoch=X_train.shape[0] / 32, epochs=100)
+    plot_loss('review/train_val_loss_021.png', history)
 
-
-# Fit model
-
-history = model.fit_generator(datagen.flow(X_train,Y_train, batch_size=32),
-                    steps_per_epoch=X_train.shape[0] / 32, epochs=100)
-plot_loss('review/train_val_loss_021.png', history)
 
 # Predict with model
 
-output = model.predict(X_test)
-logger.debug("prediction output shape: {}".format(output.shape))
+X_gamma_test = adjust_gamma(X_test)
 
+output = model.predict(X_gamma_test)
+logger.debug("prediction output shape: {}".format(output.shape))
 
 # Review image output
 
@@ -80,7 +96,7 @@ for i in range(output.shape[0]):
     if i % every == 0:
 
         name = urljoin(base, 'model_pred_{}.png'.format(i))
-        plot_imgpair(output[i, ...], Y_test[i,...], name)
+        plot_imgpair(name, X_gamma_test[i,...], output[i, ...], Y_test[i,...])
 
 
 
