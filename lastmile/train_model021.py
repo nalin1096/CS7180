@@ -102,7 +102,7 @@ def review_image_output(X_test, Y_pred, Y_true, imgtup, every=10):
         if i % every == 0:
 
             name = urljoin(base, 'model_pred_{}_{}.png'.format(i, imgname))
-            plot_images(name, X_test[i,...], Y_pred[i, ...], Y_test[i,...])
+            plot_images(name, imgfunc(X_test[i,...]), Y_pred[i, ...], Y_test[i,...])
 
 if __name__ == "__main__":
 
@@ -122,6 +122,7 @@ if __name__ == "__main__":
 
     for imgtup in imgman:
 
+        imgname, imgfunc = imgtup
         logger.info("Processing: {}".format(imgtup[0]))
         model = fit_model(X_train, Y_test, model, checkpoint_dir, imgtup)
         Y_pred = model_predict(model, X_test, imgtup)
