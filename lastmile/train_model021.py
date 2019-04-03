@@ -18,7 +18,9 @@ from model02 import model02
 from model_utils import enable_cloud_log, plot_images, plot_loss
 from custom_loss import mean_absolute_error
 from augment_utils import (adjust_gamma, add_noise,
-                           remove_white_balance)
+                           remove_white_balance,
+                           increase_black_level,
+                           black_noise)
 
 logger = logging.getLogger(__name__)
 enable_cloud_log('DEBUG')
@@ -76,6 +78,8 @@ def fit_model(X_train, Y_test, model, checkpoint_dir, imgtup):
                                       steps_per_epoch=X_train.shape[0] / 32, epochs=100)
         plot_loss('review/train_val_loss_021_{}.png'.format(imgname), history)
 
+    return model
+
 def model_predict(model, X_test, imgtup):
 
     imgname, imgfunc = imgtup
@@ -91,13 +95,14 @@ def review_image_output(X_test, Y_pred, Y_true, imgtup, every=10):
     # Review image output
 
     imgname, imgfunc = imgtup
+    base = "review/"
+
     for i in range(Y_pred.shape[0]):
 
-    base = "review/"
-    if i % every == 0:
+        if i % every == 0:
 
-        name = urljoin(base, 'model_pred_{}_{}.png'.format(i, imgname))
-        plot_images(name, X_test[i,...], Y_pred[i, ...], Y_test[i,...])
+            name = urljoin(base, 'model_pred_{}_{}.png'.format(i, imgname))
+            plot_images(name, X_test[i,...], Y_pred[i, ...], Y_test[i,...])
 
 if __name__ == "__main__":
 
@@ -111,13 +116,15 @@ if __name__ == "__main__":
         ('adjust_gamma', adjust_gamma),
         ('add_noise', add_noise),
         ('remove_white_balance', remove_white_balance),
+        ('increase_black_level', increase_black_level),
+        ('black_noise', black_noise),
     ]
 
     for imgtup in imgman:
 
         logger.info("Processing: {}".format(imgtup[0]))
-        fit_model(X_train, Y_test, model, checkpoint_dir, imgtup)
-        model_predict(model, X_test, imgtup)
-        review_image_output(X_test, Y_pred, Y_true, imgtup, every=10)
+        model = fit_model(X_train, Y_test, model, checkpoint_dir, imgtup)
+        Y_pred = model_predict(model, X_test, imgtup)
+        review_image_output(X_test, Y_pred, Y_test, imgtup, every=10)
 
 

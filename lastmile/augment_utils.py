@@ -29,6 +29,19 @@ def remove_white_balance(image):
 
     return image
 
+def increase_black_level(image):
+    BL = 30
+    image[image < BL] = BL
+    image[image > BL] = image[image > BL] - BL
+    return image
+
+def black_noise(image):
+    image = adjust_gamma(image)
+    image = add_noise(image)
+    image = remove_white_balance(image)
+    image = increase_black_level(image)
+    return image
+    
 
 class SimulateCondition(object):
     
