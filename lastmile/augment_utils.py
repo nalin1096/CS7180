@@ -15,6 +15,21 @@ def adjust_gamma(image):
     GAMMA = np.random.normal(0.9, 0.1)
     return image**GAMMA
 
+def add_noise(image):
+    return random_noise(image, mode='poisson') * 255.0
+
+def remove_white_balance(image):
+    WB = [np.random.normal(0.8, 0.04),
+          np.random.normal(0.8, 0.04),
+          np.random.normal(0.7, 0.04)]
+
+    image[... ,0] = WB[0] * image[... ,0]
+    image[... ,1] = WB[1] * image[... ,1]
+    image[... ,2] = WB[2] * image[... ,2]
+
+    return image
+
+
 class SimulateCondition(object):
     
     def __init__(self):

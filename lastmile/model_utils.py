@@ -38,7 +38,7 @@ def plot_loss(fpath, history):
     plt.show()
     plt.savefig(fpath, format='png')
 
-def plot_images(X_test, Y_pred, Y_true, name):
+def plot_images(name, X_test, Y_pred, Y_true):
     tmp = np.concatenate((X_test, Y_pred, Y_true), axis=1)
     tmp = tmp.astype(np.uint8)
     plt.imsave(name, tmp)
