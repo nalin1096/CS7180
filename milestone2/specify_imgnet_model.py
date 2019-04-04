@@ -6,6 +6,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import rawpy
+import imageio
 import tensorflow as tf
 from tensorflow.python.framework import ops
 import tensorflow.contrib.slim as slim
@@ -321,6 +322,20 @@ def random_mini_batches(m, minibatch_size, seed):
     for id_val in ids:
         yield id_val
 
+def process_minibatch(minibatch_X, minibatch_Y, ps=16):
+    
+    mb_X = np.expand_dims(minibatch_X, axis=0)
+    mb_Y = np.expand_dims(minibatch_Y, axis=0)
+    
+    _, H, W, _ = mb_X.shape
+    
+    xx = np.random.randint(0, W - ps)
+    yy = np.random.randint(0, H - ps)
+    
+    X_patch = mb_X[:,yy:yy + ps, xx:xx + ps, :]
+    Y_patch = mb_Y
+    
+    return X_patch, Y_patch
 
 def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 num_epochs=1, minibatch_size=32, print_cost=True):
@@ -345,14 +360,16 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
     ops.reset_default_graph() # be able to rerun the model 
     tf.set_random_seed(42)
     seed = 42
-    #(m, n_H, n_W, n_C) = X_train.shape
+    m = X_train.shape[0]
     assert X_train.shape == Y_train.shape
     costs = []
 
     #X,Y = create_placeholders(n_H, n_W, n_C)
     #parameters = initialize_parameters()
     #Z = forward_propagation(X, parameters)
-    X, Y = X_train, Y_train
+
+    X = tf.placeholder(tf.float32, [None, None, None, 3])
+    Y = tf.placeholder(tf.float32, [None, None, None, 3])
     
     Z = sony_network(X)
 
@@ -374,7 +391,8 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
         # Do the training loop
 
         minibatches = random_mini_batches(m, minibatch_size, seed)
-        
+
+        logger.info("Starting epochs")
         for epoch in range(num_epochs):
 
             minibatch_cost = 0
@@ -389,14 +407,13 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                 minibatch_X = X_train[minibatch,...]
                 minibatch_Y = Y_train[minibatch,...]
 
-                _, temp_cost = sess.run([optimizer, cost],
+                minibatch_X, minibatch_Y = process_minibatch(minibatch_X, minibatch_Y)
+
+                _, temp_cost, output = sess.run([optimizer, cost, Z],
                                         feed_dict={X: minibatch_X,
                                                    Y: minibatch_Y})
 
                 minibatch_cost += temp_cost / num_minibatches
-
-                logger.debug('temp_cost: {}, minibatch cost: {}'.\
-                             format(temp_cost, num_minibatches))
 
             # Print the cost every epoch
             if print_cost == True and epoch % 5 == 0:
@@ -404,6 +421,12 @@ def cifar_model(X_train, Y_train, X_test, Y_test, learning_rate=1e-4,
                                                          minibatch_cost))
             if print_cost == True and epoch % 1 == 0:
                 costs.append(minibatch_cost)
+
+    # Write out image
+    output = np.minimum(np.maximum(output, 0), 1)
+    logger.info("output shape: {}".format(output.shape))
+    imageio.imwrite("sony_network.jpg", output[0,...])
+    parameters = {}
 
     return (parameters, costs, learning_rate)
 

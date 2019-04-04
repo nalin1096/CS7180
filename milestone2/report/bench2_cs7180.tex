@@ -43,7 +43,7 @@
 
 \author{%
   Nalin Gupta \\
-  \texttt{NUID: 001726854} \\
+  \texttt{NUID: 001497315} \\
   \And
   Christopher Botica\\
   \texttt{NUID: 001726854} \\
@@ -118,49 +118,48 @@ their model is camera specific and not easily generalizable.\newline
 We propose a transferable CNN for image brightening and denoising. Instead
 of training our model on actual true (bright light) and corrupted
 (low light) image pairs, we use images from the publicly available
-"MIT-Adobe FiveK Dataset" dataset as our baseline and corrupt these by simulating
-low-light conditions. We train our CNN on the synthetic data to obtain our initial
-model parameters. Then, using these, and a small fraction of the real image pairs
-from the SID Dataset, we adopt a transfer learning \cite{Goodfellow-et-al-2016}
-approach to update our model parameters. We then use this model to test on our
-SID Dataset. In addition, we aim to test various transfer learning approaches,
-such as the traditional transfer learning and zero shot learning \cite{larochelle2008,
-  NIPS2009_3650, socher2013zeroshot}.\newline
+RAISE raw images dataset \cite{Dang-Nguyen:2015:RRI:2713168.2713194}. We
+use the RAISE raw images dataset as our true images and corrupt these by
+simulating low-light conditions for use in our model. We train our CNN on
+this synthetic
+data to obtain our initial model parameters. A small fraction of the real
+images paired from the SID dataset is then used in our transfer learning
+\cite{Goodfellow-et-al-2016} approach to update our model parameters.
+These model parameters are updated for the particular camera used in the
+SID dataset. We then use this model to test on the SID Dataset. In
+addition, we aim to test various transfer learning approaches, such as the
+traditional transfer learning and zero shot learning \cite{larochelle2008, NIPS2009_3650,socher2013zeroshot}. \newline
 
 The novelty of our approach stems from the idea of ``more for less''. Our
 model drastically reduces the overhead costs of data collection by
-synthesizing readily available training data (MIT-Adobe FiveK). This is
+synthesizing readily available training data (RAISE raw images dataset).
+This is
 particularly beneficial in domains where collecting images pairs is
-expensive/time consuming. 
+expensive/time consuming.
 
 \section{Methods}
 
 Our contributions were to simulate the data and replicate their model
 using simulated data.
 
+\subsection{Dataset}
+
+We plan to use the RAISE raw images dataset which includes 6,000 high
+definition images taken by professional photographers. Since these are
+raw images, they have not been touched or processed in any way. This gives
+us a true representation of the scene. 
+
 \subsection{Model}
 
-As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the RAISE dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. An example of a training pair
+(image taken in low-light and normal light conditions) is shown in
+Figure \ref{fig:train4}.This is highlighted in our model framework in Figure 2. 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.35]{pipeline.jpg}
-  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
-\end{figure}
-
-Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
-
-\begin{figure}[ht]
-  \centering
-  \includegraphics[scale=0.5]{model.png}
+  \includegraphics[scale=0.5]{model}
   \caption{Our proposed model framework}
 \end{figure}
-
-\subsection{Low Light Image Simulation}
-
-TODO: some theory, maybe Chris?
-
-\subsection{Replicating their Model}
 
 We tried to replicate their model to using other readily
 available data such as CIFAR10 \cite{cifar10} and ImageNet
@@ -174,32 +173,121 @@ simulate images but also account for the \textit{change in dimensionality}
 across image types.
 
 
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+
+Our model is based on the one developed for SID, with the addition of 2 fully-connected layers. Note that we may increase this if training runtime permits. Using the transfer learning approach, we will first train our model on the MIT dataset, then erase the learned weights from the last two fully-connected layers, and retrain on the SID dataset. This is highlighted in our model framework in Figure 2. 
+
+We tried to replicate their model to using other readily
+available data such as CIFAR10 \cite{cifar10} and ImageNet
+\cite{imagenet_cvpr09}. The CIFAR10 ad ImageNet data is augmented to
+simulate properties of the images used by Chen et. al. (2018)
+\cite{chen2018learning}. The CIFAR10 and ImageNet datasets are distinctly
+different because they are not \textit{raw} images. This means the
+dimensionality of CIFAR10 is $32 \times 32 \times 3$ rather than a raw
+image which could be $512 \times 512 \times 4$. We not only need to
+simulate images but also account for the \textit{change in dimensionality}
+across image types.
+
+
+
+\subsection{Computational Resources}
+
+Using AWSEducate did not work for us. We were unable to create roles with
+IAM authentication so it's really hard or impossible to move data from a
+S3 Bucket to an EC2 Instance. We tried to create a $p3.8xlarge$ instance but
+these instances are not allowed even though they are listed. Using regular
+AWS does work but is costly. Ran a single AWS EC2 $p3.8xlarge$ instance
+with 32 CPU, 244 GB of Memory, 4 Tesla V100 GPUs, and 64 GPU Memory. This
+costs \$12.24 an hour. This is the amount of GPU Memory requested by the
+paper authors as a minimum amount. \newline
+
+We have also been able to use Google Cloud for some of our workload. This
+resource is well integrated with Tensorflow. Leading up to Milestone 2,
+we extensively used Google Cloud Compute with 2 CPU and 7.5GB of memory
+for debugging and working with image datasets; primarily CIFAR10 and
+Tiny ImageNet. \newline
+
+In regards to training our model, one of our group members has also
+received permission to use computational resources from Lincoln
+Laboratory's Super Computer (LLSC) for our project. We are currently
+waiting for complete access and expect to be able to use it in the coming
+days.
+
+\subsection{Low Light Simulation}
+
+As illustrated in Figure 1, the traditional pipeline takes a corrupted image, and applies the following sequence of modules: Reduce Black Level, Denoising, White Balance, and Gamma Correction. The Black Level refers to refers to the level of brightness at the darkest parts of the image, and is reduced by subtracting the minimum pixel value. Denoising is reduced using common algorithms such as BM3D. White Balance refers to the color balance in the image (i.e., white should be true white) and is corrected by re-balancing the intensities of each color RGB. Finally, Gamma Correction controls the overall brightness of the image. We synthetically generate corrupted images by applying the reverse of this pipeline. Gamma Distortion: decrease the brightness of the image, White Imbalance: skew the color-space by multiplying each level of RGB by a random weight, Poisson Noise: add Poisson noise to the image, Black Level: add a negative bias to the pixel values (i.e., random black level). 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.35]{pipeline.jpg}
+  \caption{Top: Traditional Pipeline for processing low-light images. Bottom: Our  pipeline to simulate low-light images based on the traditional, only in reverse.}
+\end{figure}
+
+We simulate our low light images by successively applying gamma distortion, white imbalance, Poisson noise, and black level to a normal lighted. An example of two of such images is represented in Figure 3. 
+
+For a given bright image, \(B\), a matrix of size \(m\)x\(n\)x3, we want to simulate a low-light image \(D\), or the same. We define gamma distortion as follows:
+\[   D = {B}^{1/\gamma}, \] 
+where \(\gamma\) controls the brightness of the image and the exponentiation is computed element-wise.
+
+Furthermore, for the three channels of \(B\), namely \(B_{R}\), \(B_{G}\), and \(B_{B}\), and the three channels of \(D\), namely \(D_{R}\), \(D_{G}\), and \(D_{B}\), respectively, we define color distortion as follows:
+\[ D_{R} = w_{R}*B_{R},\]
+\[ D_{G} = w_{G}*B_{G},\]
+\[ D_{B} = w_{B}*B_{B},\]
+where \(w_{R}, w_{G}, w_{B}\) are small weights that distort the color space.  
+
+We define the black level as follows: 
+\[  D = max(B-bl,0), \]
+where \(bl\) represents the amount of black level added to the image. Note that the closer the pixel values are to 0, the darker they are. The maximum of \(B - bl\) and 0 is taken so that no pixels are negative. \newline
+
+Finally, we add Poison noise. Since this outputs values between \([0, 1]\), we first scale our image, apply Poison, and then re-scale as follows:
+\[  D/255 = Poisson(B/255). \]
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.3]{fig3.png}
+  \caption{Simulating two low-light images via our pipeline: (a) Gamma Distortion, (b) White Imbalance, (c) Poisson Noise addition, (d) Black Level, (e) Final low-light simulation}
+\end{figure}
+
+
+Our initial approach to creating simulated low light images was to randomly select values for \(\gamma, w_{R}, w_{G}, w_{B},\) and \(bl\) was to choose these randomly and validate them by visualizing the distorted image. However, this process is not good enough to yield accurate results. The purpose of the simulation step is to simulate low light images the best we can, in order to then provide a well-trained model for transfer. Therefore, we assume values for these hyper-parameters for natural low-light images belong to certain distributions. In the next step, we aim to approximate these distributions.  \newline
+
+Let \(b_{i,j,k}\) be a pixel value from \(B\) and \(d_{i,j,k}\) be a pixel value from \(D\). We approximate \(\gamma\) finding the value such, when gamma-distortion is applied to the bright image, the average pixel value equals that to the darker image:
+
+\[  \frac{1}{3mn}\sum_{i,j,k}b_{i,j,k}^
+{1/\gamma} = \frac{1}{3mn}\sum_{i,j,k}d_{i,j,k}\] 
+
+Similarly, for a given pair \(B\) and \(D\), we find the optimal values for \(w_{R}, w_{G}, w_{B},\) and \(bl\), such that, after applying color-distortion, and adding black-level, respectively, the average pixel value for \(B\) equals that of \(D\). \newline
+
+We repeat this process for 200 random pairs \(B\) and \(D\) from SID and compute the distribution for each value of \(\gamma, w_{R}, w_{G}, w_{B},\) and \(bl\). These distributions are exemplified in Figure 4. Our assumption is that, by sampling these values from their respective distribution, we can create more accurate low-light images. We find these distributions by computing
+the Kernel Density Estimation (KDE) and then randomly sample. 
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.4]{Distributions}
+  \caption{Distributions for (a) gamma, (b) RGB weights, and (c) black level.}
+  \label{fig:train2}
+\end{figure}
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.5]{low_light_normal_light}
+  \caption{ SID Images in Normal and Low Light Conditions}
+  \label{fig:train4}
+\end{figure}
+
+
 \section{Experiment}
 
-We experimented on our contributions
+Our experiments consist of recreating the see-in-the-dark model and
+getting results from our own model. We also compare results and provide
+insight into the model implementation details.
 
-\subsection{Low Light Image Simulation}
+\subsection{Model Implementation}
 
-TODO: Nalin script
-
-\subsection{Model Replication}
-
-We tried replicating their model and writing a model in parallel to
-replicate their functionality. We also tried using the CIFAR10 and
-ImageNet datasets as input. The primary issue when replicating their
-model related to dimensionality. The RGB images in CIFAR10 and ImageNet
-have $m \times n \times 3$ dimensions. Raw images have $m \times n \times 4$
-dimensions.
-
-We were able to confirm that output dimensions from Chen et. al.
-\cite{chen2018learning} follow the pattern $2m \times 2n \times 3$
-irrespective of the image size or type used. During our experiment,
-we focused our debugging efforts on understanding whether the dimensionality
-of a raw image as an input generated incompatible dimensions with the
-target vector after model output. This error resulted in our replicated
-model not being able to compute the cost function.
-
-In terms of techniques used, their model is mostly written in a higher
+We took inspiration from the SID model and wrote our own model which
+had similar functionality. The SID model is mostly written in a higher
 level Tensorflow contribution module called ``slim''. The ``slim''
 contribution module does not appear to have any documentation and requires
 one to read the module code embedded within Tensorflow. We initially tried
@@ -209,25 +297,38 @@ forward propagation to not be documented well. We then rewrote the
 Chen et. al. \cite{chen2018learning} model using only low level Tensorflow
 code. This approach has the disadvantage of requiring the dimensions of
 all weight matrices to be specified and initialized in a separate function
-we called 'initialize\_parameters()'.
+we called 'initialize\_parameters()'. \newline
 
-These efforts allowed us to understand the dimensionality of both models
-at each of the 10 blocks within their forward propagation. We also
-experimented with pooling in regards to window size. We also experimented
-with strides for convolutional layers with each block. We also added up
+These efforts allowed us to understand the dimensionality of both models at
+each of the 10 blocks within their forward propagation. We used these
+models to experiment with pooling window size, and stride
+length for the convolutional layers. We also added up
 to three additional blocks with different parameters in an attempt to
-get the output dimensions to match the dimensionality of our input image.
+get the output dimensions to match the dimensionality of our input
+image. \newline
 
-At this point, we have not been able to use RGB images, having
-$m \times n \times 3$ dimensions, to work with Chen et. al.
-\cite{chen2018learning} model. It is important for us to develop this
+We also tried using the CIFAR10 and ImageNet datasets as input. The primary
+issue when replicating their model was related to dimensionality. The RGB
+images in CIFAR10 and ImageNet have $m \times n \times 3$ dimensions.
+However, the SID model takes as input Raw images which have
+$m \times n \times 4$ dimensions. We were able to confirm that output
+dimensions from Chen et. al. \cite{chen2018learning} follow the pattern
+$2m \times 2n \times 3$ irrespective of the image size or type used. During
+our experiment, we focused our debugging efforts on understanding whether
+the dimensionality of a raw image as an input generated incompatible
+dimensions with the target vector after model output. This error resulted
+in our replicated model not being able to compute the cost function.\newline
+
+Currently, we are working with raw images as input which have been corrupted
+using our low light simulation; mentioned in Section 3.4. The results
+for our model are shown in Section 4.3. At this point, we have not been
+able to use RGB images, having $m \times n \times 3$ dimensions, to work
+with our model. It is important for us to develop this
 capability in order to qualitatively verify that we are correctly augmenting
-image data. We are unable to generate images in raw format because
-it would require us to know proprietary information about how a camera
-generated an image.
-
-In order to generate output for this milestone, we modified images from
-Chen et. al. \cite{chen2018learning}, such that
+image data. We are unable to view simulated images in raw format because
+it requires us to know proprietary information about how a camera
+generated an image. In order to generate output for this milestone, we
+modified images from Chen et. al. \cite{chen2018learning}, such that
 
 \begin{align*}
   X &= g(y_{train})\\
@@ -238,33 +339,70 @@ where function $g$ is an application of artificial noise to a clean
 image in $y_{train}$ which is then trained against a corresponding
 image where $g$ has not been applied.
 
+\subsection{State of the Art Model Results}
 
-\section{Discussion}
-
-ok
-
-\section{Appendix}
+The model used by Chen et. al. \cite{chen2018learning} trains on raw
+images for 4,000 epochs. It beats the current state of the art denoising
+technique, BM3D. An example of a result for this model is shown in
+Figure \ref{fig:train}. A drawback of this model is that it learns a
+separate model for each device used to capture the raw images.
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.1]{00002_00_train_100}
-  \caption{ Example Training Data}
+  \includegraphics[scale=0.35]{Their_results}
+  \caption{ State of the Art Model Results}
   \label{fig:train}
 \end{figure}
 
+We can see in Figure \ref{fig:train}, a nearly dark image in sub-figure
+(a) is converted to an image shot in normal light conditions; shown
+in sub-figure (b).
+
+\subsection{Our Model Results}
+
+Currently, our model has been trained on a subset of simulated lowlight
+images using the SID dataset as mentioned in Section 4.1. We ran the model
+for 25 epochs due to limited resources. However, we were still able to obtain
+images which showed some enhancement. We are able to show some initial
+results but they are not of the same quality compared to state-of-the-art.
+\cite{chen2018learning}. 
+
 \begin{figure}[ht]
   \centering
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_gt}
-    \caption{Input}
-  \end{subfigure}
-  \begin{subfigure}[t]{0.3\textwidth}
-    \includegraphics[width=\textwidth]{10016_00_100_scale}
-    \caption{Output}
-  \end{subfigure}
-  \caption{ Example Test Data}
-  \label{fig:test}
+  \includegraphics[scale=0.1]{trashcan_original_simmulated_and_our_result}
+  \caption{ Predicted Results}
+  \label{fig:ourmodel}
 \end{figure}
+
+Figure \ref{fig:ourmodel} shows the steps followed by our approach.
+Sub-figure (a) is the original image, sub-figure (b) is the simulated low
+light image described in Section 3.4, and sub-figure (c) shows the result
+of our model. We can clearly observe from Figure \ref{fig:ourmodel} that
+our model was able to identify the colors while simultaneously brightening
+the image.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.65]{loss_epoch_our_model}
+  \caption{ Loss vs. Epochs}
+  \label{fig:ourloss}
+\end{figure}
+
+Figure \ref{fig:ourloss} plots our loss function at each epoch. We can
+see a downward trend in the loss function output. However, we can also
+see that our model is having trouble converging after 25 epochs. We believe
+this problem can be solved when we use the entire dataset to train the model.
+
+\section{Discussion}
+
+Currently, we are simulating low light images using (Section 3.4) using
+raw images from the SID dataset. A drawback of this approach is that we
+can modify the pixels of the image to simulate low light but we cannot
+view these modifications as a RGB image. Our proposed next step is to modify
+our model is so it is compatible with RGB images as input. We have identified
+blocks within the model which most likely need to be changed. After
+updating our model to accept RGB input, we will be implementing transfer
+learning to obtain the final result. 
 
 
 \bibliographystyle{unsrt}

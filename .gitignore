@@ -7,3 +7,6 @@ __pycache__
 *.aux
 *.log
 *.out
+*.ipynb_checkpoints
+*.ARW
+*.png
