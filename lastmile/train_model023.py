@@ -118,7 +118,7 @@ def callbacks(model_type):
     """
     # Prepare model, model saving directory
     
-    save_dir = os.path.join(os.getwcd(), 'saved_models', model_type)
+    save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
@@ -179,7 +179,7 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
 
     # Managing review directory
     
-    review_dir = os.path.join(os.getwcd(), 'review')
+    review_dir = os.path.join(os.getcwd(), 'review')
     if not os.path.isdir(review_dir):
         os.makedirs(review_dir)
 
@@ -266,12 +266,12 @@ def run_simulation(fcov, fmean):
 
         # Fit model
 
-        model, history = fit_model(dataflow, model, imgtup,
+        model, history = fit_model(dataflow, model, imgtup, model_id,
                                    lr=1e-3, epochs=100)
 
         # Review model (we'll need to modify this with larger test data)
 
-        review_model(X_test, Y_true, model, history, imgtup, num_images=10)
+        review_model(X_test, Y_test, model, history, imgtup, num_images=10)
 
         # Reset model and history
 
@@ -284,14 +284,14 @@ def run_sony_images(model, model_type):
 
     logger.info("STARTED running sony images")
     
-    save_dir = os.path.join(os.getwcd(), 'saved_models', model_type)
+    save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
     model.load_weights(save_dir)
 
     # Set up for prediction or training
 
     # load images
 
-    review_sony_model(model, X_test, Y_test)
+    #review_sony_model(model, X_test, Y_test)
 
     logger.info("FINISHED running sony images")
 
@@ -302,6 +302,21 @@ def run_sony_images(model, model_type):
 def main():
     """ Main function to run training and prediction. """
     
+    run_simulation(fcov, fmean)
+
+    model, model_id = model02()
+    imgname = 'bl_cd_pn_ag'
+    model_type = '{}_{}'.format(model_id, imgname)
+
+    run_sony_images(model, model_type)
+
+def main_ngpus():
+    """ Main function to run training and predictions on N GPUs. """
+    pass
+
+
+if __name__ == "__main__":
+
     enable_cloud_log('DEBUG')
 
     # Run simulation
@@ -312,17 +327,6 @@ def main():
     COVM = read_pickle(fcov)
     MEANM = read_pickle(fmean)
 
-    run_simulation(fcov, fmean)
-
-    #model, model_id = model02()
-    #imgname = 'bl_cd_pn_ag'
-    #model_type = '{}_{}'.format(model_id, imgname)
-
-    #run_sony_images(model, model_type)
-
-def main_ngpus():
-    """ Main function to run training and predictions on N GPUs. """
-    pass
         
     
 
