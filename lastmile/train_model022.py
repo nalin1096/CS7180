@@ -1,4 +1,4 @@
-""" Training and test for model v0.2.1
+""" Training and test for model v0.2.2
 
 This is a version which includes the augmented data. We're
 using a different approach than the Sony model so we don't
@@ -16,6 +16,7 @@ from tensorflow.train import AdamOptimizer
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import save_model, load_model
 
 from model02 import model02
 from model_utils import enable_cloud_log, plot_images, plot_loss
