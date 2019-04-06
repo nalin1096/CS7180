@@ -261,7 +261,9 @@ def run_simulation(fcov, fmean):
 
         # Define model
 
-        model, model_id = model02()
+        mod = model02()
+        model = mod.get('model', None)
+        model_id = mod.get('model_id', None)
         logger.info("Processing model: {}".format(imgname))
 
         # Fit model
@@ -285,9 +287,18 @@ def run_sony_images(model, model_type):
     logger.info("STARTED running sony images")
     
     save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
-    model.load_weights(save_dir)
+    #model.load_weights(save_dir)
+
+    def foo(X): return X
 
     # Set up for prediction or training
+
+    test_datagen = ImageDataGenerator(preprocessing_function=foo)
+    test_generator = test_datagen.flow_from_directory(
+        'data/sony/test',
+        target_size=(256,256,3)
+    )
+    
 
     # load images
 

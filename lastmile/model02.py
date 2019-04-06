@@ -36,7 +36,8 @@ def model02():
     model.add(Dense(8))
     model.add(Dense(3))
 
-    return model, model_id
+    mod = {"model": model, "model_id": model_id}
+    return mod
 
     
 
