@@ -90,15 +90,6 @@ cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
                               period=5, verbose=1)
 
 
-# Dataset of 50,000 32x32 color training images, 
-# labeled over 10 categories, and 10,000 test images.
-
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
-
-# Define model
-
-model = model02()
-
 # Retrieve latest checkpoint if it exists
 
 def fit_model(X_train, Y_test, model, checkpoint_dir, imgtup):
@@ -167,6 +158,16 @@ def review_image_output(X_test, Y_pred, Y_true, imgtup, every=10):
 def run_simulation(fcov, fmean):
 
     logger.info("STARTED running simulations")
+
+    # Dataset of 50,000 32x32 color training images, 
+    # labeled over 10 categories, and 10,000 test images.
+
+    (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+    # Define model
+    
+    model = model02()
+
     COVM = read_pickle(fcov)
     MEANM = read_pickle(fmean)
     
