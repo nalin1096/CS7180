@@ -9,6 +9,8 @@ import logging
 import pickle
 from urllib.parse import urljoin
 
+import numpy as np
+import scipy.stats as sct
 import tensorflow as tf
 from tensorflow.train import AdamOptimizer
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -30,7 +32,7 @@ def read_pickle(fpath):
 
 def bl(image, sample=False):
     """ Apply black level """
-    if not sample:
+    if not np.all(sample):
         sample = np.random.multivariate_normal(MEANM, COVM)
 
     BL = int(sample[0])
@@ -41,7 +43,7 @@ def bl(image, sample=False):
 def bl_cd(image, sample=False):
     """ Apply black level with color distortion """
 
-    if not sample:
+    if not np.all(sample):
         sample = np.random.multivariate_normal(MEANM, COVM)
 
     image = bl(image, sample)
@@ -57,15 +59,14 @@ def bl_cd(image, sample=False):
 def bl_cd_pn(image, sample=False):
     """ Apply black level with color distortion and poisson noise. """
     
-    if not sample:
+    if not np.all(sample):
         sample = np.random.multivariate_normal(MEANM, COVM)
 
     noise_param = 10
 
     image = bl_cd(image, sample)
-    image = np.random.poisson(image / 255.0 * noise_param) / \
+    image = sct.poisson.rvs(image / 255.0 * noise_param) /\
         noise_param * 255
-
     return image
 
 def bl_cd_pn_ag(image, sample=False):
@@ -73,7 +74,7 @@ def bl_cd_pn_ag(image, sample=False):
     Apply black level, color distortion, poisson noise, adjust gamma. 
     """
 
-    if not sample:
+    if not np.all(sample):
         sample = np.random.multivariate_normal(MEANM, COVM)
 
     image = bl_cd_pn(image, sample)
@@ -92,14 +93,15 @@ cp_callback = ModelCheckpoint(checkpoint_path, save_weights_only=True,
 
 # Retrieve latest checkpoint if it exists
 
-def fit_model(X_train, Y_test, model, checkpoint_dir, imgtup):
+def fit_model(X_train, Y_train, model, checkpoint_dir, imgtup):
 
     imgname, imgfunc = imgtup
     
     chk = os.listdir(checkpoint_dir)
     if len(chk) > 1:
-        latest = tf.train.latest_checkpoint(checkpoint_dir)
-        model.load_weights(latest)
+    #    latest = tf.train.latest_checkpoint(checkpoint_dir)
+    #    model.load_weights(latest)
+        pass
 
     else:
         datagen = ImageDataGenerator(
@@ -152,7 +154,7 @@ def review_image_output(X_test, Y_pred, Y_true, imgtup, every=10):
 
             name = urljoin(base, 'model_pred_{}_{}.png'.format(i, imgname))
             plot_images(name, imgfunc(X_test[i,...]), Y_pred[i, ...],
-                        Y_test[i,...])
+                        Y_true[i,...])
 
 
 def run_simulation(fcov, fmean):
@@ -194,13 +196,14 @@ def run_simulation(fcov, fmean):
 
 if __name__ == "__main__":
 
-    COVM = read_pickle(fcov)
-    MEANM = read_pickle(fmean)
-
     enable_cloud_log('DEBUG')
     
     fcov = "simulation_cov.pkl"
     fmean = "simulation_mean.pkl"
+
+    COVM = read_pickle(fcov)
+    MEANM = read_pickle(fmean)
+
 
     run_simulation(fcov, fmean)
 
