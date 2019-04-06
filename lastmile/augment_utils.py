@@ -8,6 +8,10 @@ import rawpy
 import imageio
 
 
+#############################
+## PREVIOUS
+#############################
+
 logger = logging.getLogger(__name__)
 
 
