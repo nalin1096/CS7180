@@ -163,13 +163,6 @@ def run_simulation(fcov, fmean):
     # labeled over 10 categories, and 10,000 test images.
 
     (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-
-    # Define model
-    
-    model = model02()
-
-    COVM = read_pickle(fcov)
-    MEANM = read_pickle(fmean)
     
     m = 64
     X_train = X_train[0:m,...]
@@ -186,16 +179,23 @@ def run_simulation(fcov, fmean):
 
     for imgtup in imgman:
 
+        # Define model    
+        model = model02()
+
         imgname, imgfunc = imgtup
         logger.info("Processing: {}".format(imgtup[0]))
         model = fit_model(X_train, Y_test, model, checkpoint_dir, imgtup)
         Y_pred = model_predict(model, X_test, imgtup)
         review_image_output(X_test, Y_pred, Y_test, imgtup, every=10)
 
+        model = None
+
     logger.info("FINISHED running simulations")
 
 if __name__ == "__main__":
 
+    COVM = read_pickle(fcov)
+    MEANM = read_pickle(fmean)
 
     enable_cloud_log('DEBUG')
     
