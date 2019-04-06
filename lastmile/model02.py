@@ -13,6 +13,7 @@ class LeakyReLU(LeakyReLU):
 
 def model02():
     """ Removed upsampling from model01. """
+    model_id = 'model02'
 
     lrelu = LeakyReLU(alpha=0.2)
     model = Sequential()
@@ -35,7 +36,7 @@ def model02():
     model.add(Dense(8))
     model.add(Dense(3))
 
-    return model
+    return model, model_id
 
     
 

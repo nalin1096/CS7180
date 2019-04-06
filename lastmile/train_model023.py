@@ -4,9 +4,7 @@ This model runs on multiple gpus. Checkpointing. RGB input images.
 
 TODO:
 
-* Set up dataflow for each model run
 * Set up sony with dataflow
-* Verify checkpoint restoration
 * Include patches
 * Update image augmentation functions from last night
 * Run on GPUs
@@ -45,10 +43,19 @@ def read_pickle(fpath):
 # Image augmentation functions
 ###############################
 
+def valid_sample():
+    sample = [-1, -1, -1, -1, -1]   # Make sure sample isn't negative
+    while not(sample[0]>0 and sample[1]>0 and sample[2]>0 \
+              and sample[3]>0 and sample[4]>0):
+        
+        sample = np.random.multivariate_normal(MEANM, COVM)
+
+    return sample
+
 def bl(image, sample=False):
     """ Apply black level """
     if not np.all(sample):
-        sample = np.random.multivariate_normal(MEANM, COVM)
+        sample = valid_sample()
 
     BL = int(sample[0])
     image[image < BL] = BL
@@ -59,7 +66,7 @@ def bl_cd(image, sample=False):
     """ Apply black level with color distortion """
 
     if not np.all(sample):
-        sample = np.random.multivariate_normal(MEANM, COVM)
+        sample = valid_sample()
 
     image = bl(image, sample)
 
@@ -75,7 +82,7 @@ def bl_cd_pn(image, sample=False):
     """ Apply black level with color distortion and poisson noise. """
     
     if not np.all(sample):
-        sample = np.random.multivariate_normal(MEANM, COVM)
+        sample = valid_sample()
 
     noise_param = 10
 
@@ -94,7 +101,7 @@ def bl_cd_pn_ag(image, sample=False):
     """
 
     if not np.all(sample):
-        sample = np.random.multivariate_normal(MEANM, COVM)
+        sample = valid_sample()
 
     image = bl_cd_pn(image, sample)
     image = image**sample[4]
@@ -111,10 +118,11 @@ def callbacks(model_type):
     """
     # Prepare model, model saving directory
     
-    save_dir = os.path.join(os.getwcd(), 'saved_models')
-    model_name = '%s_model.{epoch:03d}-{val_loss:.2f}.hdf5' % model_type
+    save_dir = os.path.join(os.getwcd(), 'saved_models', model_type)
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
+
+    model_name = '%s_model.{epoch:03d}-{val_loss:.2f}.hdf5' % model_type
     filepath = os.path.join(save_dir, model_name)
 
     # Prepare callbacks for model saving (option to adjust lr)
@@ -125,7 +133,7 @@ def callbacks(model_type):
 
     return callbacks
 
-def fit_model(dataflow, model, imgtup, lr=1e-3, epochs=100):
+def fit_model(dataflow, model, imgtup, model_id, lr=1e-3, epochs=100):
     """ Fits model, Returns model and history keras objects. """
 
     imgname, imgfun = imgtup
@@ -140,7 +148,8 @@ def fit_model(dataflow, model, imgtup, lr=1e-3, epochs=100):
 
     # Fit model
 
-    calls = callbacks(model_type=imgname)
+    model_type = '{}_{}'.format(model_id, imgname)
+    calls = callbacks(model_type=model_type)
     history = model.fit_generator(dataflow, epochs=epochs, callbacks=calls)
 
     return model, history
@@ -211,7 +220,10 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
 
     logger.info("FINISHED model diagnostics")
 
-def run_simulation(fcov, fmean, dataflow):
+def review_sony_model(model, X_test, Y_test):
+    pass
+
+def run_simulation(fcov, fmean):
     """ Run models using data augmented with simulated images. """
 
     logger.info("STARTED running simulations")
@@ -223,17 +235,33 @@ def run_simulation(fcov, fmean, dataflow):
         ('bl_cd_pn_ag', bl_cd_pn_ag),
     ]
 
+    # We want to keep our data in memory if possible
+    # because the data will otherwise need to be read
+    # off disk (slow) for each model iteration.
+    
+    # Dataset of 50,000 32x32 color training images, 
+    # labeled over 10 categories, and 10,000 test images.
+
+    (X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+    Y_train = np.copy(X_train)
+    Y_test = np.copy(X_test)
+
+    # Run model on each data augmentation scenario
+
     for imgtup in imgman:
 
         imgname, imgfunc = imgtup
 
-        # Define the data flow
+        # Define the data flow for training and test 
 
-        dataflow = None # TODO
+        datagen = ImageDataGenerator(preprocessing_function=imgfunc)
+        datagen.fit(X_train)
+        dataflow = datagen.flow(X_train, Y_train, batch_size=32)
 
         # Define model
 
-        model = model02()
+        model, model_id = model02()
         logger.info("Processing model: {}".format(imgname))
 
         # Fit model
@@ -241,28 +269,56 @@ def run_simulation(fcov, fmean, dataflow):
         model, history = fit_model(dataflow, model, imgtup,
                                    lr=1e-3, epochs=100)
 
-        # Review model
+        # Review model (we'll need to modify this with larger test data)
 
         review_model(X_test, Y_true, model, history, imgtup, num_images=10)
 
+        # Reset model and history
+
+        model = None
+        history = None
+
     logger.info("FINISHED running simulations")
 
-def run_sony_images():
-    pass
+def run_sony_images(model, model_type):
+
+    logger.info("STARTED running sony images")
+    
+    save_dir = os.path.join(os.getwcd(), 'saved_models', model_type)
+    model.load_weights(save_dir)
+
+    # Set up for prediction or training
+
+    # load images
+
+    review_sony_model(model, X_test, Y_test)
+
+    logger.info("FINISHED running sony images")
+
+#################################################
+# Main functions for each hardware configuration
+#################################################
 
 def main():
     """ Main function to run training and prediction. """
-
-    datagen = ImageDataGenerator(preprocessing_function=imgfunc)
-
-    # Transform all training images
-    datagen.fit(X_train)
-
-    dataflow = datagen.flow(X_train, Y_train, batch_size=32)
-
-
     
-    pass
+    enable_cloud_log('DEBUG')
+
+    # Run simulation
+    
+    fcov = "simulation_cov.pkl"
+    fmean = "simulation_mean.pkl"
+
+    COVM = read_pickle(fcov)
+    MEANM = read_pickle(fmean)
+
+    run_simulation(fcov, fmean)
+
+    #model, model_id = model02()
+    #imgname = 'bl_cd_pn_ag'
+    #model_type = '{}_{}'.format(model_id, imgname)
+
+    #run_sony_images(model, model_type)
 
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """
