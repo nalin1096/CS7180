@@ -65,8 +65,12 @@ def bl_cd_pn(image, sample=False):
     noise_param = 10
 
     image = bl_cd(image, sample)
-    image = sct.poisson.rvs(image / 255.0 * noise_param) /\
+
+    noise = lambda x : np.random.poisson(x / 255.0 * noise_param) / \
         noise_param * 255
+
+    func = np.vectorize(noise)
+    image = func(image)
     return image
 
 def bl_cd_pn_ag(image, sample=False):
