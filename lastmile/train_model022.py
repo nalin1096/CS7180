@@ -20,7 +20,6 @@ from model_utils import enable_cloud_log, plot_images, plot_loss
 from custom_loss import mean_absolute_error
 
 logger = logging.getLogger(__name__)
-enable_cloud_log('DEBUG')
 
 # Helper functions
 
@@ -167,6 +166,7 @@ def review_image_output(X_test, Y_pred, Y_true, imgtup, every=10):
 
 def run_simulation(fcov, fmean):
 
+    logger.info("STARTED running simulations")
     COVM = read_pickle(fcov)
     MEANM = read_pickle(fmean)
     
@@ -191,4 +191,15 @@ def run_simulation(fcov, fmean):
         Y_pred = model_predict(model, X_test, imgtup)
         review_image_output(X_test, Y_pred, Y_test, imgtup, every=10)
 
+    logger.info("FINISHED running simulations")
+
+if __name__ == "__main__":
+
+
+    enable_cloud_log('DEBUG')
+    
+    fcov = "simulation_cov.pkl"
+    fmean = "simulation_mean.pkl"
+
+    run_simulation(fcov, fmean)
 
