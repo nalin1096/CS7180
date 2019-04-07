@@ -1,0 +1,9 @@
+# ninja log v5
+1	1063	1554590239031266112	/Users/tylerbrown/projects/CS7180/.pytype/pyi/custom_loss.pyi	67fd6c8692fbc1f
+0	1155	1554590239105789105	/Users/tylerbrown/projects/CS7180/.pytype/pyi/model02.pyi	1dbe6a6f7102154d
+1	1723	1554590239684833192	/Users/tylerbrown/projects/CS7180/.pytype/pyi/model_utils.pyi	9e925bb47f730a8f
+0	2206	1554590640295289238	/Users/tylerbrown/projects/CS7180/.pytype/pyi/train_model023.pyi	3a0ccf8b9407be09
+0	844	1554591640590933088	/Users/tylerbrown/projects/CS7180/.pytype/pyi/model02.pyi	1dbe6a6f7102154d
+0	2275	1554591672755371783	/Users/tylerbrown/projects/CS7180/.pytype/pyi/train_model023.pyi	3a0ccf8b9407be09
+0	1057	1554594138870657280	/Users/tylerbrown/projects/CS7180/.pytype/pyi/model01.pyi	b05c288c136a86c3
+0	2426	1554595618446208414	/Users/tylerbrown/projects/CS7180/.pytype/pyi/train_model023.pyi	3a0ccf8b9407be09

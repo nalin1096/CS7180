@@ -1,0 +1,21 @@
+rule infer
+  command = pytype-single --imports_info $imports --module-name $module -V 3.6 -o $out --no-report-errors --nofail --quick $in
+  description = infer $module
+rule check
+  command = pytype-single --imports_info $imports --module-name $module -V 3.6 -o $out --analyze-annotated --nofail --quick $in
+  description = check $module
+build /Users/tylerbrown/projects/CS7180/.pytype/pyi/model02.pyi: infer /Users/tylerbrown/projects/CS7180/lastmile/model02.py
+  imports = /Users/tylerbrown/projects/CS7180/.pytype/imports/model02.imports
+  module = model02
+build /Users/tylerbrown/projects/CS7180/.pytype/pyi/model_utils.pyi: infer /Users/tylerbrown/projects/CS7180/lastmile/model_utils.py
+  imports = /Users/tylerbrown/projects/CS7180/.pytype/imports/model_utils.imports
+  module = model_utils
+build /Users/tylerbrown/projects/CS7180/.pytype/pyi/model01.pyi: infer /Users/tylerbrown/projects/CS7180/lastmile/model01.py | /Users/tylerbrown/projects/CS7180/.pytype/pyi/model_utils.pyi
+  imports = /Users/tylerbrown/projects/CS7180/.pytype/imports/model01.imports
+  module = model01
+build /Users/tylerbrown/projects/CS7180/.pytype/pyi/custom_loss.pyi: infer /Users/tylerbrown/projects/CS7180/lastmile/custom_loss.py
+  imports = /Users/tylerbrown/projects/CS7180/.pytype/imports/custom_loss.imports
+  module = custom_loss
+build /Users/tylerbrown/projects/CS7180/.pytype/pyi/train_model023.pyi: check /Users/tylerbrown/projects/CS7180/lastmile/train_model023.py | /Users/tylerbrown/projects/CS7180/.pytype/pyi/model02.pyi /Users/tylerbrown/projects/CS7180/.pytype/pyi/model01.pyi /Users/tylerbrown/projects/CS7180/.pytype/pyi/model_utils.pyi /Users/tylerbrown/projects/CS7180/.pytype/pyi/custom_loss.pyi
+  imports = /Users/tylerbrown/projects/CS7180/.pytype/imports/train_model023.imports
+  module = train_model023
