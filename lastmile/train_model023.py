@@ -22,11 +22,10 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.datasets import cifar10
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from model02 import model02
 from model_utils import (enable_cloud_log, plot_images,
-                         plot_loss, create_patch)
+                         plot_loss, create_patch, ImageDataGenerator)
 from custom_loss import mean_absolute_error
 
 logger = logging.getLogger(__name__)
@@ -224,7 +223,6 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
 def review_sony_model(results, imgnum):
 
     if imgnum > 0:
-
         pass
 
 def run_simulation(fcov, fmean):
@@ -259,9 +257,13 @@ def run_simulation(fcov, fmean):
 
         # Define the data flow for training and test 
 
-        datagen = ImageDataGenerator(preprocessing_function=imgfunc)
+        datagen = ImageDataGenerator(preprocessing_function=imgfunc,
+                                     stride=5,
+                                     patch_size=(16,16),
+                                     target_size=(32,32,3))
         datagen.fit(X_train)
-        dataflow = datagen.flow(X_train, Y_train, batch_size=32)
+        #dataflow = datagen.flow(X_train, Y_train, batch_size=32)
+        dataflow = datagen.dirflow_raise(dirpath='foo', batch_size=512) 
 
         # Define model
 

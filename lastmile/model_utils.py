@@ -1,10 +1,13 @@
 """ Utility functions for working with model
 
 """
+import os
 import logging
 
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import rawpy
 
 
 def enable_cloud_log(level='INFO'):
@@ -48,3 +51,45 @@ def plot_imgpair(Y_pred, Y_true, name):
     tmp = np.concatenate((Y_pred, Y_true), axis=1)
     tmp = tmp.astype(np.uint8)
     plt.imsave(name, tmp)
+
+class ImageDataGenerator(object):
+
+    def __init__(self,
+                 preprocessing_function=None,
+                 stride=1,
+                 patch_size=None,
+                 target_size=None):
+        
+        self.preprocessing_function = preprocessing_function
+        self.stride = stride
+        self.patch_size = patch_size
+        self.target_size = target_size
+        
+
+    def dirflow_sony(self, X_dir, Y_dir, batch_size=32):
+
+        X_fnames = os.listdir(X_dir)
+        Y_fnames = os.listdir(Y_dir)
+
+        # Validate x/y
+        
+        pass
+
+    def dirflow_raise(self, dirpath):
+        dirs = os.listdir(dirpath)
+
+        X, Y = np.array([])
+        for i in range(batch_size):
+
+            fpath = dirs.pop()
+
+            # TODO: read RGB image in as a np array
+
+            # TODO: use np.copy so we don't shallow copy
+
+            # TODO: apply preprocessing function
+
+        yield (X, Y)
+
+        
+        
