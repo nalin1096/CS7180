@@ -25,7 +25,8 @@ from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from model02 import model02
-from model_utils import enable_cloud_log, plot_images, plot_loss
+from model_utils import (enable_cloud_log, plot_images,
+                         plot_loss, create_patch)
 from custom_loss import mean_absolute_error
 
 logger = logging.getLogger(__name__)
@@ -220,8 +221,11 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
 
     logger.info("FINISHED model diagnostics")
 
-def review_sony_model(model, X_test, Y_test):
-    pass
+def review_sony_model(results, imgnum):
+
+    if imgnum > 0:
+
+        pass
 
 def run_simulation(fcov, fmean):
     """ Run models using data augmented with simulated images. """
@@ -287,22 +291,28 @@ def run_sony_images(model, model_type):
     logger.info("STARTED running sony images")
     
     save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
-    #model.load_weights(save_dir)
+    model.load_weights(save_dir)
+    model.summary()
 
-    def foo(X): return X
+    # Load data as generator and take patch size
 
-    # Set up for prediction or training
-
-    test_datagen = ImageDataGenerator(preprocessing_function=foo)
-    test_generator = test_datagen.flow_from_directory(
-        'data/sony/test',
-        target_size=(256,256,3)
+    X_test_datagen = ImageDataGenerator(preprocessing_function=create_patch)
+    X_test_dataflow = X_test_datagen.flow_from_directory(
+        'data/sony/test/short',
+        target_size=(256,256,3),
+        batch_size=32
     )
-    
+    Y_test_datagen = ImageDataGenerator()
+    Y_test_dataflow = Y_test_datagen.flow_from_directory(
+        'data/sony/test/long',
+        target_size=(256,256,3),
+        batch_size=32
+    )
+    test_dataflow = zip(X_test_dataflow, Y_test_dataflow)
 
-    # load images
-
-    #review_sony_model(model, X_test, Y_test)
+    evaluation = model.evaluate_generator(test_dataflow, verbose=1)
+    #results = model.predict_generator(test_dataflow)
+    #review_sony_model(results)
 
     logger.info("FINISHED running sony images")
 
@@ -315,7 +325,9 @@ def main():
     
     run_simulation(fcov, fmean)
 
-    model, model_id = model02()
+    mod = model02()
+    model = mod.get('model', None)
+    model_id = mod.get('model_id', None)
     imgname = 'bl_cd_pn_ag'
     model_type = '{}_{}'.format(model_id, imgname)
 
@@ -337,11 +349,3 @@ if __name__ == "__main__":
 
     COVM = read_pickle(fcov)
     MEANM = read_pickle(fmean)
-
-        
-    
-
-                                
-                                               
-
-
