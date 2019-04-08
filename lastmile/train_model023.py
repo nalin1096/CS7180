@@ -21,12 +21,12 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.datasets import cifar10
 
 from model02 import model02
 from model_utils import (enable_cloud_log, plot_images,
-                         plot_loss, create_patch, ImageDataGenerator)
+                         plot_loss, create_patch)
 from custom_loss import mean_absolute_error
+from image_preprocessing import ImageDataGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -38,74 +38,6 @@ def read_pickle(fpath):
     with open(fpath, "rb") as infile:
         m = pickle.load(infile)
     return m
-
-###############################
-# Image augmentation functions
-###############################
-
-def valid_sample():
-    sample = [-1, -1, -1, -1, -1]   # Make sure sample isn't negative
-    while not(sample[0]>0 and sample[1]>0 and sample[2]>0 \
-              and sample[3]>0 and sample[4]>0):
-        
-        sample = np.random.multivariate_normal(MEANM, COVM)
-
-    return sample
-
-def bl(image, sample=False):
-    """ Apply black level """
-    if not np.all(sample):
-        sample = valid_sample()
-
-    BL = int(sample[0])
-    image[image < BL] = BL
-    image = image - BL
-    return image
-
-def bl_cd(image, sample=False):
-    """ Apply black level with color distortion """
-
-    if not np.all(sample):
-        sample = valid_sample()
-
-    image = bl(image, sample)
-
-    WB = [ sample[1], sample[2], sample[3] ]
-    
-    image[... ,0] = WB[0] * image[... ,0]
-    image[... ,1] = WB[1] * image[... ,1]
-    image[... ,2] = WB[2] * image[... ,2]
-
-    return image
-
-def bl_cd_pn(image, sample=False):
-    """ Apply black level with color distortion and poisson noise. """
-    
-    if not np.all(sample):
-        sample = valid_sample()
-
-    noise_param = 10
-
-    image = bl_cd(image, sample)
-
-    noise = lambda x : np.random.poisson(x / 255.0 * noise_param) / \
-        noise_param * 255
-
-    func = np.vectorize(noise)
-    image = func(image)
-    return image
-
-def bl_cd_pn_ag(image, sample=False):
-    """ 
-    Apply black level, color distortion, poisson noise, adjust gamma. 
-    """
-
-    if not np.all(sample):
-        sample = valid_sample()
-
-    image = bl_cd_pn(image, sample)
-    image = image**sample[4]
-    return image
 
 ##################################################
 # Model fitting, prediction, and review functions
@@ -219,7 +151,7 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
         logger.info("Wrote out review image: {}".format(img_pred_name))
 
     logger.info("FINISHED model diagnostics")
-
+ 
 def review_sony_model(results, imgnum):
 
     if imgnum > 0:
@@ -230,40 +162,22 @@ def run_simulation(fcov, fmean):
 
     logger.info("STARTED running simulations")
 
-    imgman = [
-        ('bl', bl),
-        ('bl_cd', bl_cd),
-        ('bl_cd_pn', bl_cd_pn),
-        ('bl_cd_pn_ag', bl_cd_pn_ag),
-    ]
+    imgnames = ['bl', 'bl_cd', 'bl_cd_pn', 'bl_cd_pn_ag']
 
     # We want to keep our data in memory if possible
     # because the data will otherwise need to be read
     # off disk (slow) for each model iteration.
     
-    # Dataset of 50,000 32x32 color training images, 
-    # labeled over 10 categories, and 10,000 test images.
-
-    (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-
-    Y_train = np.copy(X_train)
-    Y_test = np.copy(X_test)
-
     # Run model on each data augmentation scenario
 
-    for imgtup in imgman:
+    for imgname in imgnames:
 
-        imgname, imgfunc = imgtup
-
-        # Define the data flow for training and test 
-
-        datagen = ImageDataGenerator(preprocessing_function=imgfunc,
-                                     stride=5,
-                                     patch_size=(16,16),
-                                     target_size=(32,32,3))
-        datagen.fit(X_train)
-        #dataflow = datagen.flow(X_train, Y_train, batch_size=32)
-        dataflow = datagen.dirflow_raise(dirpath='foo', batch_size=512) 
+        # Define the data flow for training and test
+        datagen = ImageDataGenerator(preprocessing_function=imgname,
+                                     stride=128,
+                                     batch_size=64,
+                                     patch_size=512)
+       dataflow = datagen.dirflow_train_raise(dirpath='data')
 
         # Define model
 
