@@ -23,7 +23,9 @@ class ImageDataGenerator(object):
                  patch_size=None,
                  random_seed=None,
                  meanm_fpath='',
-                 covm_fpath=''
+                 covm_fpath='',
+                 image_dims=(32,32,3),
+                 num_images=10
     ):
         
         self.preprocessing_function = preprocessing_function
@@ -33,12 +35,14 @@ class ImageDataGenerator(object):
         self.random_seed = random_seed
         self.meanm = self.read_pickle(meanm_fpath)
         self.covm = self.read_pickle(covm_fpath)
+        self.num_images = num_images
 
         self.prepfuncs = {
             'bl': self.bl,
             'bl_cd': self.bl_cd,
             'bl_cd_pn': self.bl_cd_pn,
             'bl_cd_pn_ag': self.bl_cd_pn_ag,
+            'sony': None,
         }
 
         if preprocessing_function not in self.prepfuncs:
@@ -46,9 +50,13 @@ class ImageDataGenerator(object):
                             format(preprocessing_function))
 
     def read_pickle(self, fpath):
-        with open(fpath, "rb") as infile:
-            m = pickle.load(infile)
-        return m
+        try:
+            with open(fpath, "rb") as infile:
+                m = pickle.load(infile)
+            return m
+
+        except FileNotFoundError:
+            logger.warning("Filepath not set for pickle")
 
     def reformat_imgpath(self, img_path: str):
         rfmt = img_path[7:-4]
@@ -146,7 +154,7 @@ class ImageDataGenerator(object):
 
             yield np.array(batch)
 
-    def dirflow_train_raise(self, dirpath):
+    def _dirflow_train_val_raise(self, dirpath):
         """ Generator for RAISE dataset during training
 
         Equal batch sizes are generated during training except
@@ -199,6 +207,12 @@ class ImageDataGenerator(object):
             XY_batch = np.array(batch)
             yield XY_batch
 
+    def dirflow_train_raise(self, dirpath):
+        yield self._dirflow_train_val_raise(dirpath)
+
+    def dirflow_val_raise(self, dirpath):
+        yield self._dirflow_train_val_raise(dirpath)
+
     def dirflow_test_raise(self, dirpath):
         """ Generator for RAISE dataset during testing
 
@@ -206,7 +220,11 @@ class ImageDataGenerator(object):
         aren't effecting the loss function and need to stitch 
         the predicted image together for model review.
         """
-        fnames = os.listdir(dirpath)
+        fnames = np.array(os.listdir(dirpath))
+        np.random.seed(self.random_seed)
+        np.random.shuffle(fnames)
+        fnames = fnames[:self.num_images]
+        
         if len(fnames) == 0:
             raise TypeError("No file names found in directory")
         
@@ -235,7 +253,7 @@ class ImageDataGenerator(object):
 
                 uneven_batch.append((X_patch, Y_patch))
 
-            yield np.array(uneven_batch)
+            yield (np.array(uneven_batch), file_path)
 
     def valid_sample(self):
         np.random.seed(self.random_seed)
@@ -386,7 +404,7 @@ class ImageDataGenerator(object):
     
         return np.array(cropped_images)
     
-    def reconstruct_patches(self, patches, image_size, stride=1):
+    def reconstruct_patches(self, patches, image_size):
         i_h, i_w = image_size[:2]
         p_h, p_w = patches.shape[1:3]
         img = np.zeros(image_size)
@@ -394,8 +412,8 @@ class ImageDataGenerator(object):
 
         n_h = i_h - p_h + 1
         n_w = i_w - p_w + 1
-        for p, (i, j) in zip(patches, product(range(0, n_h, stride),
-                                              range(0, n_w, stride))):
+        for p, (i, j) in zip(patches, product(range(0, n_h, self.stride),
+                                              range(0, n_w, self.stride))):
             img_map[i:i + p_h, j:j + p_w] += 1
             img[i:i + p_h, j:j + p_w] += p
     
@@ -403,4 +421,7 @@ class ImageDataGenerator(object):
                          out=np.zeros_like(img, dtype=np.float32),
                          where=img_map!=0)
 
-
+    def image_to_arr(self, img_path):
+        img = kimg.load_img(img_path)
+        Y = img.img_to_array(img)
+        return Y

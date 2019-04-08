@@ -5,7 +5,6 @@ import os
 import logging
 from itertools import product
 
-import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import rawpy
@@ -35,7 +34,7 @@ def plot_loss(fpath, history):
     
     # Plot training & validation loss values
     plt.plot(history.history['loss'])
-    #plt.plot(history.history['val_loss'])
+    plt.plot(history.history['val_loss'])
     plt.title('Model loss')
     plt.ylabel('Loss')
     plt.xlabel('Epoch')

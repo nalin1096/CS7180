@@ -1,10 +1,8 @@
 # ninja log v5
-2	1026	1554514952068604844	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/custom_loss.pyi	a092981578912996
-0	1185	1554514952225825217	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/model02.pyi	64f5fb609a28d705
-1	1658	1554514952696865341	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/model_utils.pyi	76bfc234f3711001
-0	2003	1554515376552755980	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model022.pyi	465c5f8f453d639c
-0	2118	1554515500069030587	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model022.pyi	465c5f8f453d639c
-0	2051	1554515745392097216	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model022.pyi	465c5f8f453d639c
-0	2097	1554516084248626349	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model022.pyi	465c5f8f453d639c
-0	2097	1554516630726283543	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model022.pyi	465c5f8f453d639c
-0	3097	1554720919196338329	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/image_preprocessing.pyi	1c05a16934110760
+0	1468	1554732740979939449	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/model_utils.pyi	670a6d53c7e1f33f
+0	2844	1554732749426313917	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/image_preprocessing.pyi	1c05a16934110760
+1	1351	1554732757538216854	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/custom_loss.pyi	a092981578912996
+0	1488	1554732757655117736	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/model02.pyi	64f5fb609a28d705
+1	2140	1554732758318125437	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/model_utils.pyi	76bfc234f3711001
+2	3030	1554732759067847904	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/image_preprocessing.pyi	c59d3ef614e2f60d
+3030	5817	1554732761796648137	/Users/tylerbrown/projects/CS7180/lastmile/.pytype/pyi/train_model023.pyi	3453ac8f675242ef

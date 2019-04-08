@@ -1,6 +1,6 @@
 # (generated with --quick)
 
-from typing import Any
+from typing import Any, Dict
 
 Conv2D: Any
 Dense: Any
@@ -11,4 +11,4 @@ class LeakyReLU(Any):
     def __init__(self, **kwargs) -> None: ...
 
 
-def model02() -> Any: ...
+def model02() -> Dict[str, Any]: ...

@@ -23,7 +23,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
 from model02 import model02
-from model_utils import (enable_cloud_log, plot_images,
+from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
 from image_preprocessing import ImageDataGenerator
@@ -57,10 +57,16 @@ def callbacks(model_type):
 
     return callbacks
 
-def fit_model(dataflow, model, imgtup, model_id, lr=1e-3, epochs=100):
+def fit_model(train_dataflow, val_dataflow, mod, imgproc, lr, epochs):
     """ Fits model, Returns model and history keras objects. """
 
-    imgname, imgfun = imgtup
+    # Define model
+
+    model = mod.get('model', None)
+    model_id = mod.get('model_id', None)
+
+    if model is None:
+        raise TypeError("model must be defined: {}".format(model))
 
     # Compile model
     
@@ -72,9 +78,14 @@ def fit_model(dataflow, model, imgtup, model_id, lr=1e-3, epochs=100):
 
     # Fit model
 
-    model_type = '{}_{}'.format(model_id, imgname)
+    model_type = '{}_{}'.format(model_id, imgproc)
     calls = callbacks(model_type=model_type)
-    history = model.fit_generator(dataflow, epochs=epochs, callbacks=calls)
+    history = model.fit_generator(
+        generator=train_dataflow,
+        epochs=epochs,
+        callbacks=calls,
+        validation_data=val_dataflow
+    )
 
     return model, history
 
@@ -82,24 +93,24 @@ def fit_model_ngpus(X_train, Y_train, model, imgtup, lr=1e-3, epochs=100):
     """ Fits model with N GPUs, Returns model and history keras objects. """
     pass
 
-def model_predict(model, X_test, imgtup):
-    """ Returns y_pred """
+def model_predict(uneven_batch, file_path, datagen, model):
+    """ Predict patches from a single image then reconstruct that image. """
 
-    imgname, imgfunc = imgtup
+    patches = [pred for pred in model.predict_generator(uneven_batch)]
 
-    X_noise_test = imgfunc(X_test)
-    output = model.predict(X_noise_test)
-    
-    logger.debug("prediction output shape: {}".format(output.shape))
+    Y_true = datagen.image_to_arr(file_path)
+    Y_pred = datagen.reconstruct_patches(patches, image_size=Y_true.shape)
 
-    return output
-
-def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
+    return Y_pred, Y_true
+ 
+def review_model(test_dataflow, test_imgreview_dataflow, model, history,
+                 model_id, imgproc, datagen):
     """ Model diagnostics written to disk; performs prediction """
 
-    logger.info("STARTED model diagnostics")
+    model_name = '{}_{}'.format(model_id, imgproc)
+    datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    imgname, imgfunc = imgtup
+    logger.info("STARTED model diagnostics for '{}'".format(model_name))
 
     # Managing review directory
     
@@ -107,85 +118,113 @@ def review_model(X_test, Y_true, model, history, imgtup, num_images=10):
     if not os.path.isdir(review_dir):
         os.makedirs(review_dir)
 
-    # Prediction
+    # Report train/val loss vs. epochs
 
-    Y_pred = model_predict(model, X_test, imgtup)
+    if history is not None:
+        logger.info("Reporting train/val loss vs. epochs plot")
+        model_history_name = 'history_{}_{}.png'.format(model_name,
+                                                        datetime_now)
+        mh_filepath = os.path.join(review_dir, model_history_name)
+        plot_loss(mh_filepath, history)
 
-    # Output loss plot for model name
+    # Evaluate using test set
 
-    datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-    
-    model_history_name = 'history_{}_{}.png'.format(imgname, datetime_now)
-    mh_filepath = os.path.join(review_dir, model_history_name)
-    plot_loss(mh_filepath, history)
+    logger.info("Evaluating test set and generating report")
+    model.evaluate_generator(test_dataflow)
+    test_eval = str(model.metric_names)
+    test_eval_name = 'test_eval_{}_{}.txt'.format(model_name, datetime_now)
+    te_filepath = os.path.join(review_dir, test_eval_name)
+    with open(te_filepath, "w") as outfile:
+        outfile.write(test_eval)
 
-    logger.info("Wrote out model history loss plt: {}".\
-                format(model_history_name))
+    # Prediction and reconstrution of N images
 
-    # Output 'num_images' fmt: imgfunc(X_test), Y_pred, Y_true
+    logger.info("Predicting test image and generating review images")
+    for uneven_batch, file_path in test_imgreview_dataflow:
 
-    np.random.seed(0)
+        Y_pred, Y_true = model_predict(uneven_batch, file_path,
+                                       datagen, model)
 
-    y_pred_idx = np.array([i for i in range(Y_pred.shape[0])])
-    np.random.shuffle(y_pred_idx)
-
-    for i in range(num_images):
-
-        img_idx = y_pred_idx[i]
-
-        img_pred_name = 'img_pred_{}_idx_{}_{}.png'.\
-            format(imgname, img_idx, datetime_now)
+        img_pred_name = 'img_pred_{}_{}_{}.png'.\
+            format(model_id, imgproc, datetime_now)
         img_filepath = os.path.join(review_dir, img_pred_name)
         
-        plot_images(img_filepath, imgfunc(X_test[img_idx, ...]),
-                    Y_pred[img_idx, ...], Y_true[img_idx, ...])
-
+        plot_imgpair(Y_pred, Y_true, img_filepath)
         logger.info("Wrote out review image: {}".format(img_pred_name))
 
-    logger.info("FINISHED model diagnostics")
- 
-def review_sony_model(results, imgnum):
+    logger.info("FINISHED model diagnostics for '{}'".format(model_name))
 
-    if imgnum > 0:
-        pass
+def run_simulation(mod: dict):
+    """ Run models using data augmented with simulated images. 
+    
+    Arguments:
+        mod: output from a model function
 
-def run_simulation(fcov, fmean):
-    """ Run models using data augmented with simulated images. """
-
+    Returns:
+        Runs through training, validation, and testing for a given
+        model using all data augmentation functions. Reports model 
+        diagnostics for each data augmentation function. Checkpoints
+        the given model using <model_id> and data augmentation function
+        name <imgproc> using subfolders within a 'saved_models' directory.
+        Output comparisons use the same subfolders and are located in 
+        the 'reviews' directory.
+    """
     logger.info("STARTED running simulations")
 
     imgnames = ['bl', 'bl_cd', 'bl_cd_pn', 'bl_cd_pn_ag']
-
-    # We want to keep our data in memory if possible
-    # because the data will otherwise need to be read
-    # off disk (slow) for each model iteration.
     
     # Run model on each data augmentation scenario
 
-    for imgname in imgnames:
+    for imgproc in imgnames:
 
-        # Define the data flow for training and test
-        datagen = ImageDataGenerator(preprocessing_function=imgname,
+        # Define the data flow for training, validation, and test sets
+        
+        datagen = ImageDataGenerator(preprocessing_function=imgproc,
                                      stride=128,
-                                     batch_size=64,
-                                     patch_size=512)
-       dataflow = datagen.dirflow_train_raise(dirpath='data')
+                                     batch_size=32,
+                                     patch_size=512,
+                                     random_seed=42,
+                                     meanm_fpath='simulation_mean.pkl',
+                                     covm_fpath='simulation_cov.pkl',
+                                     num_images=10
+        )
+
+        train_dataflow = datagen.dirflow_train_raise(
+            dirpath='raise/rgb/train/'
+        )
+
+        val_dataflow = datagen.dirflow_val_raise(
+            dirpath='raise/rgb/val/'
+        )
 
         # Define model
 
-        mod = model02()
         model = mod.get('model', None)
         model_id = mod.get('model_id', None)
-        logger.info("Processing model: {}".format(imgname))
+
+        if model is None or model_id is None:
+            raise TypeError("model or model_id not defined: {}".\
+                            format(model_id))
+        
+        logger.info("Processing model: {}".format(imgproc))
 
         # Fit model
 
-        model, history = fit_model(dataflow, model, imgtup, model_id,
-                                   lr=1e-3, epochs=100)
+        model, history = fit_model(train_dataflow, val_dataflow, mod,
+                                   imgproc, lr=1e-3, epochs=100)
 
-        # Review model (we'll need to modify this with larger test data)
+        # Review model
 
-        review_model(X_test, Y_test, model, history, imgtup, num_images=10)
+        test_dataflow = datagen.dirflow_val_raise(
+            dirpath='raise/rgb/test/'
+        )
+
+        test_imgreview_dataflow = datagen.dirflow_test_raise(
+            dirpath='raise/rgb/test/'
+        )
+
+        review_model(test_dataflow, test_imgreview_dataflow, model,
+                     history, model_id, imgproc, datagen)
 
         # Reset model and history
 
@@ -194,33 +233,45 @@ def run_simulation(fcov, fmean):
 
     logger.info("FINISHED running simulations")
 
-def run_sony_images(model, model_type):
+def run_sony_images(mod, model_name):
 
     logger.info("STARTED running sony images")
+
+    # Loading saved weights to model
+
+    model = mod.get('model', None)
+
+    if model is None:
+        raise TypeError("model must be defined: {}".format(model))
     
-    save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
+    save_dir = os.path.join(os.getcwd(), 'saved_models', model_name)
     model.load_weights(save_dir)
     model.summary()
 
-    # Load data as generator and take patch size
+    # Training model
+    # TODO: freeze layers and train model using sony images
 
-    X_test_datagen = ImageDataGenerator(preprocessing_function=create_patch)
-    X_test_dataflow = X_test_datagen.flow_from_directory(
-        'data/sony/test/short',
-        target_size=(256,256,3),
-        batch_size=32
+    datagen = ImageDataGenerator(preprocessing_function='sony',
+                                     stride=128,
+                                     batch_size=32,
+                                     patch_size=512,
+                                     random_seed=42,
+                                     num_images=10
     )
-    Y_test_datagen = ImageDataGenerator()
-    Y_test_dataflow = Y_test_datagen.flow_from_directory(
-        'data/sony/test/long',
-        target_size=(256,256,3),
-        batch_size=32
-    )
-    test_dataflow = zip(X_test_dataflow, Y_test_dataflow)
 
-    evaluation = model.evaluate_generator(test_dataflow, verbose=1)
-    #results = model.predict_generator(test_dataflow)
-    #review_sony_model(results)
+    # Review model
+
+    test_dataflow = datagen.dirflow_val_sony(
+        sony_val_list='dataset/Sony_test_list.txt'
+    )
+
+    test_imgreview_dataflow = datagen.dirflow_test_sony(
+        sony_test_list='dataset/Sony_test_list.txt'
+    )
+
+    review_model(test_dataflow, test_imgreview_dataflow, model,
+                 history=None, model_id=model_name, imgproc='bl_cd_pn_ag',
+                 datagen=datagen)
 
     logger.info("FINISHED running sony images")
 
@@ -230,30 +281,25 @@ def run_sony_images(model, model_type):
 
 def main():
     """ Main function to run training and prediction. """
-    
-    run_simulation(fcov, fmean)
 
     mod = model02()
-    model = mod.get('model', None)
-    model_id = mod.get('model_id', None)
-    imgname = 'bl_cd_pn_ag'
-    model_type = '{}_{}'.format(model_id, imgname)
+    run_simulation(mod)
 
-    run_sony_images(model, model_type)
+    mod = model02()
+    model_id = mod.get('model_id', None)
+    imgproc = 'bl_cd_pn_ag'
+    model_name = '{}_{}'.format(model_id, imgproc)
+    run_sony_images(mod, model_name)
 
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """
     pass
 
 
-if __name__ == "__main__":
+#######################################################
+# Running train_model script, Jupyter Notebook config
+#######################################################
 
-    enable_cloud_log('DEBUG')
+enable_cloud_log('DEBUG')
+main()
 
-    # Run simulation
-    
-    fcov = "simulation_cov.pkl"
-    fmean = "simulation_mean.pkl"
-
-    COVM = read_pickle(fcov)
-    MEANM = read_pickle(fmean)

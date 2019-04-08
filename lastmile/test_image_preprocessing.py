@@ -57,5 +57,3 @@ class TestImageDataGenerator(unittest.TestCase):
 
         assert output[0] == ('Sony/rgb/short/20211_00_0.1s.png',
                              'Sony/rgb/long/20211_00_10s.png')
-
-
