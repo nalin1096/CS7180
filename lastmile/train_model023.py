@@ -30,14 +30,6 @@ from image_preprocessing import ImageDataGenerator
 
 logger = logging.getLogger(__name__)
 
-#####################
-# Helper functions
-#####################
-
-def read_pickle(fpath):
-    with open(fpath, "rb") as infile:
-        m = pickle.load(infile)
-    return m
 
 ##################################################
 # Model fitting, prediction, and review functions

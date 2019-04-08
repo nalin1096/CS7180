@@ -2,8 +2,14 @@
 Handle image preprocessing tasks
 """
 import logging
+import os
+import pickle
+from urllib.parse import urljoin
 
+from itertools import product
 import numpy as np
+from numpy.lib.stride_tricks import as_strided
+from tensorflow.keras.preprocessing import image as kimg
 
 
 logger = logging.getLogger(__name__)
@@ -14,12 +20,19 @@ class ImageDataGenerator(object):
                  preprocessing_function=None,
                  stride=1,
                  batch_size=32,
-                 patch_size=None)
+                 patch_size=None,
+                 random_seed=None,
+                 meanm_fpath='',
+                 covm_fpath=''
+    ):
         
         self.preprocessing_function = preprocessing_function
         self.stride = stride
         self.batch_size = batch_size
         self.patch_size = patch_size
+        self.random_seed = random_seed
+        self.meanm = self.read_pickle(meanm_fpath)
+        self.covm = self.read_pickle(covm_fpath)
 
         self.prepfuncs = {
             'bl': self.bl,
@@ -32,19 +45,34 @@ class ImageDataGenerator(object):
             raise TypeError("preprocessing function not available: {}".\
                             format(preprocessing_function))
 
+    def read_pickle(self, fpath):
+        with open(fpath, "rb") as infile:
+            m = pickle.load(infile)
+        return m
+
+    def reformat_imgpath(self, img_path: str):
+        rfmt = img_path[7:-4]
+        rfmt = 'Sony/rgb/' + rfmt + ".png"
+        return rfmt
+
     def parse_sony_list(self, sony_list: str):
         try:
             with open(sony_list, "r") as infile:
                 sony_pairs = infile.readlines()
 
+            np.random.seed(self.random_seed)
             np.random.shuffle(sony_pairs)
 
             pairs = []
             for idx, pair in enumerate(sony_pairs):
 
-                shrt, lng, = pair.split(" ")
+                items = pair.strip().split(" ")
 
-                pairs.append((shrt, lng))
+                if len(items) != 4:
+                    raise TypeError("Corrupted list: {}".format(sony_list))
+
+                pairs.append((self.reformat_imgpath(items[0]),
+                              self.reformat_imgpath(items[1])))
 
             return pairs
 
@@ -52,18 +80,15 @@ class ImageDataGenerator(object):
             logger.exception(exc)
             raise exc
 
-    def _train_val_sony(self, dirpath: str, sony_list: str):
+    def _train_val_sony(self, sony_list: str):
         sony_pairs = self.parse_sony_list(sony_list)
         
         batch = []
         batch_count = 0
-        for X_file_name, Y_file_name in sony_pairs:
+        for X_file_path, Y_file_path in sony_pairs:
 
-            X_file_path = urljoin(dirpath, X_file_name)
-            Y_file_path = urljoin(dirpath, Y_file_name)
-
-            X_img = image.load_img(X_file_path)
-            Y_img = image.load_img(Y_file_path)
+            X_img = kimg.load_img(X_file_path)
+            Y_img = kimg.load_img(Y_file_path)
 
             X = X_img.img_to_array(X_img)
             Y = Y_img.img_to_array(Y_img)
@@ -98,17 +123,14 @@ class ImageDataGenerator(object):
         """ Yield train set for sony. """
         yield self._train_val_sony(sony_train_list)
 
-    def dirflow_test_sony(self, dirpath, sony_test_list):
+    def dirflow_test_sony(self, sony_test_list):
         """ We want uneven batch sizes so the image can be patched back. """
         sony_pairs = self.parse_sony_list(sony_test_list)
 
-        for X_file_name, Y_file_name in sony_pairs:
+        for X_file_path, Y_file_path in sony_pairs:
 
-            X_file_path = urljoin(dirpath, X_file_name)
-            Y_file_path = urljoin(dirpath, Y_file_name)
-
-            X_img = image.load_img(X_file_path)
-            Y_img = image.load_img(Y_file_path)
+            X_img = kimg.load_img(X_file_path)
+            Y_img = kimg.load_img(Y_file_path)
 
             X = X_img.img_to_array(X_img)
             Y = Y_img.img_to_array(Y_img)
@@ -140,7 +162,7 @@ class ImageDataGenerator(object):
         for file_name in fnames:
             
             file_path = urljoin(dirpath, file_name)
-            img = image.load_img(file_path)
+            img = kimg.load_img(file_path)
 
             Y = img.img_to_array(img)
 
@@ -177,7 +199,7 @@ class ImageDataGenerator(object):
             XY_batch = np.array(batch)
             yield XY_batch
 
-    def dirflow_test_raise(self. dirpath):
+    def dirflow_test_raise(self, dirpath):
         """ Generator for RAISE dataset during testing
 
         Here we don't care about the batch size because we
@@ -192,7 +214,7 @@ class ImageDataGenerator(object):
 
             uneven_batch = []
             file_path = urljoin(dirpath, file_name)
-            img = image.load_img(file_path)
+            img = kimg.load_img(file_path)
 
             Y = img.img_to_array(img)
 
@@ -216,10 +238,11 @@ class ImageDataGenerator(object):
             yield np.array(uneven_batch)
 
     def valid_sample(self):
+        np.random.seed(self.random_seed)
         sample = [-1, -1, -1, -1, -1]   # Make sure sample isn't negative
         while not(sample[0]>0 and sample[1]>0 and sample[2]>0 \
                   and sample[3]>0 and sample[4]>0):
-                sample = np.random.multivariate_normal(MEANM, COVM)
+                sample = np.random.multivariate_normal(self.meanm, self.covm)
         return sample
 
     def bl(self, image, sample=False):
@@ -238,7 +261,7 @@ class ImageDataGenerator(object):
         if not np.all(sample):
             sample = self.valid_sample()
 
-        image = bl(image, sample)
+        image = self.bl(image, sample)
 
         WB = [ sample[1], sample[2], sample[3] ]
     
@@ -256,8 +279,9 @@ class ImageDataGenerator(object):
 
         noise_param = 10
 
-        image = bl_cd(image, sample)
+        image = self.bl_cd(image, sample)
 
+        np.random.seed(self.random_seed)
         noise = lambda x : np.random.poisson(x / 255.0 * noise_param) / \
             noise_param * 255
 
@@ -273,13 +297,12 @@ class ImageDataGenerator(object):
         if not np.all(sample):
             sample = self.valid_sample()
 
-        image = bl_cd_pn(image, sample)
+        image = self.bl_cd_pn(image, sample)
         image = image**sample[4]
         return image
 
 
-    def extract_patches(self, data, patch_size, stride = 1,
-                         random_state=None):
+    def extract_patches(self, data):
     
         def _compute_n_patches(i_h, i_w, p_h, p_w):
 
@@ -292,7 +315,7 @@ class ImageDataGenerator(object):
         def get_patches(arr, patch_shape):
             arr_ndim = arr.ndim
 
-            extraction_step = tuple([stride] * arr_ndim)
+            extraction_step = tuple([self.stride] * arr_ndim)
 
             patch_strides = arr.strides
 
@@ -311,7 +334,7 @@ class ImageDataGenerator(object):
 
         def _ex_pt(image):
             i_h, i_w = image.shape[:2]
-            p_h, p_w = patch_size
+            p_h, p_w = self.patch_size
 
             image = image.reshape((i_h, i_w, -1))
             n_colors = image.shape[-1]
@@ -330,7 +353,6 @@ class ImageDataGenerator(object):
             else:
                 return patches
 
-
         batch = data.shape[0]
         pair = data.shape[1]
     
@@ -338,8 +360,8 @@ class ImageDataGenerator(object):
         for idx in range(batch):
             image_patches.extend(np.array(list(map(_ex_pt,
                                                    data[idx]))).\
-                                 reshape((-1, pair, patch_size[0],
-                                          patch_size[1], 3)))
+                                 reshape((-1, pair, self.patch_size[0],
+                                          self.patch_size[1], 3)))
     
         return np.array(image_patches)
 
@@ -350,7 +372,7 @@ class ImageDataGenerator(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
-        return img[:crop_h, :crop_w]
+        return image[:crop_h, :crop_w]
 
 
     def crop_images(self, data):
