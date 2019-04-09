@@ -182,7 +182,7 @@ def run_simulation(mod: dict):
         # KEEP these params
         idp = ImageDataPipeline(preprocessing_function=imgproc,
                                     stride=128,
-                                    batch_size=30, # KEEP % 15
+                                    batch_size=1, # KEEP % 15
                                     patch_size=(256,256),
                                     random_seed=42,
                                     meanm_fpath='simulation_mean.pkl',
@@ -216,16 +216,16 @@ def run_simulation(mod: dict):
 
         # Review model
 
-        test_dataflow = datagen.dirflow_val_raise(
-            dirpath='raise/rgb/test/'
-        )
+        #test_dataflow = datagen.dirflow_val_raise(
+        #    dirpath='raise/rgb/test/'
+        #)
 
-        test_imgreview_dataflow = datagen.dirflow_test_raise(
-            dirpath='raise/rgb/test/'
-        )
+        #test_imgreview_dataflow = datagen.dirflow_test_raise(
+        #    dirpath='raise/rgb/test/'
+        #)
 
-        review_model(test_dataflow, test_imgreview_dataflow, model,
-                     history, model_id, imgproc, datagen)
+        #review_model(test_dataflow, test_imgreview_dataflow, model,
+        #             history, model_id, imgproc, datagen)
 
         # Reset model and history
 
@@ -290,7 +290,8 @@ def main():
     model_id = mod.get('model_id', None)
     imgproc = 'bl_cd_pn_ag'
     model_name = '{}_{}'.format(model_id, imgproc)
-    run_sony_images(mod, model_name)
+    model.summary()
+    #run_sony_images(mod, model_name)
 
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """

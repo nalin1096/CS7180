@@ -364,6 +364,14 @@ class RiseDataGenerator(Sequence):
         item = (np.array(X_batch), np.array(Y_batch))
         return item
 
+    def __iter__(self):
+        logger.debug("len of self: {}".format(len(self)))
+        for item in (self[i] for i in range(len(self))):
+            logger.debug("item type from dunder iter: {}".format(type(item)))
+
+            if item[0].shape[0] != 0:
+                yield item
+
 class SonyDataGenerator(Sequence):
 
     def __init__(self):
