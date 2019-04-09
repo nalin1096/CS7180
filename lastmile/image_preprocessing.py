@@ -144,61 +144,22 @@ class ImageDataPipeline(object):
 
             yield np.array(batch)
 
-    def rise_pipeline(self, Y_filepath):
-        """ Pipeline for creating X,Y pair. """
-        Y = cv2.imread(Y_filepath)
+    def raise_pipeline(self, Y):
 
-    def _dirflow_train_val_raise(self, dirpath):
-        """ Generator for RAISE dataset during training
-
-        Equal batch sizes are generated during training except
-        for the last one.
-        """
-        fnames = os.listdir(dirpath)
-
-        if len(fnames) == 0:
-            raise TypeError("No file names found in directory")
-
-        batch = []
-        batch_count = 0
-        for file_name in fnames:
-            
-            file_path = urljoin(dirpath, file_name)
-            Y = cv2.imread(file_path)
-
-            # Crop each image, do not resize
+        # Crop each image, do not resize
                 
-            Y = self.crop(Y)
+        Y = self.crop(Y)
 
-            # Extract patches from each image
+        # Extract patches from each image
 
-            for Y_patch in self.extract_patches(Y):
+        logger.debug("Y shape: {}".format(Y.shape))
+        for Y_patch in self.extract_patches(Y):
 
-                # Apply relevant noise function
+            # Apply relevant noise function
 
-                X_patch = np.copy(Y_patch)
-
-                X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
-
-                if batch_count < self.batch_size:
-
-                    batch.append((X_patch, Y_patch))
-                    batch_count += 1
-
-                else:
-                    XY_batch = np.array(batch)
-                    yield XY_batch
-
-                    batch = []
-                    batch.append((X_patch, Y_patch))
-                    batch_count = 1
-
-        # Final batch includes all remaining patches
-
-        if len(batch) > 0:
-            XY_batch = np.array(batch)
-            yield XY_batch
-
+            X_patch = np.copy(Y_patch)
+            X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
+            yield (X_patch, Y_patch)
 
     def valid_sample(self):
         np.random.seed(self.random_seed)
@@ -372,32 +333,33 @@ class ImageDataPipeline(object):
 
 class RiseDataGenerator(Sequence):
     
-    def __init__(self, x_set, y_set, idp):
-        self.x, self.y = x_set, y_set
-        self.batch_size = self.idp.batch_size
+    def __init__(self, y_set, idp):
+        self.y = y_set
+        self.batch_size = idp.batch_size
         self.idp = idp
         
     def __len__(self):
-        return math.ceil(len(self.x) / self.batch_size)
+        # ASSUMES image size is (512,512), stride is 128
+        return math.ceil(len(self.y) * 15 / self.batch_size)
 
     def __getitem__(self, idx):
-        batch_x = self.x[idx * self.batch_size:(idx + 1) *
-                         self.batch_size]
         batch_y = self.y[idx * self.batch_size:(idx + 1) *
                          self.batch_size]
+        X_batch = []
+        Y_batch = []
+        for Y_filepath in batch_y:
 
-        for file_name in batch_x:
+            Y = cv2.imread(Y_filepath)
 
-            
+            for X_patch, Y_patch in self.idp.raise_pipeline(Y):
 
-        
-        
-        
-        return np.array([
-            resize(imread(file_name), (200, 200))
-            for file_name in batch_x]), np.array(batch_y)
+                X_batch.append(X_patch)
+                Y_batch.append(Y_patch)
 
-class SonyDataGenerator(Sequence, ImageDataGenerator):
+        item = (np.array(X_batch), np.array(Y_batch))
+        return item
+
+class SonyDataGenerator(Sequence):
 
     def __init__(self):
         pass

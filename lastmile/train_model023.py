@@ -26,7 +26,7 @@ from model02 import model02
 from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
-from image_preprocessing import ImageDataGenerator
+from image_preprocessing import (ImageDataPipeline, RiseDataGenerator)
 
 logger = logging.getLogger(__name__)
 
@@ -178,24 +178,25 @@ def run_simulation(mod: dict):
     for imgproc in imgnames:
 
         # Define the data flow for training, validation, and test sets
-        
-        datagen = ImageDataGenerator(preprocessing_function=imgproc,
-                                     stride=128,
-                                     batch_size=32,
-                                     patch_size=512,
-                                     random_seed=42,
-                                     meanm_fpath='simulation_mean.pkl',
-                                     covm_fpath='simulation_cov.pkl',
-                                     num_images=10
+
+        # KEEP these params
+        idp = ImageDataPipeline(preprocessing_function=imgproc,
+                                    stride=128,
+                                    batch_size=30, # KEEP % 15
+                                    patch_size=(256,256),
+                                    random_seed=42,
+                                    meanm_fpath='simulation_mean.pkl',
+                                    covm_fpath='simulation_cov.pkl',
+                                    num_images=10
         )
 
-        train_dataflow = datagen.dirflow_train_raise(
-            dirpath='raise/rgb/train/'
-        )
+        train_dir = 'raise/rgb/train/'
+        y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
+        train_dataflow = RiseDataGenerator(y_train_set, idp)
 
-        val_dataflow = datagen.dirflow_val_raise(
-            dirpath='raise/rgb/val/'
-        )
+        val_dir = 'raise/rgb/train/'
+        y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
+        val_dataflow = RiseDataGenerator(y_train_set, idp)
 
         # Define model
 
