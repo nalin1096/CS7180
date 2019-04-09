@@ -183,9 +183,9 @@ def run_simulation(mod: dict):
 
         # KEEP these params
         idp = ImageDataPipeline(preprocessing_function=imgproc,
-                                    stride=128,
+                                    stride=256,
                                     batch_size=1, # KEEP % 15
-                                    patch_size=(256,256),
+                                    patch_size=(512,512),
                                     random_seed=42,
                                     meanm_fpath='simulation_mean.pkl',
                                     covm_fpath='simulation_cov.pkl',
