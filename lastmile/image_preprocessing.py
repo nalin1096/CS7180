@@ -346,7 +346,7 @@ class RiseDataGenerator(Sequence):
         
     def __len__(self):
         # ASSUMES image size is (512,512), stride is 128
-        return int(np.ceil(len(self.y) * 15 / float(self.batch_size)))
+        return int(np.ceil(len(self.y)  / float(self.batch_size)))
 
     def __getitem__(self, idx):
         batch_y = self.y[idx * self.batch_size:(idx + 1) *
