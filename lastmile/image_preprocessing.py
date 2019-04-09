@@ -123,13 +123,6 @@ class ImageDataPipeline(object):
         if len(batch) > 0:
             yield np.array(batch)
 
-    def dirflow_val_sony(self, sony_val_list: str):
-        """ Yield validation set for sony. """
-        return self._train_val_sony(sony_val_list)
-
-    def dirflow_train_sony(self, sony_train_list: str):
-        """ Yield train set for sony. """
-        return self._train_val_sony(sony_train_list)
 
     def dirflow_test_sony(self, sony_test_list):
         """ We want uneven batch sizes so the image can be patched back. """
@@ -150,6 +143,10 @@ class ImageDataPipeline(object):
                 batch.append((X_patch, Y_patch))
 
             yield np.array(batch)
+
+    def rise_pipeline(self, Y_filepath):
+        """ Pipeline for creating X,Y pair. """
+        Y = cv2.imread(Y_filepath)
 
     def _dirflow_train_val_raise(self, dirpath):
         """ Generator for RAISE dataset during training
@@ -202,51 +199,6 @@ class ImageDataPipeline(object):
             XY_batch = np.array(batch)
             yield XY_batch
 
-    def dirflow_train_raise(self, dirpath):
-        yield self._dirflow_train_val_raise(dirpath)
-
-    def dirflow_val_raise(self, dirpath):
-        yield self._dirflow_train_val_raise(dirpath)
-
-    def dirflow_test_raise(self, dirpath):
-        """ Generator for RAISE dataset during testing
-
-        Here we don't care about the batch size because we
-        aren't effecting the loss function and need to stitch 
-        the predicted image together for model review.
-        """
-        fnames = np.array(os.listdir(dirpath))
-        np.random.seed(self.random_seed)
-        np.random.shuffle(fnames)
-        fnames = fnames[:self.num_images]
-        
-        if len(fnames) == 0:
-            raise TypeError("No file names found in directory")
-        
-        for file_name in fnames:
-
-            uneven_batch = []
-            file_path = urljoin(dirpath, file_name)
-            Y = cv2.imread(file_path)
-
-            # Crop each image, do not resize
-                
-            Y = self.crop(Y)
-
-            # Extract patches from each image
-
-            uneven_batch = []
-            for Y_patch in self.extract_patches(Y):
-
-                # Apply relevant noise function
-
-                X_patch = np.copy(Y_patch)
-
-                X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
-
-                uneven_batch.append((X_patch, Y_patch))
-
-            yield (np.array(uneven_batch), file_path)
 
     def valid_sample(self):
         np.random.seed(self.random_seed)
@@ -433,6 +385,10 @@ class RiseDataGenerator(Sequence):
                          self.batch_size]
         batch_y = self.y[idx * self.batch_size:(idx + 1) *
                          self.batch_size]
+
+        for file_name in batch_x:
+
+            
 
         
         
