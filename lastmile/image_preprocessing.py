@@ -17,7 +17,7 @@ from tensorflow.keras.utils import Sequence
 logger = logging.getLogger(__name__)
 
 
-class ImageDataGenerator(object):
+class ImageDataPipeline(object):
 
     def __init__(self, 
                  preprocessing_function=None,
@@ -418,10 +418,28 @@ class ImageDataGenerator(object):
         return Y
 
 
-class RiseDataGenerator(Sequence, ImageDataGenerator):
+class RiseDataGenerator(Sequence):
+    
+    def __init__(self, x_set, y_set, idp):
+        self.x, self.y = x_set, y_set
+        self.batch_size = self.idp.batch_size
+        self.idp = idp
+        
+    def __len__(self):
+        return math.ceil(len(self.x) / self.batch_size)
 
-    def __init__(self):
-        pass
+    def __getitem__(self, idx):
+        batch_x = self.x[idx * self.batch_size:(idx + 1) *
+                         self.batch_size]
+        batch_y = self.y[idx * self.batch_size:(idx + 1) *
+                         self.batch_size]
+
+        
+        
+        
+        return np.array([
+            resize(imread(file_name), (200, 200))
+            for file_name in batch_x]), np.array(batch_y)
 
 class SonyDataGenerator(Sequence, ImageDataGenerator):
 
