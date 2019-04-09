@@ -257,7 +257,7 @@ def run_sony_images(mod, model_name):
     datagen = ImageDataGenerator(preprocessing_function='sony',
                                      stride=128,
                                      batch_size=32,
-                                     patch_size=512,
+                                     patch_size=(256, 256),
                                      random_seed=42,
                                      num_images=10
     )

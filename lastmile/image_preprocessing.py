@@ -302,7 +302,8 @@ class ImageDataPipeline(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
-        return image[:512, :512] #TODO: hard coded dims
+        return image[:crop_h, :crop_w]
+        # return image[:512, :512] #TODO: hard coded dims
 
 
     def crop_images(self, data):
