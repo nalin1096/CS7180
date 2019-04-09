@@ -95,18 +95,21 @@ def fit_model_ngpus(X_train, Y_train, model, imgtup, lr=1e-3, epochs=100):
     """ Fits model with N GPUs, Returns model and history keras objects. """
     pass
 
-def model_predict(uneven_batch, file_path, datagen, model):
+def model_predict(test_imgreview_dataflow, model, idp, Y_true_fpath):
     """ Predict patches from a single image then reconstruct that image. """
 
-    patches = [pred for pred in model.predict_generator(uneven_batch)]
+    patches = [pred for pred in
+               model.predict_generator(test_imgreview_dataflow)]
 
-    Y_true = datagen.image_to_arr(file_path)
-    Y_pred = datagen.reconstruct_patches(patches, image_size=Y_true.shape)
+    Y_true = cv2.imread(file_path)
+    Y_pred = image_data_pipeline.reconstruct_patches(
+        patches, image_size=Y_true.shape
+    )
 
     return Y_pred, Y_true
  
-def review_model(test_dataflow, test_imgreview_dataflow, model, history,
-                 model_id, imgproc, datagen):
+def review_model(test_dataflow, test_imgreview, model, history,
+                 model_id, imgproc, image_data_pipeline):
     """ Model diagnostics written to disk; performs prediction """
 
     model_name = '{}_{}'.format(model_id, imgproc)
@@ -132,8 +135,8 @@ def review_model(test_dataflow, test_imgreview_dataflow, model, history,
     # Evaluate using test set
 
     logger.info("Evaluating test set and generating report")
-    model.evaluate_generator(test_dataflow)
-    test_eval = str(model.metric_names)
+    evaluate = model.evaluate_generator(test_dataflow)
+    test_eval = str(model.metrics_names) + str(evaluate)
     test_eval_name = 'test_eval_{}_{}.txt'.format(model_name, datetime_now)
     te_filepath = os.path.join(review_dir, test_eval_name)
     with open(te_filepath, "w") as outfile:
@@ -142,13 +145,16 @@ def review_model(test_dataflow, test_imgreview_dataflow, model, history,
     # Prediction and reconstrution of N images
 
     logger.info("Predicting test image and generating review images")
-    for uneven_batch, file_path in test_imgreview_dataflow:
 
-        Y_pred, Y_true = model_predict(uneven_batch, file_path,
-                                       datagen, model)
+    for file_path in test_imgreview:
 
-        img_pred_name = 'img_pred_{}_{}_{}.png'.\
-            format(model_id, imgproc, datetime_now)
+        y_test_set = [file_path]
+        test_imgreview_dataflow = RaiseDataGenerator(y_test_set, idp)
+
+        Y_pred, Y_true = model_predict(test_imgreview_dataflow, model,
+                                       idp, Y_true_fpath=file_path)
+                                       
+        img_pred_name = 'img_pred_{}_{}.png'.format(model_name, datetime_now)
         img_filepath = os.path.join(review_dir, img_pred_name)
         
         plot_imgpair(Y_pred, Y_true, img_filepath)
@@ -217,16 +223,16 @@ def run_simulation(mod: dict):
 
         # Review model
 
-        #test_dataflow = datagen.dirflow_val_raise(
-        #    dirpath='raise/rgb/test/'
-        #)
+        test_dir = 'raise/rgb/test/'
+        y_test_set = [urljoin(test_dir, f) for f in os.listdir(test_dir)]
+        test_dataflow = RaiseDataGenerator(y_test_set, idp)
 
-        #test_imgreview_dataflow = datagen.dirflow_test_raise(
-        #    dirpath='raise/rgb/test/'
-        #)
+        test_imgreview_dir = 'raise/rgb/test/'
+        test_imgreview = [urljoin(test_imgreview_dir, f)
+                          for f in os.listdir(test_imgreview_dir)]
 
-        #review_model(test_dataflow, test_imgreview_dataflow, model,
-        #             history, model_id, imgproc, datagen)
+        review_model(test_dataflow, test_imgreview, model, history,
+                     model_id, imgproc, idp)
 
         # Reset model and history
 
@@ -266,17 +272,17 @@ def run_sony_images(mod, model_name):
     # Review model
 
     
-    test_dataflow = datagen.dirflow_val_sony(
-        sony_val_list='dataset/Sony_test_list.txt'
-    )
+    #test_dataflow = datagen.dirflow_val_sony(
+    #    sony_val_list='dataset/Sony_test_list.txt'
+    #)
 
-    test_imgreview_dataflow = datagen.dirflow_test_sony(
-        sony_test_list='dataset/Sony_test_list.txt'
-    )
+    #test_imgreview_dataflow = datagen.dirflow_test_sony(
+    #    sony_test_list='dataset/Sony_test_list.txt'
+    #)
 
-    review_model(test_dataflow, test_imgreview_dataflow, model,
-                 history=None, model_id=model_name, imgproc='bl_cd_pn_ag',
-                 datagen=datagen)
+    #review_model(test_dataflow, test_imgreview_dataflow, model,
+    #             history=None, model_id=model_name, imgproc='bl_cd_pn_ag',
+    #             image_data_pipeline=idp)
 
     logger.info("FINISHED running sony images")
 

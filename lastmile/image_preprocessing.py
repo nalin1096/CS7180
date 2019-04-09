@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
+import rawpy
 from tensorflow.keras.utils import Sequence
 
 
@@ -60,7 +61,7 @@ class ImageDataPipeline(object):
 
         except FileNotFoundError:
             logger.warning("Filepath not set for pickle")
-
+        
     def reformat_imgpath(self, img_path: str):
         rfmt = img_path[7:-4]
         rfmt = 'Sony/rgb/' + rfmt + ".png"
@@ -90,6 +91,16 @@ class ImageDataPipeline(object):
         except Exception as exc:
             logger.exception(exc)
             raise exc
+
+    def process_sony_list(self, sony_list: str):
+        pass
+    
+    def convert_sony(self, sony_lists: list, infolder: str, outfolder: str):
+        """ Convert RAW Sony images to RGB. """
+
+        for sony_list in sony_lists:
+            self.parse_sony_list(sony_list)
+
 
     def _train_val_sony(self, sony_list: str):
         sony_pairs = self.parse_sony_list(sony_list)
