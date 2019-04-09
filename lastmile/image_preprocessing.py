@@ -149,6 +149,7 @@ class ImageDataPipeline(object):
         # Crop each image, do not resize
                 
         Y = self.crop(Y)
+        logger.debug("Y crop dimensions: {}".format(Y.shape))
 
         # Extract patches from each image
 
@@ -256,6 +257,7 @@ class ImageDataPipeline(object):
             return patches
 
         def _ex_pt(image):
+            logger.debug("img shape: {}".format(image[0].shape))
             i_h, i_w = image.shape[:2]
             p_h, p_w = self.patch_size
 
@@ -278,16 +280,18 @@ class ImageDataPipeline(object):
 
         batch = data.shape[0]
         pair = data.shape[1]
-    
-        image_patches = []
-        for idx in range(batch):
-            image_patches.extend(np.array(list(map(_ex_pt,
-                                                   data[idx]))).\
-                                 reshape((-1, pair, self.patch_size[0],
-                                          self.patch_size[1], 3)))
-    
-        return np.array(image_patches)
 
+        logger.debug("shape of data: {}".format(data.shape))
+        #image_patches = []
+        #for idx in range(batch):
+        #    image_patches.extend(np.array(list(map(_ex_pt,
+        #                                           data[idx]))).\
+        #                         reshape((-1, pair, self.patch_size[0],
+        #                                  self.patch_size[1], 3)))
+        #
+        #return np.array(image_patches)
+        return _ex_pt(data)
+    
     def crop(self, image):
         i_h, i_w = image.shape[:2]
         p_h, p_w = self.patch_size
@@ -295,7 +299,7 @@ class ImageDataPipeline(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
-        return image[:crop_h, :crop_w]
+        return image[:512, :512] #TODO: hard coded dims
 
 
     def crop_images(self, data):
@@ -350,6 +354,7 @@ class RiseDataGenerator(Sequence):
         for Y_filepath in batch_y:
 
             Y = cv2.imread(Y_filepath)
+            logger.debug("Y input dim: {}".format(Y.shape))
 
             for X_patch, Y_patch in self.idp.raise_pipeline(Y):
 
