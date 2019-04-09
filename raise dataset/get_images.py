@@ -15,6 +15,8 @@ for url in urls:
         img = urllib.urlopen(url).read()
     except urllib.error.HTTPError:
         # add the os.environ code here 
+        img = urllib.urlopen(url).read()
+        
     f = open(image_str,'wb')
     f.write(img)
     f.close()
