@@ -11,6 +11,9 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from tensorflow.keras.preprocessing import image as kimg
 
+from skimage.io import imread
+from skimage.transform import resize
+
 
 logger = logging.getLogger(__name__)
 
@@ -425,3 +428,5 @@ class ImageDataGenerator(object):
         img = kimg.load_img(img_path)
         Y = img.img_to_array(img)
         return Y
+
+    
