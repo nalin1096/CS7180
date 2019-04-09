@@ -13,9 +13,6 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from tensorflow.keras.utils import Sequence
 
-from skimage.io import imread
-from skimage.transform import resize
-
 
 logger = logging.getLogger(__name__)
 
@@ -338,7 +335,7 @@ class ImageDataPipeline(object):
         Y = cv2.imread(img_path)
         return Y
 
-class RiseDataGenerator(Sequence):
+class RaiseDataGenerator(Sequence):
     
     def __init__(self, y_set, idp):
         self.y = y_set

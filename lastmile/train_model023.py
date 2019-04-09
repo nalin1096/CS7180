@@ -23,11 +23,11 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
 #from model02 import model02
-from model02c import model02
+from model02b import model02
 from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
-from image_preprocessing import (ImageDataPipeline, RiseDataGenerator)
+from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
                            
 
 logger = logging.getLogger(__name__)
@@ -181,10 +181,9 @@ def run_simulation(mod: dict):
 
         # Define the data flow for training, validation, and test sets
 
-        # KEEP these params
         idp = ImageDataPipeline(preprocessing_function=imgproc,
                                     stride=128,
-                                    batch_size=1, # KEEP % 15
+                                    batch_size=1,
                                     patch_size=(256,256),
                                     random_seed=42,
                                     meanm_fpath='simulation_mean.pkl',
@@ -194,11 +193,11 @@ def run_simulation(mod: dict):
 
         train_dir = 'raise/rgb/train/'
         y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
-        train_dataflow = RiseDataGenerator(y_train_set, idp)
+        train_dataflow = RaiseDataGenerator(y_train_set, idp)
 
         val_dir = 'raise/rgb/val/'
         y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
-        val_dataflow = RiseDataGenerator(y_val_set, idp)
+        val_dataflow = RaiseDataGenerator(y_val_set, idp)
 
         # Define model
 
@@ -254,16 +253,19 @@ def run_sony_images(mod, model_name):
     # Training model
     # TODO: freeze layers and train model using sony images
 
-    datagen = ImageDataGenerator(preprocessing_function='sony',
-                                     stride=128,
-                                     batch_size=32,
-                                     patch_size=(256, 256),
-                                     random_seed=42,
-                                     num_images=10
+    idp = ImageDataPipeline(preprocessing_function='sony',
+                            stride=128,
+                            batch_size=1,
+                            patch_size=(256,256),
+                            random_seed=42,
+                            meanm_fpath='simulation_mean.pkl',
+                            covm_fpath='simulation_cov.pkl',
+                            num_images=10
     )
 
     # Review model
 
+    
     test_dataflow = datagen.dirflow_val_sony(
         sony_val_list='dataset/Sony_test_list.txt'
     )
