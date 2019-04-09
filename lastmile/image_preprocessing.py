@@ -1,22 +1,25 @@
 """
 Handle image preprocessing tasks
 """
+from itertools import product
 import logging
+import math
 import os
 import pickle
 from urllib.parse import urljoin
 
-from itertools import product
+import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-from tensorflow.keras.preprocessing import image as kimg
+from tensorflow.keras.utils import Sequence
 
 
 logger = logging.getLogger(__name__)
 
+
 class ImageDataGenerator(object):
 
-    def __init__(self,
+    def __init__(self, 
                  preprocessing_function=None,
                  stride=1,
                  batch_size=32,
@@ -95,11 +98,8 @@ class ImageDataGenerator(object):
         batch_count = 0
         for X_file_path, Y_file_path in sony_pairs:
 
-            X_img = kimg.load_img(X_file_path)
-            Y_img = kimg.load_img(Y_file_path)
-
-            X = X_img.img_to_array(X_img)
-            Y = Y_img.img_to_array(Y_img)
+            X = cv2.imread(X_file_path)
+            Y = cv2.imread(Y_file_path)
 
             X = self.crop(X)
             Y = self.crop(Y)
@@ -125,11 +125,11 @@ class ImageDataGenerator(object):
 
     def dirflow_val_sony(self, sony_val_list: str):
         """ Yield validation set for sony. """
-        yield self._train_val_sony(sony_val_list)
+        return self._train_val_sony(sony_val_list)
 
     def dirflow_train_sony(self, sony_train_list: str):
         """ Yield train set for sony. """
-        yield self._train_val_sony(sony_train_list)
+        return self._train_val_sony(sony_train_list)
 
     def dirflow_test_sony(self, sony_test_list):
         """ We want uneven batch sizes so the image can be patched back. """
@@ -137,11 +137,8 @@ class ImageDataGenerator(object):
 
         for X_file_path, Y_file_path in sony_pairs:
 
-            X_img = kimg.load_img(X_file_path)
-            Y_img = kimg.load_img(Y_file_path)
-
-            X = X_img.img_to_array(X_img)
-            Y = Y_img.img_to_array(Y_img)
+            X = cv2.imread(X_file_path)
+            Y = cv2.imread(Y_file_path)
 
             X = self.crop(X)
             Y = self.crop(Y)
@@ -170,9 +167,7 @@ class ImageDataGenerator(object):
         for file_name in fnames:
             
             file_path = urljoin(dirpath, file_name)
-            img = kimg.load_img(file_path)
-
-            Y = img.img_to_array(img)
+            Y = cv2.imread(file_path)
 
             # Crop each image, do not resize
                 
@@ -232,9 +227,7 @@ class ImageDataGenerator(object):
 
             uneven_batch = []
             file_path = urljoin(dirpath, file_name)
-            img = kimg.load_img(file_path)
-
-            Y = img.img_to_array(img)
+            Y = cv2.imread(file_path)
 
             # Crop each image, do not resize
                 
@@ -318,7 +311,6 @@ class ImageDataGenerator(object):
         image = self.bl_cd_pn(image, sample)
         image = image**sample[4]
         return image
-
 
     def extract_patches(self, data):
     
@@ -422,6 +414,21 @@ class ImageDataGenerator(object):
                          where=img_map!=0)
 
     def image_to_arr(self, img_path):
-        img = kimg.load_img(img_path)
-        Y = img.img_to_array(img)
+        Y = cv2.imread(img_path)
         return Y
+
+
+class RiseDataGenerator(Sequence, ImageDataGenerator):
+
+    def __init__(self):
+        pass
+
+class SonyDataGenerator(Sequence, ImageDataGenerator):
+
+    def __init__(self):
+        pass
+
+
+# https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/data_utils.py
+
+    
