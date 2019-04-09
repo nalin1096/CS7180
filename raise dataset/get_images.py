@@ -9,11 +9,12 @@ urls = df['NEF'].values
 num_images = 1
 image_count = 1
 for url in urls:
-    if image_count>num_images:
-        break
     image_str = './raise_dataset/raw/' + str(image_count) + '.nef'
     print(image_str)
-    img = urllib.urlopen(url).read()
+    try:
+        img = urllib.urlopen(url).read()
+    except urllib.error.HTTPError:
+        # add the os.environ code here 
     f = open(image_str,'wb')
     f.write(img)
     f.close()
