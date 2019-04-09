@@ -13,9 +13,6 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from tensorflow.keras.utils import Sequence
 
-from skimage.io import imread
-from skimage.transform import resize
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +27,7 @@ class ImageDataPipeline(object):
                  random_seed=None,
                  meanm_fpath='',
                  covm_fpath='',
-                 image_dims=(32,32,3),
+                 image_dims=(512,512,3),
                  num_images=10
     ):
         
@@ -302,6 +299,7 @@ class ImageDataPipeline(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
+        # return image[:crop_h, :crop_w]
         return image[:512, :512] #TODO: hard coded dims
 
 
@@ -337,7 +335,7 @@ class ImageDataPipeline(object):
         Y = cv2.imread(img_path)
         return Y
 
-class RiseDataGenerator(Sequence):
+class RaiseDataGenerator(Sequence):
     
     def __init__(self, y_set, idp):
         self.y = y_set
@@ -346,7 +344,7 @@ class RiseDataGenerator(Sequence):
         
     def __len__(self):
         # ASSUMES image size is (512,512), stride is 128
-        return int(np.ceil(len(self.y) * 15 / float(self.batch_size)))
+        return int(np.ceil(len(self.y)  / float(self.batch_size)))
 
     def __getitem__(self, idx):
         batch_y = self.y[idx * self.batch_size:(idx + 1) *
