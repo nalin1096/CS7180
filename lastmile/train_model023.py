@@ -26,7 +26,8 @@ from model02 import model02
 from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
-from image_preprocessing import (ImageDataPipeline, RiseDataGenerator)
+from image_preprocessing import (ImageDataPipeline, RiseDataGenerator,
+                                 CIFAR10Sequence)
 
 logger = logging.getLogger(__name__)
 
