@@ -17,6 +17,7 @@ import logging
 import pickle
 from urllib.parse import urljoin
 
+import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
@@ -98,11 +99,11 @@ def fit_model_ngpus(X_train, Y_train, model, imgtup, lr=1e-3, epochs=100):
 def model_predict(test_imgreview_dataflow, model, idp, Y_true_fpath):
     """ Predict patches from a single image then reconstruct that image. """
 
-    patches = [pred for pred in
-               model.predict_generator(test_imgreview_dataflow)]
+    patches = np.array([pred for pred in
+                        model.predict_generator(test_imgreview_dataflow)])
 
-    Y_true = cv2.imread(file_path)
-    Y_pred = image_data_pipeline.reconstruct_patches(
+    Y_true = cv2.imread(Y_true_fpath)
+    Y_pred = idp.reconstruct_patches(
         patches, image_size=Y_true.shape
     )
 
@@ -149,10 +150,12 @@ def review_model(test_dataflow, test_imgreview, model, history,
     for file_path in test_imgreview:
 
         y_test_set = [file_path]
-        test_imgreview_dataflow = RaiseDataGenerator(y_test_set, idp)
+        test_imgreview_dataflow = RaiseDataGenerator(y_test_set,
+                                                     image_data_pipeline)
 
         Y_pred, Y_true = model_predict(test_imgreview_dataflow, model,
-                                       idp, Y_true_fpath=file_path)
+                                       image_data_pipeline,
+                                       Y_true_fpath=file_path)
                                        
         img_pred_name = 'img_pred_{}_{}.png'.format(model_name, datetime_now)
         img_filepath = os.path.join(review_dir, img_pred_name)
