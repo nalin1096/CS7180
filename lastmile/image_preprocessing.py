@@ -291,7 +291,7 @@ class ImageDataPipeline(object):
         #
         #return np.array(image_patches)
         return _ex_pt(data)
-    
+
     def crop(self, image):
         i_h, i_w = image.shape[:2]
         p_h, p_w = self.patch_size

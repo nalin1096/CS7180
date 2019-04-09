@@ -194,7 +194,6 @@ def run_simulation(mod: dict):
         y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
         train_dataflow = RiseDataGenerator(y_train_set, idp)
 
-
         val_dir = 'raise/rgb/val/'
         y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
         val_dataflow = RiseDataGenerator(y_val_set, idp)
