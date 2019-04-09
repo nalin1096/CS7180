@@ -30,7 +30,7 @@ class ImageDataPipeline(object):
                  random_seed=None,
                  meanm_fpath='',
                  covm_fpath='',
-                 image_dims=(32,32,3),
+                 image_dims=(512,512,3),
                  num_images=10
     ):
         

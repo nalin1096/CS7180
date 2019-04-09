@@ -255,9 +255,9 @@ def run_sony_images(mod, model_name):
     # TODO: freeze layers and train model using sony images
 
     datagen = ImageDataGenerator(preprocessing_function='sony',
-                                     stride=128,
+                                     stride=256,
                                      batch_size=32,
-                                     patch_size=(256, 256),
+                                     patch_size=(512, 512),
                                      random_seed=42,
                                      num_images=10
     )
