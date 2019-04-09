@@ -22,7 +22,8 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from model02 import model02
+#from model02 import model02
+from model02b import model02
 from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
@@ -213,7 +214,7 @@ def run_simulation(mod: dict):
         # Fit model
 
         model, history = fit_model(train_dataflow, val_dataflow, mod,
-                                   imgproc, lr=1e-3, epochs=100)
+                                   imgproc, lr=1e-3, epochs=3)
 
         # Review model
 
@@ -291,7 +292,6 @@ def main():
     model_id = mod.get('model_id', None)
     imgproc = 'bl_cd_pn_ag'
     model_name = '{}_{}'.format(model_id, imgproc)
-    model.summary()
     #run_sony_images(mod, model_name)
 
 def main_ngpus():
