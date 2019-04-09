@@ -1,15 +1,17 @@
 """
 Handle image preprocessing tasks
 """
+from itertools import product
 import logging
+import math
 import os
 import pickle
 from urllib.parse import urljoin
 
-from itertools import product
+import cv2
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-from tensorflow.keras.preprocessing import image as kimg
+from tensorflow.keras.utils import Sequence
 
 from skimage.io import imread
 from skimage.transform import resize
@@ -17,9 +19,10 @@ from skimage.transform import resize
 
 logger = logging.getLogger(__name__)
 
-class ImageDataGenerator(object):
 
-    def __init__(self,
+class ImageDataPipeline(object):
+
+    def __init__(self, 
                  preprocessing_function=None,
                  stride=1,
                  batch_size=32,
@@ -98,11 +101,8 @@ class ImageDataGenerator(object):
         batch_count = 0
         for X_file_path, Y_file_path in sony_pairs:
 
-            X_img = kimg.load_img(X_file_path)
-            Y_img = kimg.load_img(Y_file_path)
-
-            X = X_img.img_to_array(X_img)
-            Y = Y_img.img_to_array(Y_img)
+            X = cv2.imread(X_file_path)
+            Y = cv2.imread(Y_file_path)
 
             X = self.crop(X)
             Y = self.crop(Y)
@@ -126,13 +126,6 @@ class ImageDataGenerator(object):
         if len(batch) > 0:
             yield np.array(batch)
 
-    def dirflow_val_sony(self, sony_val_list: str):
-        """ Yield validation set for sony. """
-        yield self._train_val_sony(sony_val_list)
-
-    def dirflow_train_sony(self, sony_train_list: str):
-        """ Yield train set for sony. """
-        yield self._train_val_sony(sony_train_list)
 
     def dirflow_test_sony(self, sony_test_list):
         """ We want uneven batch sizes so the image can be patched back. """
@@ -140,11 +133,8 @@ class ImageDataGenerator(object):
 
         for X_file_path, Y_file_path in sony_pairs:
 
-            X_img = kimg.load_img(X_file_path)
-            Y_img = kimg.load_img(Y_file_path)
-
-            X = X_img.img_to_array(X_img)
-            Y = Y_img.img_to_array(Y_img)
+            X = cv2.imread(X_file_path)
+            Y = cv2.imread(Y_file_path)
 
             X = self.crop(X)
             Y = self.crop(Y)
@@ -157,106 +147,23 @@ class ImageDataGenerator(object):
 
             yield np.array(batch)
 
-    def _dirflow_train_val_raise(self, dirpath):
-        """ Generator for RAISE dataset during training
+    def raise_pipeline(self, Y):
 
-        Equal batch sizes are generated during training except
-        for the last one.
-        """
-        fnames = os.listdir(dirpath)
-
-        if len(fnames) == 0:
-            raise TypeError("No file names found in directory")
-
-        batch = []
-        batch_count = 0
-        for file_name in fnames:
-            
-            file_path = urljoin(dirpath, file_name)
-            img = kimg.load_img(file_path)
-
-            Y = img.img_to_array(img)
-
-            # Crop each image, do not resize
+        # Crop each image, do not resize
                 
-            Y = self.crop(Y)
+        Y = self.crop(Y)
+        logger.debug("Y crop dimensions: {}".format(Y.shape))
 
-            # Extract patches from each image
+        # Extract patches from each image
 
-            for Y_patch in self.extract_patches(Y):
+        logger.debug("Y shape: {}".format(Y.shape))
+        for Y_patch in self.extract_patches(Y):
 
-                # Apply relevant noise function
+            # Apply relevant noise function
 
-                X_patch = np.copy(Y_patch)
-
-                X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
-
-                if batch_count < self.batch_size:
-
-                    batch.append((X_patch, Y_patch))
-                    batch_count += 1
-
-                else:
-                    XY_batch = np.array(batch)
-                    yield XY_batch
-
-                    batch = []
-                    batch.append((X_patch, Y_patch))
-                    batch_count = 1
-
-        # Final batch includes all remaining patches
-
-        if len(batch) > 0:
-            XY_batch = np.array(batch)
-            yield XY_batch
-
-    def dirflow_train_raise(self, dirpath):
-        yield self._dirflow_train_val_raise(dirpath)
-
-    def dirflow_val_raise(self, dirpath):
-        yield self._dirflow_train_val_raise(dirpath)
-
-    def dirflow_test_raise(self, dirpath):
-        """ Generator for RAISE dataset during testing
-
-        Here we don't care about the batch size because we
-        aren't effecting the loss function and need to stitch 
-        the predicted image together for model review.
-        """
-        fnames = np.array(os.listdir(dirpath))
-        np.random.seed(self.random_seed)
-        np.random.shuffle(fnames)
-        fnames = fnames[:self.num_images]
-        
-        if len(fnames) == 0:
-            raise TypeError("No file names found in directory")
-        
-        for file_name in fnames:
-
-            uneven_batch = []
-            file_path = urljoin(dirpath, file_name)
-            img = kimg.load_img(file_path)
-
-            Y = img.img_to_array(img)
-
-            # Crop each image, do not resize
-                
-            Y = self.crop(Y)
-
-            # Extract patches from each image
-
-            uneven_batch = []
-            for Y_patch in self.extract_patches(Y):
-
-                # Apply relevant noise function
-
-                X_patch = np.copy(Y_patch)
-
-                X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
-
-                uneven_batch.append((X_patch, Y_patch))
-
-            yield (np.array(uneven_batch), file_path)
+            X_patch = np.copy(Y_patch)
+            X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
+            yield (X_patch, Y_patch)
 
     def valid_sample(self):
         np.random.seed(self.random_seed)
@@ -322,7 +229,6 @@ class ImageDataGenerator(object):
         image = image**sample[4]
         return image
 
-
     def extract_patches(self, data):
     
         def _compute_n_patches(i_h, i_w, p_h, p_w):
@@ -354,6 +260,7 @@ class ImageDataGenerator(object):
             return patches
 
         def _ex_pt(image):
+            logger.debug("img shape: {}".format(image[0].shape))
             i_h, i_w = image.shape[:2]
             p_h, p_w = self.patch_size
 
@@ -376,15 +283,17 @@ class ImageDataGenerator(object):
 
         batch = data.shape[0]
         pair = data.shape[1]
-    
-        image_patches = []
-        for idx in range(batch):
-            image_patches.extend(np.array(list(map(_ex_pt,
-                                                   data[idx]))).\
-                                 reshape((-1, pair, self.patch_size[0],
-                                          self.patch_size[1], 3)))
-    
-        return np.array(image_patches)
+
+        logger.debug("shape of data: {}".format(data.shape))
+        #image_patches = []
+        #for idx in range(batch):
+        #    image_patches.extend(np.array(list(map(_ex_pt,
+        #                                           data[idx]))).\
+        #                         reshape((-1, pair, self.patch_size[0],
+        #                                  self.patch_size[1], 3)))
+        #
+        #return np.array(image_patches)
+        return _ex_pt(data)
 
     def crop(self, image):
         i_h, i_w = image.shape[:2]
@@ -393,7 +302,7 @@ class ImageDataGenerator(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
-        return image[:crop_h, :crop_w]
+        return image[:512, :512] #TODO: hard coded dims
 
 
     def crop_images(self, data):
@@ -425,8 +334,50 @@ class ImageDataGenerator(object):
                          where=img_map!=0)
 
     def image_to_arr(self, img_path):
-        img = kimg.load_img(img_path)
-        Y = img.img_to_array(img)
+        Y = cv2.imread(img_path)
         return Y
 
+class RiseDataGenerator(Sequence):
     
+    def __init__(self, y_set, idp):
+        self.y = y_set
+        self.batch_size = idp.batch_size
+        self.idp = idp
+        
+    def __len__(self):
+        # ASSUMES image size is (512,512), stride is 128
+        return math.ceil(len(self.y) * 15 / self.batch_size)
+
+    def __getitem__(self, idx):
+        batch_y = self.y[idx * self.batch_size:(idx + 1) *
+                         self.batch_size]
+        X_batch = []
+        Y_batch = []
+        for Y_filepath in batch_y:
+
+            Y = cv2.imread(Y_filepath)
+            logger.debug("Y input dim: {}".format(Y.shape))
+
+            for X_patch, Y_patch in self.idp.raise_pipeline(Y):
+
+                X_batch.append(X_patch)
+                Y_batch.append(Y_patch)
+
+        item = (np.array(X_batch), np.array(Y_batch))
+        return item
+
+    def __iter__(self):
+        logger.debug("len of self: {}".format(len(self)))
+        for item in (self[i] for i in range(len(self))):
+            logger.debug("item type from dunder iter: {}".format(type(item)))
+
+            if item[0].shape[0] != 0:
+                yield item
+
+class SonyDataGenerator(Sequence):
+
+    def __init__(self):
+        pass
+
+
+# https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/data_utils.py
