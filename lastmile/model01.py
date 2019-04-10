@@ -51,6 +51,7 @@ def simple_sony():
 def full_sony():
     """ Full version of the Sony LSD model. """
 
+    model_id = 'sony'
     lrelu = LeakyReLU(alpha=0.2)
     model = Sequential()
 
@@ -106,7 +107,8 @@ def full_sony():
     model.add(Conv2D(12, (3,3), padding='same', activation=lrelu))
     model.add(Lambda(lambda x : tf.depth_to_space(x, 2)))
 
-    return model
+    mod = {"model": model, "model_id": model_id}
+    return mod
 
 
 

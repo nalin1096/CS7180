@@ -15,6 +15,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import multi_gpu_model
 
 from model04 import model04
+from model01 import full_sony
 from model_utils import enable_cloud_log
 from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
@@ -156,7 +157,7 @@ def run_simulation_ngpus(mod: dict):
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """
 
-    mod = model04()
+    mod = full_sony()
     run_simulation_ngpus(mod)
 
 
