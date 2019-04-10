@@ -1,3 +1,5 @@
+
+import tensorflow as tf
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D
@@ -15,8 +17,10 @@ class LeakyReLU(LeakyReLU):
 
 def functionial_sony():
 
+    model_id = 'sony'
+
     lrelu = LeakyReLU(alpha=0.2)
-    inputs = Input(shape=(512,512,3))
+    inputs = Input(shape=(256,256,3))
 
     x0 = Lambda(lambda x: create_patch(x))(inputs)
 
@@ -72,7 +76,4 @@ def functionial_sony():
 
     mod = {"model": model, "model_id": model_id}
 
-    
-    b = None # output
-
-    
+    return mod

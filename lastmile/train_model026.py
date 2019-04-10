@@ -93,9 +93,9 @@ def run_simulation(mod: dict):
         # Specify Image Data Pipeline
 
         idp = ImageDataPipeline(preprocessing_function=imgproc,
-                                stride=128,
+                                stride=256,
                                 batch_size=64,
-                                patch_size=(256,256),
+                                patch_size=(512,512),
                                 random_seed=42,
                                 meanm_fpath='simulation_mean.pkl',
                                 covm_fpath='simulation_cov.pkl',
@@ -126,7 +126,7 @@ def run_simulation(mod: dict):
         # Fit model
 
         model, history = fit_model(train_dataflow, val_dataflow, mod,
-                                   imgproc, lr=1e-3, epochs=3)
+                                   imgproc, lr=1e-3, epochs=100)
 
         # Save history
 
@@ -169,6 +169,6 @@ def main():
 # Running train_model script, Jupyter Notebook config
 #######################################################
 
-enable_cloud_log('DEBUG')
+enable_cloud_log('INFO')
 main()
 
