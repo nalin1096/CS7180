@@ -14,7 +14,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import multi_gpu_model
 
-from model03 import model03
+from model04 import model04
 from model_utils import enable_cloud_log
 from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
@@ -80,8 +80,9 @@ def run_simulation_ngpus(mod: dict):
     """ Run simulation using N GPUs """
     logger.info("STARTED running simulations")
 
-    imgnames = ['bl', 'bl_cd', 'bl_cd_pn', 'bl_cd_pn_ag']
-    
+    #imgnames = ['bl', 'bl_cd', 'bl_cd_pn', 'bl_cd_pn_ag']
+    imgnames = ['bl_cd_pn_ag']
+
     # Run model on each data augmentation scenario
 
     for imgproc in imgnames:
@@ -120,9 +121,10 @@ def run_simulation_ngpus(mod: dict):
 
         # Fit Model
 
-        model, history = fit_model_ngpus(train_dataflow, val_dataflow,
-                                         model, model_id,
-                                         imgproc, lr=1e-3, epochs=3)
+        parallel_model, history = fit_model_ngpus(train_dataflow,
+                                                  val_dataflow,
+                                                  model, model_id,
+                                                  imgproc, lr=1e-3, epochs=3)
 
         # Save history
 
@@ -153,7 +155,7 @@ def run_simulation_ngpus(mod: dict):
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """
 
-    mod = model03()
+    mod = model04()
     run_simulation_ngpus(mod)
 
 
