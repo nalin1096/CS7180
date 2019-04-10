@@ -15,12 +15,12 @@ class LeakyReLU(LeakyReLU):
 
 
 
-def functionial_sony():
+def functional_sony():
 
     model_id = 'sony'
 
     lrelu = LeakyReLU(alpha=0.2)
-    inputs = Input(shape=(512,512,3))
+    inputs = Input(shape=(256,256,3))
 
     x0 = Lambda(lambda x: create_patch(x))(inputs)
 
