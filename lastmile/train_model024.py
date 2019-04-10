@@ -212,7 +212,7 @@ def run_simulation_ngpus(mod: dict):
 
         idp = ImageDataPipeline(preprocessing_function=imgproc,
                                 stride=128,
-                                batch_size=1,
+                                batch_size=64,
                                 patch_size=(256,256),
                                 random_seed=42,
                                 meanm_fpath='simulation_mean.pkl',
