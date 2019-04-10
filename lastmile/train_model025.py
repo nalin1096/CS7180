@@ -21,6 +21,7 @@ from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
                            
 
 logger = logging.getLogger(__name__)
+os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
 
 
 ##################################################

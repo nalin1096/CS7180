@@ -234,7 +234,7 @@ def run_simulation_ngpus(mod: dict):
 
         model, history = fit_model_ngpus(train_dataflow, val_dataflow,
                                          model, model_id,
-                                         imgproc, lr=1e-3, epochs=3)
+                                         imgproc, lr=1e-3, epochs=10)
 
         # Review model
 
@@ -408,7 +408,7 @@ def main_ngpus():
 # Running train_model script, Jupyter Notebook config
 #######################################################
 
-enable_cloud_log('DEBUG')
+enable_cloud_log('INFO')
 #main()
 main_ngpus()
 
