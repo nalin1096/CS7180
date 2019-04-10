@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/model04_bl_cd_pn_ag/model04_bl_cd_pn_ag_model.001-19.45.ckpt"
+all_model_checkpoint_paths: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/model04_bl_cd_pn_ag/model04_bl_cd_pn_ag_model.001-19.45.ckpt"
