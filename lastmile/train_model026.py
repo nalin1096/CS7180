@@ -93,9 +93,9 @@ def run_simulation(mod: dict):
         # Specify Image Data Pipeline
 
         idp = ImageDataPipeline(preprocessing_function=imgproc,
-                                stride=256,
-                                batch_size=64,
-                                patch_size=(512,512),
+                                stride=32,
+                                batch_size=32,
+                                patch_size=(64,64),
                                 random_seed=42,
                                 meanm_fpath='simulation_mean.pkl',
                                 covm_fpath='simulation_cov.pkl',

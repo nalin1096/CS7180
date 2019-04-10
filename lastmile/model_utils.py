@@ -20,7 +20,7 @@ def enable_cloud_log(level='INFO'):
     logging.basicConfig(level=levels[level],
                         format='%(asctime)s %(levelname)s %(message)s')
 
-def create_patch(X, ps=256):
+def create_patch(X, ps=32):
 
     m, H, W, C, = X.shape
     xx = np.random.randint(0, W - ps)

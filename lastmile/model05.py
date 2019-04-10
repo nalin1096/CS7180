@@ -20,13 +20,13 @@ def functional_sony():
     model_id = 'sony'
 
     lrelu = LeakyReLU(alpha=0.2)
-    inputs = Input(shape=(256,256,3))
+    inputs = Input(shape=(32,32,3))
 
     x0 = Lambda(lambda x: create_patch(x))(inputs)
 
     # Block 1
-    x1 = Conv2D(512, (3,3), padding='same', activation=lrelu)(x0)
-    x1 = Conv2D(512, (3,3), padding='same', activation=lrelu)(x1)
+    x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x0)
+    x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x1)
     x1 = MaxPooling2D(pool_size=2)(x1)
 
     # Block 2
