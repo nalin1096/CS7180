@@ -93,7 +93,8 @@ def fit_model(train_dataflow, val_dataflow, mod, imgproc, lr, epochs):
 
     return model, history
 
-def fit_model_ngpus(train_dataflow, val_dataflow, mod, imgproc, lr, epochs):
+def fit_model_ngpus(train_dataflow, val_dataflow, model, model_id,
+                    imgproc, lr, epochs):
     """ Fits model with N GPUs, Returns model and history keras objects. """
 
     # Replicate the model on 4 GPUs
@@ -117,7 +118,7 @@ def fit_model_ngpus(train_dataflow, val_dataflow, mod, imgproc, lr, epochs):
         validation_data=val_dataflow
     )
 
-    return model, history
+    return parallel_model, history
 
 def model_predict(test_imgreview_dataflow, model, idp, Y_true_fpath):
     """ Predict patches from a single image then reconstruct that image. """
@@ -210,7 +211,32 @@ def run_simulation_ngpus(mod: dict):
 
             logger.info("Processing model: {}".format(imgproc))
 
-        model, history = fit_model_ngpus(train_dataflow, val_dataflow, mod,
+        # Specify Image Data Pipeline
+
+        idp = ImageDataPipeline(preprocessing_function=imgproc,
+                                stride=128,
+                                batch_size=1,
+                                patch_size=(256,256),
+                                random_seed=42,
+                                meanm_fpath='simulation_mean.pkl',
+                                covm_fpath='simulation_cov.pkl',
+                                num_images=10
+        )
+
+        # Specify train/val generators
+
+        train_dir = 'raise/rgb/train/'
+        y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
+        train_dataflow = RaiseDataGenerator(y_train_set, idp)
+
+        val_dir = 'raise/rgb/val/'
+        y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
+        val_dataflow = RaiseDataGenerator(y_val_set, idp)
+
+        # Fit Model
+
+        model, history = fit_model_ngpus(train_dataflow, val_dataflow,
+                                         model, model_id,
                                          imgproc, lr=1e-3, epochs=3)
 
         # Review model
