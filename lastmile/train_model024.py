@@ -24,8 +24,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.utils import multi_gpu_model
 
-#from model02 import model02
-from model02b import model02
+from model03 import model03
 from model_utils import (enable_cloud_log, plot_imgpair,
                          plot_loss, create_patch)
 from custom_loss import mean_absolute_error
@@ -389,10 +388,10 @@ def run_sony_images(mod, model_name):
 def main():
     """ Main function to run training and prediction. """
 
-    mod = model02()
+    mod = model03()
     run_simulation(mod)
 
-    mod = model02()
+    mod = model03()
     model_id = mod.get('model_id', None)
     imgproc = 'bl_cd_pn_ag'
     model_name = '{}_{}'.format(model_id, imgproc)
@@ -401,7 +400,7 @@ def main():
 def main_ngpus():
     """ Main function to run training and predictions on N GPUs. """
 
-    mod = model02()
+    mod = model03()
     run_simulation_ngpus(mod)
 
 
