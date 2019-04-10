@@ -6,6 +6,7 @@ import logging
 import math
 import os
 import pickle
+import random
 from urllib.parse import urljoin
 
 import cv2
@@ -287,7 +288,7 @@ class ImageDataPipeline(object):
             if patches.shape[-1] == 1:
                 return patches.reshape((n_patches, p_h, p_w))
             else:
-                return np.random.choice(patches, 1)
+                return [random.choice(patches)]
 
         batch = data.shape[0]
         pair = data.shape[1]
