@@ -164,6 +164,9 @@ def main_ngpus():
 # Running train_model script, Jupyter Notebook config
 #######################################################
 
+
+os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+
 enable_cloud_log('DEBUG')
 main_ngpus()
 
