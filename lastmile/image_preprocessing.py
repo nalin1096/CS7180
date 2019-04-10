@@ -287,7 +287,7 @@ class ImageDataPipeline(object):
             if patches.shape[-1] == 1:
                 return patches.reshape((n_patches, p_h, p_w))
             else:
-                return patches
+                return np.random.choice(patches, 1)
 
         batch = data.shape[0]
         pair = data.shape[1]
@@ -310,8 +310,8 @@ class ImageDataPipeline(object):
         crop_h, crop_w = i_h-((i_h-p_h)%self.stride), \
             i_w-((i_w-p_w)%self.stride)
 
-        # return image[:crop_h, :crop_w]
-        return image[:512, :512] #TODO: hard coded dims
+        return image[:crop_h, :crop_w]
+        # return image[:512, :512] #TODO: hard coded dims
 
 
     def crop_images(self, data):
