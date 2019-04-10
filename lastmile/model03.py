@@ -10,7 +10,7 @@ def model03():
     model = Sequential()
 
     # Block 1
-    model.add(Conv2D(8, (3,3), activation=my_relu,
+    model.add(Conv2D(8, (3,3), activation=K.relu,
                         padding='same', input_shape=(256,256,3)))
     model.add(Conv2D(8, (3,3), padding='same', activation=K.relu))
 
