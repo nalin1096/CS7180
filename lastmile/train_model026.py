@@ -13,7 +13,7 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from model01 import full_sony
+from model05 import functionial_sony
 from model_utils import enable_cloud_log
 from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
@@ -162,7 +162,7 @@ def run_simulation(mod: dict):
 def main():
     """ Main function to run training and prediction. """
 
-    mod = full_sony()
+    mod = functionial_sony()
     run_simulation(mod)
 
 #######################################################
