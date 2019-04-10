@@ -8,7 +8,7 @@ def model03():
     """ Removed upsampling from model01. """
     model_id = 'model03'
 
-    lrelu = ReLU(alpha=0.2)
+    lrelu = ReLU()
     model = Sequential()
 
     # Block 1
