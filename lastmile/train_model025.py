@@ -38,13 +38,13 @@ def callbacks(model_type):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
 
-    model_name = '%s_model.{epoch:03d}-{val_loss:.2f}.hdf5' % model_type
+    model_name = '%s_model.{epoch:03d}-{val_loss:.2f}.ckpt' % model_type
     filepath = os.path.join(save_dir, model_name)
 
     # Prepare callbacks for model saving (option to adjust lr)
 
     checkpoint = ModelCheckpoint(filepath=filepath, monitor='val_loss',
-                                 period=1, verbose=1)
+                                 save_weights_only=True, period=1, verbose=1)
     callbacks = [checkpoint]
 
     return callbacks
