@@ -99,7 +99,7 @@ def fit_model_ngpus(train_dataflow, val_dataflow, model, model_id,
 
     # Replicate the model on 4 GPUs
 
-    parallel_model = multi_gpu_model(model, gpus=4)
+    parallel_model = multi_gpu_model(model, gpus=4, cpu_relocation=True)
     
     opt = Adam(lr=lr)
     parallel_model.compile(optimizer=opt,
@@ -198,18 +198,16 @@ def run_simulation_ngpus(mod: dict):
     # Run model on each data augmentation scenario
 
     for imgproc in imgnames:
-
-        with tf.device('/cpu:0'):
+    
+        # Define model
         
-            # Define model
+        model = mod.get('model', None)
+        model_id = mod.get('model_id', None)
 
-            model = mod.get('model', None)
-            model_id = mod.get('model_id', None)
+        if model is None:
+            raise TypeError("model must be defined: {}".format(model))
 
-            if model is None:
-                raise TypeError("model must be defined: {}".format(model))
-
-            logger.info("Processing model: {}".format(imgproc))
+        logger.info("Processing model: {}".format(imgproc))
 
         # Specify Image Data Pipeline
 
