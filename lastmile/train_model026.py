@@ -65,7 +65,6 @@ def fit_model(train_dataflow, val_dataflow, mod, imgproc, lr, epochs):
     model.compile(optimizer=opt,
                   loss=mean_absolute_error,
                   metrics=['accuracy'])
-    model.summary()
 
     # Fit model
 
