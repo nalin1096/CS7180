@@ -24,7 +24,7 @@ def simple_sony():
     # Convert X to patches
 
     x0 = Lambda(lambda x: create_patch(x))(inputs)
-
+ 
     # Block 1
     x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x0)
     x1 = Conv2D(32, (3,3), padding='same', activation=lrelu)(x1)
