@@ -20,7 +20,7 @@ def functional_sony():
     model_id = 'sony'
 
     lrelu = LeakyReLU(alpha=0.2)
-    inputs = Input(shape=(32,32,3))
+    inputs = Input(shape=(64,64,3))
 
     x0 = Lambda(lambda x: create_patch(x))(inputs)
 
