@@ -19,7 +19,7 @@ def assign_images(dist: tuple, fpaths: dict, size: int):
 
     train, test, val = dist
 
-    imgs = np.array([i for i in range(size)])
+    imgs = np.array([i for i in range(1, size + 1)])
 
     np.random.shuffle(imgs)
 
@@ -58,6 +58,9 @@ def assign_images(dist: tuple, fpaths: dict, size: int):
 
 if __name__ == "__main__":
 
+    logging.basicConfig(filename='assign_sets.log',
+                        format='%(asctime)s %(message)s',
+                        level=logging.INFO)
     logger.info("STARTED assigning sets")
     dist = (0.94, 0.03, 0.03)
     fpaths = {
