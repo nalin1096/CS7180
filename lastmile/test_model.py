@@ -8,6 +8,8 @@ import os
 
 import tensorflow as tf
 
+from image_preprocessing import ImageDataPipeline
+
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +42,22 @@ def evaluate_model(test_dataflow, model, model_name):
     with open(te_filepath, "w") as outfile:
         outfile.write(test_eval)
     
-def review_model():
+def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """
-    pass
+    X_test = tf.keras.preprocessing.image.img_to_array(image_path)
+    idp = ImageDataPipeline(preprocessing_function='sony',
+                            patch_size=(64,64),
+                            random_seed=42
+    )
+    patches = idp.extract_patches(X_test)
+    y_pred_patches = []
+    for patch in patches:
+
+        y_pred_ij = model.predict(patch)
+        y_pred_patches.append(y_pred_ij)
+
+    return y_pred_patches
+    
     
 
 
