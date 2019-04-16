@@ -44,11 +44,11 @@ def evaluate_model(test_dataflow, model, model_name):
     
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """
-    X_test = tf.keras.preprocessing.image.img_to_array(image_path)
     idp = ImageDataPipeline(preprocessing_function='sony',
                             patch_size=(64,64),
                             random_seed=42
     )
+    idp.img_to_array(image_path)
     patches = idp.extract_patches(X_test)
     y_pred_patches = []
     for patch in patches:
