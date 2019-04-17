@@ -121,9 +121,8 @@ def review_images(sony_txt, idp, model, model_type):
 
         y_pred_ij = []
         for i, x_test_i, in enumerate(x_test_ij):
-
-            y_pred = model.predict(x_test_i[i])
-            y_pred_ij.append(y_pred)
+            y_pred = model.predict(np.expand_dims(x_test_i, axis=0))
+            y_pred_ij.append(y_pred[0])
 
         # Reconstruct each image
 
@@ -140,7 +139,7 @@ def review_images(sony_txt, idp, model, model_type):
         model_name = '{}_{}'.format(model_id, model_type)
 
         datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-        model_image_name = '{}_{}.json'.format(model_name, datetime_now)
+        model_image_name = '{}_{}.png'.format(model_name, datetime_now)
         mi_filepath = os.path.join(review_dir, model_image_name)
 
         plot_images(mi_filepath, X_test, Y_pred, Y_test)
