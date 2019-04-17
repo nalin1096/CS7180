@@ -42,13 +42,12 @@ def compute_psnr(Y_pred_i, Y_test_i):
         return 100
     return 20 * np.log10(PIXEL_MAX/ np.sqrt(mse))
 
-def custom_evaluate_sony(test_dataflow, test_dataflow2, model,
-                         model_name, idp):
+def custom_evaluate_sony(test_dataflow, sony_txt, model, model_name, idp):
     """ Custom evaluation function. 
 
     Args:
        test_dataflow: test generator
-       test_dataflow2: test generator, second instance
+       sony_txt: file path to sony test file
        model: dict, {'model': keras.Model, 'model_id': <model_id_str>}
        model_name: full model name for reporting
 
@@ -72,7 +71,9 @@ def custom_evaluate_sony(test_dataflow, test_dataflow2, model,
     Y_pred = model.predict_generator(test_dataflow)
 
     idx = 0
-    for x_filepath, y_filepath in test_dataflow2:
+    pairs = idp.parse_sony_list(sony_txt)
+    
+    for x_filepath, y_filepath in pairs:
 
         # Load y_test
 
@@ -90,7 +91,6 @@ def custom_evaluate_sony(test_dataflow, test_dataflow2, model,
         idx += 1
 
     return store_mae, store_psnr
-    
 
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """

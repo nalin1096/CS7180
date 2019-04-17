@@ -295,13 +295,12 @@ def eval_frozensony(mod: dict):
     
     test_file = 'Sony_RGB/Sony_test_list.txt'
     test_dataflow = SonyDataGenerator(test_file, idp)
-    test_dataflow2 = SonyDataGenerator(test_file, idp)
 
 
     # Run evaluation
 
     store_mae, store_psnr = custom_evaluate_sony(test_dataflow,
-                                                 test_dataflow2,
+                                                 test_file,
                                                  frozen_model,
                                                  model_name, idp)
 
