@@ -244,7 +244,7 @@ def run_frozensony(mod: dict):
     frozen_model, history = train_frozen_model(train_dataflow, val_dataflow,
                                                epochs=1, mod=mod,
                                                model_type=model_type,
-                                               lr=1e-3)
+                                               lr=1e-4)
 
     # Save history
 
@@ -261,7 +261,7 @@ def run_frozensony(mod: dict):
         mh_filepath = os.path.join(review_dir, model_history_name)
 
         with open(mh_filepath, 'w') as outfile:
-            json.dump(history.history, outfile)
+            json.dump(str(history.history), outfile)
 
         logger.info('Saved model history: {}'.format(mh_filepath))
 
@@ -271,6 +271,6 @@ def run_frozensony(mod: dict):
 
 
 if __name__ == "__main__":
-
+    enable_cloud_log('INFO')
     mod = functional_sony()
     run_frozensony(mod)

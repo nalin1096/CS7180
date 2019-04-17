@@ -300,7 +300,7 @@ class ImageDataPipeline(object):
             if random_state is None:
                 return [random.choice(patches)]
             else:
-                return patches[random_state]
+                return [patches[random_state]]
 
         batch = data.shape[0]
         pair = data.shape[1]
@@ -418,13 +418,17 @@ class SonyDataGenerator(Sequence):
             X = cv2.imread(X_filepath)
             Y = cv2.imread(Y_filepath)
             for X_patch, Y_patch in self.idp.sony_pipeline(X, Y):
-
+                
+                logger.debug('X patch shape: {}'.format(X_patch.shape))
+                logger.debug('Y patch shape: {}'.format(Y_patch.shape))
+                
                 X_batch.append(X_patch)
                 Y_batch.append(Y_patch)
 
         item = (np.array(X_batch), np.array(Y_batch))
         return item
 
+    
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/data_utils.py
 
 
