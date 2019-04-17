@@ -252,7 +252,7 @@ class ImageDataPipeline(object):
         image = image**sample[4]
         return image
 
-    def extract_patches(self, data, random_state=None):
+    def extract_patches(self, data, random_state=None, is_test=False):
     
         def _compute_n_patches(i_h, i_w, p_h, p_w):
 
@@ -297,7 +297,9 @@ class ImageDataPipeline(object):
             patches = extracted_patches
 
             patches = patches.reshape(-1, p_h, p_w, n_colors)
-            if random_state is None:
+            if is_test:
+                return patches
+            elif random_state is None:
                 return [random.choice(patches)]
             else:
                 return [patches[random_state]]
