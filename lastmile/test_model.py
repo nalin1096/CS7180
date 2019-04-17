@@ -33,6 +33,60 @@ def evaluate_model(test_dataflow, model, model_name):
     with open(te_filepath, "w") as outfile:
         outfile.write(test_eval)
 
+def compute_mae(Y_pred_i, Y_test_i):
+    pass
+
+def compute_psnr():
+    pass
+
+def custom_evaluate_sony(test_dataflow, test_dataflow2, model, model_name):
+    """ Custom evaluation function. 
+
+    Args:
+       test_dataflow: test generator
+       test_dataflow2: test generator, second instance
+       model: dict, {'model': keras.Model, 'model_id': <model_id_str>}
+       model_name: full model name for reporting
+
+    WARNING: all images will be brought into memory and copied.
+             space is (k * 2 * m * n) where k is the number of
+             images in the test set.
+
+    Predict image then run evaluation metrics.
+    Write the image, X_test, and Y_test, to a file.
+
+    Evaluation metrics:
+      MAE
+      PSNR
+    """
+    # Store eval metrics
+
+    store_mae = []
+    store_psnr = []
+    
+    Y_pred = model.predict_generator(test_dataflow)
+
+    idx = 0
+    for x_test, y_test in test_dataflow2:
+
+        # Load y_test
+
+
+        # Score
+        
+        score_mae = compute_mae(Y_pred_i=Y_pred[idx], Y_test_i=y_test_mat)
+        store_mae.append((y_test, score_mae))
+                         
+        score_psnr = compute_psnr(Y_pred_i=Y_pred[idx], Y_test_i=y_test_mat)
+        store_psnr.append((y_test, score_psnr))
+
+        # Write image pair
+
+        idx += 1
+
+    return store_mae, store_psnr
+    
+
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """
 #     X_test = tf.keras.preprocessing.image.img_to_array(image_path)
