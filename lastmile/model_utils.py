@@ -9,7 +9,31 @@ import matplotlib.pyplot as plt
 import numpy as np
 import rawpy
 from tensorflow.keras.preprocessing import image
+from tensorflow.keras.callbacks import ModelCheckpoint
 from numpy.lib.stride_tricks import as_strided
+
+
+def callbacks(model_type):
+    """
+    Callbacks handle model checkpointing. We can also use them
+    to adjust learning rate.
+    """
+    # Prepare model, model saving directory
+    
+    save_dir = os.path.join(os.getcwd(), 'saved_models', model_type)
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+
+    model_name = '%s_model.{epoch:03d}-{val_loss:.2f}.ckpt' % model_type
+    filepath = os.path.join(save_dir, model_name)
+
+    # Prepare callbacks for model saving (option to adjust lr)
+
+    checkpoint = ModelCheckpoint(filepath=filepath, monitor='val_loss',
+                                 save_weights_only=True, period=1, verbose=1)
+    callbacks = [checkpoint]
+
+    return callbacks
 
 def enable_cloud_log(level='INFO'):
     """ Enable logs using default StreamHandler """

@@ -17,8 +17,7 @@ from test_model import restore_model
 from model_utils import create_patch
 
 from model05 import functional_sony
-from train_model027 import callbacks
-
+from model_utils import callbacks
 
 logger = logging.getLogger(__name__)
 
