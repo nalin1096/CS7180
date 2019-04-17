@@ -423,7 +423,7 @@ class SonyDataGenerator(Sequence):
             
             X = cv2.imread(X_filepath)
             Y = cv2.imread(Y_filepath)
-            xygen = self.idp.sony_pipeline(X, Y, rand=self.random_state)
+            xygen = self.idp.sony_pipeline(X, Y, random_state=self.rand)
             for X_patch, Y_patch in xygen:
                 
                 logger.debug('X patch shape: {}'.format(X_patch.shape))
