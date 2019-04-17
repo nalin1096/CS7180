@@ -1,7 +1,11 @@
 """ Transfer learning by freezing model layers
 
 """
+from datetime import datetime
+import json
 import logging
+import os
+from urllib.parse import urljoin
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input
@@ -12,7 +16,7 @@ from tensorflow.keras.optimizers import Adam
 
 from model_utils import enable_cloud_log
 from custom_loss import mean_absolute_error
-from image_preprocessing import (ImageDataPipeline, RaiseDataGenerator)
+from image_preprocessing import (ImageDataPipeline, SonyDataGenerator)
 from test_model import restore_model
 from model_utils import create_patch
 
@@ -175,13 +179,13 @@ def freeze_sony_model(model):
 
     return mod
 
-def train_frozen_model(num_epochs: int, mod: dict,
-                       model_type: str, lr: float):
+def train_frozen_model(train_dataflow, val_dataflow, epochs: int,
+                       mod: dict, model_type: str, lr: float):
     """ Train frozen model using latest weights. """
 
     # Define model
-    
-    model = restore_model(mod, model_type)
+    model_name = '{}_{}'.format(mod.get('model_id', ''),model_type)
+    model = restore_model(mod, model_name)
     if model is None:
         raise TypeError("model must be defined: {}".format(model))
 
@@ -198,14 +202,77 @@ def train_frozen_model(num_epochs: int, mod: dict,
                          metrics=['accuracy'])
 
     # Fit model
-    # TODO, verify data pipeline
 
-    return frozen_model
+    frzn_name = model_name.replace(mod['model_id'], frozen_mod['model_id'])
+    calls = callbacks(model_type=frzn_name)
+    history = frozen_model.fit_generator(
+        generator=train_dataflow,
+        epochs=epochs,
+        callbacks=calls,
+        validation_data=val_dataflow
+    )
+
+    return frozen_model, history
+
+def run_frozensony(mod: dict):
+    logger.info("STARTED running frozen sony model updates.")
+
+    # Specify Image Data Pipeline
+
+    idp = ImageDataPipeline(preprocessing_function='sony',
+                            stride=32,
+                            batch_size=32,
+                            patch_size=(64,64),
+                            random_seed=42,
+                            meanm_fpath='simulation_mean.pkl',
+                            covm_fpath='simulation_cov.pkl',
+                            num_images=10
+    )
+    
+    # Specify train/val generators
+
+    train_dir = 'raise/rgb/train/'
+    y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
+    train_dataflow = SonyDataGenerator(y_train_set, idp)
+
+    val_dir = 'raise/rgb/val/'
+    y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
+    val_dataflow = SonyDataGenerator(y_val_set, idp)
+
+    # Fit model
+
+    mod = functional_sony()
+    model_type = 'bl_cd_pn_ag'
+    frozen_model, history = train_frozen_model(train_dataflow, val_dataflow,
+                                               epochs=1, mod=mod,
+                                               model_type=model_type,
+                                               lr=1e-3)
+
+    # Save history
+
+    try:
+        review_dir = os.path.join(os.getcwd(), 'review')
+        if not os.path.isdir(review_dir):
+            os.makedirs(review_dir)
+
+        model_id = 'freeze_sony'
+        model_name = '{}_{}'.format(model_id, model_type)
+
+        datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
+        model_history_name = '{}_{}.json'.format(model_name, datetime_now)
+        mh_filepath = os.path.join(review_dir, model_history_name)
+
+        with open(mh_filepath, 'w') as outfile:
+            json.dump(history.history, outfile)
+
+        logger.info('Saved model history: {}'.format(mh_filepath))
+
+    except Exception as exc:
+        logger.exception(exc)
+
 
 
 if __name__ == "__main__":
 
     mod = functional_sony()
-    model_type = '_bl_cd_pn_ag'
-    train_frozen_model(num_epochs=1, mod=mod,
-                       model_type=model_type, lr=1e-3)
+    run_frozensony(mod)
