@@ -78,14 +78,17 @@ def custom_evaluate_sony(test_dataflow, sony_txt, model, model_name, idp):
         # Load y_test
 
         y_test = cv2.imread(y_filepath)
-        x_test = cv2.imread(x_filepath)
+
+        # Extract y_test patch
+
+        y_test_i = idp.extract_patches(y_test)
 
         # Score
         
-        score_mae = compute_mae(Y_pred_i=Y_pred[idx], Y_test_i=y_test)
+        score_mae = compute_mae(Y_pred_i=Y_pred[idx], Y_test_i=y_test_i)
         store_mae.append((y_filepath, score_mae))
                          
-        score_psnr = compute_psnr(Y_pred_i=Y_pred[idx], Y_test_i=y_test)
+        score_psnr = compute_psnr(Y_pred_i=Y_pred[idx], Y_test_i=y_test_i)
         store_psnr.append((y_filepath, score_psnr))
 
         idx += 1
