@@ -41,7 +41,7 @@ def evaluate_model(test_dataflow, model, model_name):
     te_filepath = os.path.join(review_dir, test_eval_name)
     with open(te_filepath, "w") as outfile:
         outfile.write(test_eval)
-    
+
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """
     idp = ImageDataPipeline(preprocessing_function='sony',
