@@ -175,7 +175,8 @@ def freeze_sony_model(model):
 
     return mod
 
-def train_frozen_model(num_epochs: int, mod: dict, model_type: str):
+def train_frozen_model(num_epochs: int, mod: dict,
+                       model_type: str, lr: float):
     """ Train frozen model using latest weights. """
 
     # Define model
@@ -186,7 +187,8 @@ def train_frozen_model(num_epochs: int, mod: dict, model_type: str):
 
     # Update restored model to frozen layers
 
-    frozen_model = freeze_sony_model(model)
+    frozen_mod = freeze_sony_model(model)
+    frozen_model = frozen_mod.get('model', None)
     
     # Compile model
 
@@ -205,4 +207,5 @@ if __name__ == "__main__":
 
     mod = functional_sony()
     model_type = '_bl_cd_pn_ag'
-    train_frozen_model(num_epochs=1, mod=mod, model_type=model_type)
+    train_frozen_model(num_epochs=1, mod=mod,
+                       model_type=model_type, lr=1e-3)

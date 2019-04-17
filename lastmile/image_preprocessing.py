@@ -247,7 +247,6 @@ class ImageDataPipeline(object):
             all_patches = n_h * n_w
 
             return all_patches
-
         def get_patches(arr, patch_shape):
             arr_ndim = arr.ndim
 
