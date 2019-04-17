@@ -8,10 +8,26 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 import rawpy
+import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.callbacks import ModelCheckpoint
 from numpy.lib.stride_tricks import as_strided
 
+logger = logging.getLogger(__name__)
+
+def restore_model(mod: dict, model_name):
+    save_dir = os.path.join(os.getcwd(), 'saved_models', model_name)
+    if os.path.isdir(save_dir):
+        latest = tf.train.latest_checkpoint(save_dir)
+
+        model = mod.get('model', None)
+        model.load_weights(latest)
+        print(model.summary())
+        return model
+
+    else:
+        logger.error("savedir not found: {}".format(save_dir))
+        return None
 
 def callbacks(model_type):
     """

@@ -14,14 +14,13 @@ from tensorflow.keras.layers import LeakyReLU, Lambda
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
-from model_utils import enable_cloud_log
 from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, SonyDataGenerator)
-from test_model import restore_model
-from model_utils import create_patch
+from model_utils import enable_cloud_log
+from model_utils import create_patch, callbacks, restore_model
+from test_model import evaluate_model
 
 from model05 import functional_sony
-from model_utils import callbacks
 
 logger = logging.getLogger(__name__)
 
@@ -268,9 +267,47 @@ def run_frozensony(mod: dict):
     except Exception as exc:
         logger.exception(exc)
 
+def eval_frozensony(mod: dict):
+    logger.info("STARTED running sony_frozen evaluation")
+
+    # Define and restore model
+    
+    model_type = 'bl_cd_pn_ag'
+    model_name = '{}_{}'.format(mod.get('model_id', ''),model_type)
+    frozen_model = restore_model(mod, model_name)
+    if model is None:
+        raise TypeError("model must be defined: {}".format(model))
+
+
+    # Specify Image Data Pipeline
+
+    idp = ImageDataPipeline(preprocessing_function='sony',
+                            stride=32,
+                            batch_size=32,
+                            patch_size=(64,64),
+                            random_seed=42,
+                            meanm_fpath='simulation_mean.pkl',
+                            covm_fpath='simulation_cov.pkl',
+                            num_images=10
+    )
+
+    # Specify test set generator
+    
+    test_file = 'Sony_RGB/Sony_test_list.txt'
+    test_dataflow = SonyDataGenerator(test_file, idp)
+
+
+    # Run evaluation
+
+    evaluate_model(test_dataflow, frozen_model, model_name)
+
+    logger.info("FINISHED running sony_frozen evaluation")
+
+
 
 
 if __name__ == "__main__":
     enable_cloud_log('INFO')
     mod = functional_sony()
-    run_frozensony(mod)
+    frozen_mod = freeze_sony_model(mod.get('model', None))
+    run_frozensony(frozen_mod)
