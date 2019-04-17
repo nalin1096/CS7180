@@ -354,7 +354,6 @@ class RaiseDataGenerator(Sequence):
         self.idp = idp
         
     def __len__(self):
-        # ASSUMES image size is (512,512), stride is 128
         return int(np.ceil(len(self.y)  / float(self.batch_size)))
 
     def __getitem__(self, idx):
@@ -376,10 +375,36 @@ class RaiseDataGenerator(Sequence):
         return item
 
 class SonyDataGenerator(Sequence):
+    """ https://keras.io/utils/#sequence """ 
 
-    def __init__(self):
-        pass
+    def __init__(self, sony_txt, idp, batch_size):
 
+        self.batch_size = batch_size
+        self.idp = idp
+
+        pairs = self.idp.parse_sony_list(sony_txt)
+        self.x = []
+        self.y = []
+
+        for x_path, y_path in pairs:
+            self.x.append(x_path)
+            self.y.append(y_path)
+
+    def __len__(self):
+        return int(np.ceil(len(self.x) / float(self.batch_size)))
+
+    def __getitem__(self, idx):
+        batch_y = self.y[idx * self.batch_size:(idx + 1) * self.batch_size]
+        batch_x = self.x[idx * self.batch_size:(idx + 1) * self.batch_size]
+
+        X_batch = []
+        Y_batch = []
+        for X_filepath, Y_filepath in zip(batch_x, batch_y):
+
+            pass # Read images, data pipeline whatever
+
+        item = (np.array(X_batch), np.array(Y_batch))
+        return item
 
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/keras/utils/data_utils.py
 
