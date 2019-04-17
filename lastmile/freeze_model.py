@@ -242,7 +242,7 @@ def run_frozensony(mod: dict):
     mod = functional_sony()
     model_type = 'bl_cd_pn_ag'
     frozen_model, history = train_frozen_model(train_dataflow, val_dataflow,
-                                               epochs=1, mod=mod,
+                                               epochs=250, mod=mod,
                                                model_type=model_type,
                                                lr=1e-4)
 
