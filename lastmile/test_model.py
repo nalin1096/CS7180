@@ -13,6 +13,7 @@ from model05 import functional_sony
 import tensorflow as tf
 
 from image_preprocessing import ImageDataPipeline
+from model_utils import plot_images
 
 
 logger = logging.getLogger(__name__)
@@ -69,6 +70,8 @@ def custom_evaluate_sony(test_dataflow, sony_txt, model, model_name, idp):
     store_psnr = []
     
     Y_pred = model.predict_generator(test_dataflow)
+    Y_pred = [(y_pred * (255.0/y_pred.max())).astype(int)
+              for y_pred in Y_pred]
 
     idx = 0
     pairs = idp.parse_sony_list(sony_txt)
@@ -94,6 +97,54 @@ def custom_evaluate_sony(test_dataflow, sony_txt, model, model_name, idp):
         idx += 1
 
     return store_mae, store_psnr
+
+
+def review_images(sony_txt, idp, model, model_type):
+    """ Review X_test, Y_pred, Y_true """
+
+    idx = 0
+    pairs = idp.parse_sony_list(sony_txt)
+
+    for x_filepath, y_filepath in pairs:
+
+        # Load X_test, Y_test
+        
+        X_test = cv2.imread(x_filepath)
+        Y_test = cv2.imread(y_filepath)
+
+        # Generate all patches
+
+        y_test_ij = idp.extract_patches(Y_test, is_test=True)
+        x_test_ij = idp.extract_patches(X_test, is_test=True)
+
+        # Run predictions against each patch
+
+        y_pred_ij = []
+        for i, x_test_i, in enumerate(x_test_ij):
+
+            y_pred = model.predict(x_test_i[i])
+            y_pred_ij.append(y_pred)
+
+        # Reconstruct each image
+
+        Y_pred_patches = np.array(y_pred_ij)
+        Y_pred = idp.reconstruct_patches(Y_pred_patches, X_test.shape)
+
+        # Write out image comparison
+
+        review_dir = os.path.join(os.getcwd(), 'review')
+        if not os.path.isdir(review_dir):
+            os.makedirs(review_dir)
+
+        model_id = 'freeze_sony'
+        model_name = '{}_{}'.format(model_id, model_type)
+
+        datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
+        model_image_name = '{}_{}.json'.format(model_name, datetime_now)
+        mi_filepath = os.path.join(review_dir, model_image_name)
+
+        plot_images(mi_filepath, X_test, Y_pred, Y_test)
+
 
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """

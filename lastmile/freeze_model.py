@@ -18,7 +18,7 @@ from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, SonyDataGenerator)
 from model_utils import enable_cloud_log
 from model_utils import create_patch, callbacks, restore_model
-from test_model import custom_evaluate_sony
+from test_model import custom_evaluate_sony, review_images
 
 from model05 import functional_sony
 
@@ -317,7 +317,7 @@ def eval_frozensony(mod: dict):
     mmae_filepath = os.path.join(review_dir, model_mae_name)
 
     with open(mmae_filepath, 'w') as outfile:
-            json.dump(store_mae, outfile)
+            json.dump(str(store_mae), outfile)
 
     # PSNR
     
@@ -325,13 +325,43 @@ def eval_frozensony(mod: dict):
     psnr_filepath = os.path.join(review_dir, model_psnr_name)
 
     with open(psnr_filepath, 'w') as outfile:
-            json.dump(store_psnr, outfile)
+            json.dump(str(store_psnr), outfile)
     logger.info("FINISHED running sony_frozen evaluation")
+
+
+def run_image_review(mod: dict):
+
+    logger.info("STARTED running sony_frozen image review")
+
+    # Define and restore model
+    
+    model_type = 'bl_cd_pn_ag'
+    model_name = '{}_{}'.format(mod.get('model_id', ''),model_type)
+    frozen_model = restore_model(mod, model_name)
+    if frozen_model is None:
+        raise TypeError("model must be defined: {}".format(frozen_model))
+
+    # Specify Image Data Pipeline
+
+    idp = ImageDataPipeline(preprocessing_function='sony',
+                            stride=32,
+                            batch_size=32,
+                            patch_size=(64,64),
+                            random_seed=None,
+                            meanm_fpath='simulation_mean.pkl',
+                            covm_fpath='simulation_cov.pkl',
+                            num_images=10
+    )
+
+    test_file = 'Sony_RGB/Sony_test_list.txt'   
+    review_images(test_file, idp, frozen_model, model_type)
+    
 
 
 if __name__ == "__main__":
     enable_cloud_log('INFO')
     mod = functional_sony()
     frozen_mod = freeze_sony_model(mod.get('model', None))
-    eval_frozensony(frozen_mod)
+    #eval_frozensony(frozen_mod)
     #run_frozensony(frozen_mod)
+    run_image_review(frozen_mod)
