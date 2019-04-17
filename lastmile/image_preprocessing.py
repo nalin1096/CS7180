@@ -173,7 +173,7 @@ class ImageDataPipeline(object):
             X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
             yield (X_patch, Y_patch)
     
-    def sony_pipeline(self, X, Y):
+    def sony_pipeline(self, X, Y, random_state=42):
 
         # Crop each image, do not resize
         
@@ -184,7 +184,9 @@ class ImageDataPipeline(object):
 
         # Extract patches from each image
 
-        for X_patch, Y_patch in zip(self.extract_patches(X, random_state=42), self.extract_patches(Y, random_state=42)):
+        for X_patch, Y_patch in zip(
+                self.extract_patches(X, random_state=random_state),
+                self.extract_patches(Y, random_state=random_state)):
             
             yield (X_patch, Y_patch)
 
@@ -261,6 +263,7 @@ class ImageDataPipeline(object):
             all_patches = n_h * n_w
 
             return all_patches
+        
         def get_patches(arr, patch_shape):
             arr_ndim = arr.ndim
 
@@ -396,6 +399,7 @@ class SonyDataGenerator(Sequence):
 
         self.batch_size = idp.batch_size
         self.idp = idp
+        self.rand = idp.random_seed
 
         pairs = self.idp.parse_sony_list(sony_txt)
         self.x = []
@@ -419,7 +423,8 @@ class SonyDataGenerator(Sequence):
             
             X = cv2.imread(X_filepath)
             Y = cv2.imread(Y_filepath)
-            for X_patch, Y_patch in self.idp.sony_pipeline(X, Y):
+            xygen = self.idp.sony_pipeline(X, Y, rand=self.random_state)
+            for X_patch, Y_patch in xygen:
                 
                 logger.debug('X patch shape: {}'.format(X_patch.shape))
                 logger.debug('Y patch shape: {}'.format(Y_patch.shape))

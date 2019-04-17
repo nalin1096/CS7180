@@ -18,7 +18,7 @@ from custom_loss import mean_absolute_error
 from image_preprocessing import (ImageDataPipeline, SonyDataGenerator)
 from model_utils import enable_cloud_log
 from model_utils import create_patch, callbacks, restore_model
-from test_model import evaluate_model
+from test_model import custom_evaluate_sony
 
 from model05 import functional_sony
 
@@ -275,8 +275,8 @@ def eval_frozensony(mod: dict):
     model_type = 'bl_cd_pn_ag'
     model_name = '{}_{}'.format(mod.get('model_id', ''),model_type)
     frozen_model = restore_model(mod, model_name)
-    if model is None:
-        raise TypeError("model must be defined: {}".format(model))
+    if frozen_model is None:
+        raise TypeError("model must be defined: {}".format(frozen_model))
 
 
     # Specify Image Data Pipeline
@@ -295,19 +295,44 @@ def eval_frozensony(mod: dict):
     
     test_file = 'Sony_RGB/Sony_test_list.txt'
     test_dataflow = SonyDataGenerator(test_file, idp)
+    test_dataflow2 = SonyDataGenerator(test_file, idp)
 
 
     # Run evaluation
 
-    evaluate_model(test_dataflow, frozen_model, model_name)
+    store_mae, store_psnr = custom_evaluate_sony(test_dataflow,
+                                                 test_dataflow2,
+                                                 frozen_model,
+                                                 model_name, idp)
 
+    ## Save results
+
+    review_dir = os.path.join(os.getcwd(), 'review')
+    if not os.path.isdir(review_dir):
+        os.makedirs(review_dir)
+
+    # MAE
+    
+    datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
+    model_mae_name = 'mae_{}_{}.json'.format(model_name, datetime_now)
+    mmae_filepath = os.path.join(review_dir, model_mae_name)
+
+    with open(mmae_filepath, 'w') as outfile:
+            json.dump(store_mae, outfile)
+
+    # PSNR
+    
+    model_psnr_name = 'psnr_{}_{}.json'.format(model_name, datetime_now)
+    psnr_filepath = os.path.join(review_dir, model_psnr_name)
+
+    with open(model_psnr_name, 'w') as outfile:
+            json.dump(store_psnr, outfile)
     logger.info("FINISHED running sony_frozen evaluation")
-
-
 
 
 if __name__ == "__main__":
     enable_cloud_log('INFO')
     mod = functional_sony()
     frozen_mod = freeze_sony_model(mod.get('model', None))
-    run_frozensony(frozen_mod)
+    eval_frozensony(frozen_mod)
+    #run_frozensony(frozen_mod)

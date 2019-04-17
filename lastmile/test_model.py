@@ -16,7 +16,7 @@ from image_preprocessing import ImageDataPipeline
 
 
 logger = logging.getLogger(__name__)
-
+PIXEL_MAX = 255.0
 
 def evaluate_model(test_dataflow, model, model_name):
     """ Evalute trained model against test set. """
@@ -34,12 +34,16 @@ def evaluate_model(test_dataflow, model, model_name):
         outfile.write(test_eval)
 
 def compute_mae(Y_pred_i, Y_test_i):
-    pass
+    return np.mean(np.abs(Y_pred_i - Y_test_i), axis=None)
 
-def compute_psnr():
-    pass
+def compute_psnr(Y_pred_i, Y_test_i):
+    mse = np.mean((Y_pred_i - Y_test_i)**2)
+    if mse == 0:
+        return 100
+    return 20 * np.log10(PIXEL_MAX/ np.sqrt(mse))
 
-def custom_evaluate_sony(test_dataflow, test_dataflow2, model, model_name):
+def custom_evaluate_sony(test_dataflow, test_dataflow2, model,
+                         model_name, idp):
     """ Custom evaluation function. 
 
     Args:
@@ -59,6 +63,7 @@ def custom_evaluate_sony(test_dataflow, test_dataflow2, model, model_name):
       MAE
       PSNR
     """
+    
     # Store eval metrics
 
     store_mae = []
@@ -67,20 +72,20 @@ def custom_evaluate_sony(test_dataflow, test_dataflow2, model, model_name):
     Y_pred = model.predict_generator(test_dataflow)
 
     idx = 0
-    for x_test, y_test in test_dataflow2:
+    for x_filepath, y_filepath in test_dataflow2:
 
         # Load y_test
 
+        y_test = cv2.imread(y_filepath)
+        x_test = cv2.imread(x_filepath)
 
         # Score
         
-        score_mae = compute_mae(Y_pred_i=Y_pred[idx], Y_test_i=y_test_mat)
-        store_mae.append((y_test, score_mae))
+        score_mae = compute_mae(Y_pred_i=Y_pred[idx], Y_test_i=y_test)
+        store_mae.append((y_filepath, score_mae))
                          
-        score_psnr = compute_psnr(Y_pred_i=Y_pred[idx], Y_test_i=y_test_mat)
-        store_psnr.append((y_test, score_psnr))
-
-        # Write image pair
+        score_psnr = compute_psnr(Y_pred_i=Y_pred[idx], Y_test_i=y_test)
+        store_psnr.append((y_filepath, score_psnr))
 
         idx += 1
 
@@ -126,9 +131,9 @@ def review_model(model, image_path: str):
    
     return X_pred
 
-mod = functional_sony()
-model = restore_model(mod, 'sony_bl_cd_pn_ag')
-_ = review_model(model, './Sony_RGB/Sony/short/00015_07_0.1s.png')
+#mod = functional_sony()
+#model = restore_model(mod, 'sony_bl_cd_pn_ag')
+#_ = review_model(model, './Sony_RGB/Sony/short/00015_07_0.1s.png')
     
     
 
