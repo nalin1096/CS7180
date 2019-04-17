@@ -175,27 +175,34 @@ def freeze_sony_model(model):
 
     return mod
 
-def train_frozen_model(num_epochs: int, model_func: dict, model_type: str):
+def train_frozen_model(num_epochs: int, mod: dict, model_type: str):
     """ Train frozen model using latest weights. """
 
     # Define model
     
-    model = restore_model(model_func, model_type)
+    model = restore_model(mod, model_type)
     if model is None:
         raise TypeError("model must be defined: {}".format(model))
 
+    # Update restored model to frozen layers
+
+    frozen_model = freeze_sony_model(model)
+    
     # Compile model
 
     opt = Adam(lr=lr)
-    model.compile(optimizer=opt,
-                  loss=mean_absolute_error,
-                  metrics=['accuracy'])
+    frozen_model.compile(optimizer=opt,
+                         loss=mean_absolute_error,
+                         metrics=['accuracy'])
 
     # Fit model
     # TODO, verify data pipeline
 
-    return model
+    return frozen_model
 
-sony_model = functional_sony()
-frozen_model = freeze_sony_model(sony_model.get('model', None))
 
+if __name__ == "__main__":
+
+    mod = functional_sony()
+    model_type = '_bl_cd_pn_ag'
+    train_frozen_model(num_epochs=1, mod=mod, model_type=model_type)
