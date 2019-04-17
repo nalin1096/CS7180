@@ -4,6 +4,7 @@
 import os
 import logging
 from itertools import product
+import cv2
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -85,7 +86,7 @@ def plot_loss(fpath, history):
 def plot_images(name, X_test, Y_pred, Y_true):
     tmp = np.concatenate((X_test, Y_pred, Y_true), axis=1)
     tmp = tmp.astype(np.uint8)
-    plt.imsave(name, tmp)
+    cv2.imwrite(name, tmp)
 
 def plot_imgpair(Y_pred, Y_true, name):
     """ Show the predicted and true images side by side. """
