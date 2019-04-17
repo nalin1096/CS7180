@@ -231,13 +231,11 @@ def run_frozensony(mod: dict):
     
     # Specify train/val generators
 
-    train_dir = 'raise/rgb/train/'
-    y_train_set = [urljoin(train_dir, f) for f in os.listdir(train_dir)]
-    train_dataflow = SonyDataGenerator(y_train_set, idp)
+    train_file = 'Sony_RGB/Sony_train_list.txt'
+    train_dataflow = SonyDataGenerator(train_file, idp)
 
-    val_dir = 'raise/rgb/val/'
-    y_val_set = [urljoin(val_dir, f) for f in os.listdir(val_dir)]
-    val_dataflow = SonyDataGenerator(y_val_set, idp)
+    val_file = 'Sony_RGB/Sony_val_list.txt'
+    val_dataflow = SonyDataGenerator(val_file, idp)
 
     # Fit model
 

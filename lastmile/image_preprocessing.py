@@ -64,8 +64,7 @@ class ImageDataPipeline(object):
             logger.warning("Filepath not set for pickle")
         
     def reformat_imgpath(self, img_path: str):
-        rfmt = img_path[7:-4]
-        rfmt = 'Sony/rgb/' + rfmt + ".png"
+        rfmt = './Sony_RGB/' + img_path
         return rfmt
 
     def parse_sony_list(self, sony_list: str):
@@ -81,7 +80,7 @@ class ImageDataPipeline(object):
 
                 items = pair.strip().split(" ")
 
-                if len(items) != 4:
+                if len(items) != 2:
                     raise TypeError("Corrupted list: {}".format(sony_list))
 
                 pairs.append((self.reformat_imgpath(items[0]),
@@ -173,6 +172,21 @@ class ImageDataPipeline(object):
             X_patch = np.copy(Y_patch)
             X_patch = self.prepfuncs[self.preprocessing_function](X_patch)
             yield (X_patch, Y_patch)
+    
+    def sony_pipeline(self, X, Y):
+
+        # Crop each image, do not resize
+        
+        X = self.crop(X)        
+        Y = self.crop(Y)
+        logger.debug("X crop dimensions: {}".format(X.shape))
+        logger.debug("Y crop dimensions: {}".format(Y.shape))
+
+        # Extract patches from each image
+
+        for X_patch, Y_patch in zip(self.extract_patches(X, random_state=42), self.extract_patches(Y, random_state=42)):
+            
+            yield (X_patch, Y_patch)
 
     def valid_sample(self):
         np.random.seed(self.random_seed)
@@ -238,7 +252,7 @@ class ImageDataPipeline(object):
         image = image**sample[4]
         return image
 
-    def extract_patches(self, data):
+    def extract_patches(self, data, random_state=None):
     
         def _compute_n_patches(i_h, i_w, p_h, p_w):
 
@@ -283,11 +297,10 @@ class ImageDataPipeline(object):
             patches = extracted_patches
 
             patches = patches.reshape(-1, p_h, p_w, n_colors)
-            # remove the color dimension if useless
-            if patches.shape[-1] == 1:
-                return patches.reshape((n_patches, p_h, p_w))
-            else:
+            if random_state is None:
                 return [random.choice(patches)]
+            else:
+                return patches[random_state]
 
         batch = data.shape[0]
         pair = data.shape[1]
@@ -377,9 +390,9 @@ class RaiseDataGenerator(Sequence):
 class SonyDataGenerator(Sequence):
     """ https://keras.io/utils/#sequence """ 
 
-    def __init__(self, sony_txt, idp, batch_size):
+    def __init__(self, sony_txt, idp):
 
-        self.batch_size = batch_size
+        self.batch_size = idp.batch_size
         self.idp = idp
 
         pairs = self.idp.parse_sony_list(sony_txt)
@@ -400,8 +413,14 @@ class SonyDataGenerator(Sequence):
         X_batch = []
         Y_batch = []
         for X_filepath, Y_filepath in zip(batch_x, batch_y):
+            
+            
+            X = cv2.imread(X_filepath)
+            Y = cv2.imread(Y_filepath)
+            for X_patch, Y_patch in self.idp.sony_pipeline(X, Y):
 
-            pass # Read images, data pipeline whatever
+                X_batch.append(X_patch)
+                Y_batch.append(Y_patch)
 
         item = (np.array(X_batch), np.array(Y_batch))
         return item
