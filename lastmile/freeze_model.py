@@ -355,6 +355,7 @@ def run_image_review(mod: dict):
 
     test_file = 'Sony_RGB/Sony_test_list.txt'   
     review_images(test_file, idp, frozen_model, model_type)
+
     
 
 
