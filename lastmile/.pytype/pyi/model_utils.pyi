@@ -1,14 +1,18 @@
 # (generated with --quick)
 
+import logging
 from typing import Any, Iterable, Iterator, Tuple, TypeVar
 
+ModelCheckpoint: module
 as_strided: Any
 image: module
+logger: logging.Logger
 logging: module
 np: module
 os: module
 plt: module
 rawpy: module
+tf: module
 
 _T1 = TypeVar('_T1')
 _T2 = TypeVar('_T2')
@@ -17,6 +21,7 @@ _T4 = TypeVar('_T4')
 _T5 = TypeVar('_T5')
 _T6 = TypeVar('_T6')
 
+def callbacks(model_type) -> list: ...
 def create_patch(X, ps = ...) -> Any: ...
 def enable_cloud_log(level = ...) -> None: ...
 def plot_images(name, X_test, Y_pred, Y_true) -> None: ...
@@ -38,3 +43,4 @@ def product(iter1: Iterable[_T1], iter2: Iterable[_T2], iter3: Iterable[_T3], it
 def product(iter1: Iterable[_T1], iter2: Iterable[_T2], iter3: Iterable[_T3], iter4: Iterable[_T4], iter5: Iterable[_T5], iter6: Iterable[_T6]) -> Iterator[Tuple[_T1, _T2, _T3, _T4, _T5, _T6]]: ...
 @overload
 def product(*iterables: Iterable, repeat: int = ...) -> Iterator[tuple]: ...
+def restore_model(mod: dict, model_name) -> Any: ...

@@ -324,7 +324,7 @@ def eval_frozensony(mod: dict):
     model_psnr_name = 'psnr_{}_{}.json'.format(model_name, datetime_now)
     psnr_filepath = os.path.join(review_dir, model_psnr_name)
 
-    with open(model_psnr_name, 'w') as outfile:
+    with open(psnr_filepath, 'w') as outfile:
             json.dump(store_psnr, outfile)
     logger.info("FINISHED running sony_frozen evaluation")
 
