@@ -139,7 +139,8 @@ def review_images(sony_txt, idp, model, model_type):
         model_name = '{}_{}'.format(model_id, model_type)
 
         datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
-        model_image_name = '{}_{}.png'.format(model_name, datetime_now)
+        image_id = y_filepath.split('/')[-1]
+        model_image_name = '{}_{}'.format(model_name, image_id)
         mi_filepath = os.path.join(review_dir, model_image_name)
 
         plot_images(mi_filepath, X_test, Y_pred, Y_test)
