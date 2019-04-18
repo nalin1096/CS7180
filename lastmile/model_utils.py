@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 
 def change_checkpoint(filename: str):
     with open('./saved_models/sony_bl_cd_pn_ag/checkpoint', 'w') as f:
-        f.write('model_checkpoint_path: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"\n'
-        f.write('all_model_checkpoint_paths: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"'
+        
+        f.write('model_checkpoint_path: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"\n')
                 
+        f.write('all_model_checkpoint_paths: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"')
+
 
 def restore_model(mod: dict, model_name):
     save_dir = os.path.join(os.getcwd(), 'saved_models', model_name)
@@ -29,7 +31,7 @@ def restore_model(mod: dict, model_name):
 
         model = mod.get('model', None)
         model.load_weights(latest)
-        print(model.summary())
+        #print(model.summary())
         return model
 
     else:
@@ -99,4 +101,3 @@ def plot_imgpair(Y_pred, Y_true, name):
     tmp = np.concatenate((Y_pred, Y_true), axis=1)
     tmp = tmp.astype(np.uint8)
     plt.imsave(name, tmp)
-
