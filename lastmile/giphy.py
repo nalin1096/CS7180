@@ -60,33 +60,24 @@ def run_raise_giph(mod: dict, model_type):
     # Read file
 
     Y_test = cv2.imread(IMG_PATH)
-    Y_patches = idp.extract_patches(Y_test, is_test=True)
+    Y_test = idp.crop(Y_test)
+
+    X_test = idp.prepfuncs[model_type](Y_test)
+    X_patches = idp.extract_patches(X_test, is_test=True)
 
     for checkpoint_name in checkpoints:
 
         change_checkpoint(checkpoint_name)
         model = restore_model(mod, model_name)
 
-
         y_pred_ij = []
-        x_test_ij = []
-        for Y_patch in Y_patches:
-
-            # Apply relevant noise function
-
-            X_patch = np.copy(Y_patch)
-            X_patch = idp.prepfuncs[model_type](X_patch)
-            x_test_ij.append(X_patch)
+        for X_patch in X_patches:
 
             # Predict against augmented X_patch
 
             y_pred = model.predict(np.expand_dims(X_patch, axis=0))
-            y_pred_ij.append(y_pred)
+            y_pred_ij.append(y_pred[0])
 
-        # Reconstruct X_test
-
-        X_test_patches = np.array(x_test_ij)
-        X_test = idp.reconstruct_patches(X_test_patches, Y_test.shape)
 
         # Reconstruct Y_pred
 
@@ -99,9 +90,12 @@ def run_raise_giph(mod: dict, model_type):
         if not os.path.isdir(review_dir):
             os.makedirs(review_dir)
 
-        model_chkpt_name = '{}_{}'.format(mod.get('model_id',''),
+        model_chkpt_name = '{}_{}.png'.format(mod.get('model_id',''),
                                           checkpoint_name)
         mi_filepath = os.path.join(review_dir, model_chkpt_name)
 
         plot_images(mi_filepath, X_test, Y_pred, Y_test)
 
+if __name__ == '__main__':
+    mod = functional_sony()
+    run_raise_giph(mod, 'bl_cd_pn_ag')
