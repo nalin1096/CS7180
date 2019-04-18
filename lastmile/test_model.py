@@ -13,7 +13,8 @@ from model05 import functional_sony
 import tensorflow as tf
 
 from image_preprocessing import ImageDataPipeline
-from model_utils import plot_images
+from model_utils import plot_images, restore_model
+import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger(__name__)
@@ -135,7 +136,7 @@ def review_images(sony_txt, idp, model, model_type):
         if not os.path.isdir(review_dir):
             os.makedirs(review_dir)
 
-        model_id = 'freeze_sony'
+        model_id = 'sony'
         model_name = '{}_{}'.format(model_id, model_type)
 
         datetime_now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -149,6 +150,8 @@ def review_images(sony_txt, idp, model, model_type):
 def review_model(model, image_path: str):
     """ Predict an image, then stitch it together. """
 #     X_test = tf.keras.preprocessing.image.img_to_array(image_path)
+    print(image_path)
+    print(os.getcwd())
     X_test = cv2.imread(image_path)
     idp = ImageDataPipeline(preprocessing_function='sony',
                             patch_size=(64,64),
@@ -163,10 +166,12 @@ def review_model(model, image_path: str):
                  'bl_cd_pn': idp.bl_cd_pn,
                  'bl_cd_pn_ag': idp.bl_cd_pn_ag
                 }
-    
+    print(np.amax(X_test))
 #     for func_name, func in prepfuncs.items():
     print(X_test.shape)
-#     X_test = func(X_test)
+#     cv2.imwrite('./model05_results/raise_result_bright1.png', X_test)
+#     X_test = idp.bl_cd_pn_ag(X_test)
+#     cv2.imwrite('./model05_results/raise_result_dark1.png', X_test)
     cropped_X_test = idp.crop(X_test)
     print(np.array(cropped_X_test).shape)
     X_test_shape = cropped_X_test.shape
@@ -180,14 +185,14 @@ def review_model(model, image_path: str):
 
     y_pred_patches = np.array(y_pred_patches)
     X_pred = idp.reconstruct_patches(y_pred_patches, X_test_shape) 
-    cv2.imwrite('./model05_results/img4_' +'.png', X_pred)
+    cv2.imwrite('./model05_results/test_pred1.png', X_pred)
     print('Done!')
    
     return X_pred
 
-#mod = functional_sony()
-#model = restore_model(mod, 'sony_bl_cd_pn_ag')
-#_ = review_model(model, './Sony_RGB/Sony/short/00015_07_0.1s.png')
+mod = functional_sony()
+model = restore_model(mod, 'sony_bl_cd_pn_ag')
+_ = review_model(model, './test.JPG')
     
     
 

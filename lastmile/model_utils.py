@@ -16,6 +16,12 @@ from numpy.lib.stride_tricks import as_strided
 
 logger = logging.getLogger(__name__)
 
+def change_checkpoint(filename: str):
+    with open('./saved_models/sony_bl_cd_pn_ag/checkpoint', 'w') as f:
+        f.write('model_checkpoint_path: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"\n'
+        f.write('all_model_checkpoint_paths: "/home/gridsan/CH27538/Project_Python/CS7180/lastmile/saved_models/sony_bl_cd_pn_ag/'+filename+'"'
+                
+
 def restore_model(mod: dict, model_name):
     save_dir = os.path.join(os.getcwd(), 'saved_models', model_name)
     if os.path.isdir(save_dir):
