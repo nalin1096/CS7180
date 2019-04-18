@@ -51,13 +51,23 @@ stage. Our folder structure relates to these stages.
 	
 ## Hardware specifications
 
-K80
+Recommended hardware for replicating Chen et. al.
+
+* Ubuntu + Intel i7 CPU + Nvidia Titan X (Pascal) with Cuda (>=8.0) and CuDNN (>=5.0)
+
+Recommended hardware for replicating our paper.
+
+* 1 Tesla K80; `p2.xlarge` instance from AWS will be sufficient. The AWS Deep Learning
+  AMI (Ubuntu), ami-060865e8b5914b4c4, will help with installation.
 
 ## Framework choice
 
-Tensorflow
+Both our paper and Chen et. al. (2018) use Tensorflow. Chen et. al. (2018) uses the
+`slim` framework, a contribution module in Tensorflow. We used Keras. Please note that
+Keras is being established as the [high-level API for Tensorflow 2.0](https://medium.com/tensorflow/standardizing-on-keras-guidance-on-high-level-apis-in-tensorflow-2-0-bad2b04c819a).
+Both approaches require using lower-level Tensorflow for different stages of the model.
 
 ## Questions and Improvements
 
-
-Github issues
+Please use [CS7180 GitHub Issues](https://github.com/tbonza/CS7180/issues) for any questions
+or improvements.
