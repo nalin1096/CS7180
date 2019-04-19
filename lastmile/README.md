@@ -22,7 +22,7 @@ depending on how you want to run this.
 python freeze_model.py
 ```
 
-## Creating images for Giph from Checkpoints
+## Creating images for Gif from Checkpoints
 
 We created a visualization of a predicted image being trained
 during every 5 epochs to qualitatively show prediction improvements.

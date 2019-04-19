@@ -190,11 +190,6 @@ def review_model(model, image_path: str):
    
     return X_pred
 
-mod = functional_sony()
-model = restore_model(mod, 'sony_bl_cd_pn_ag')
-_ = review_model(model, './test.JPG')
-    
-    
-
-
-
+#mod = functional_sony()
+#model = restore_model(mod, 'sony_bl_cd_pn_ag')
+#_ = review_model(model, './test.JPG')
