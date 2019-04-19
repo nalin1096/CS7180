@@ -92,9 +92,9 @@ def plot_loss(fpath, history):
     plt.savefig(fpath, format='png')
 
 def plot_images(name, X_test, Y_pred, Y_true):
-    tmp = np.concatenate((X_test, Y_pred, Y_true), axis=1)
-    tmp = tmp.astype(np.uint8)
-    cv2.imwrite(name, tmp)
+#     tmp = np.concatenate((X_test, Y_pred, Y_true), axis=1)
+#     tmp = tmp.astype(np.uint8)
+    cv2.imwrite(name, Y_pred.astype(np.uint8))
 
 def plot_imgpair(Y_pred, Y_true, name):
     """ Show the predicted and true images side by side. """
