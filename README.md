@@ -5,7 +5,7 @@ in Spring 2019. Our project builds off the [Learning to See in the Dark](http://
 deep learning model which converts a picture taken in the dark to one the is taken in ideal
 lighting conditions.
 
-![Chen et. al. 2018](https://github.com/tbonza/CS7180/blob/master/imgs/fig1.png "Results from Chen et. al. 2018")
+![Chen et. al. 2018](https://github.com/tbonza/CS7180/blob/master/imgs/Model_Results.png "Our Model Results vs Chen et. al. 2018")
 
 Our contribution has been to simulate dark conditions on readily available datasets,
 rather than using professinal photography equipment and generating relatively few images.
